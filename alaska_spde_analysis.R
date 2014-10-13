@@ -4,7 +4,7 @@
 ##             Create spde for spatial analysis
 ## Author:     Kelli Faye Johnson
 ## Contact:    kellifayejohnson@gmail.com
-## Date:       2014-08-17
+## Date:       2014-10-13
 ## Comments:   Polygons for the seven areas in Alaska are based on a shape file
 ##             provided by Annie Greig of NOAA (email: angie.greig@noaa.gov).
 ##             Shape file were in arcgis format.

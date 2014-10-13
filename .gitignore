@@ -13,3 +13,5 @@ tmb/sptlGmprtzSim**
 **/*.fdb_latexmk
 **/*.dll
 **/*.o
+.SyncID
+.SyncIgnore

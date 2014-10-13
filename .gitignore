@@ -1,0 +1,15 @@
+.SyncArchive/**
+data/**
+ignore/**
+log/**
+ms/alaska_ms_2014????.pdf
+references/**
+results/**
+tmb/sptlGmprtzSim**
+**/*.aux
+**/*.log
+**/*.fls
+**/*.synctex.gz
+**/*.fdb_latexmk
+**/*.dll
+**/*.o

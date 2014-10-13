@@ -10,9 +10,29 @@
 #' returned in the final SpatialPolygons item.
 #' @export
 
-create_areas <- function(shape = shape.afsc.akcrs,
-                         listofareas = alaska_areas,
-                         subset = NA){
+create_areas <- function(shape = shape.afsc.akcrs){
+    #Polygons for areas
+    alaska_areas_management <- list(
+      "GOA_W" = matrix(c(c(-140, -170, -170, -140, -140) %% 360,
+                         c(45.0, 45.0, 65.0, 65.0, 45.0)), ncol = 2),
+      "AI" = matrix(c(c(165, 165, -170, -170, 165) %% 360,
+                          c(45.0, 65.0, 65.0, 45.0, 45.0)), ncol = 2)
+      )
+    alaska_noSE <- list(
+      "GOA_W" = matrix(c(c(-140, -170, -170, -140, -140) %% 360,
+                         c(45.0, 45.0, 65.0, 65.0, 45.0)), ncol = 2),
+      "buldir" = matrix(c(c(174, 165, 165, 174, 175.3, 174.5, 174) %% 360,
+                          c(45.0, 45.0, 65.0, 65.0, 52.5, 52.1, 45.0)), ncol = 2),
+      "amchitka" = matrix(c(c(174, 174.5, 175.3, 174, 178.4, -178.68, 180, 180, 174) %% 360,
+                            c(45.0, 52.1, 52.5, 65.0, 65.0, 52.82, 51.7, 45.0, 45.0)), ncol = 2),
+      "samalga" = matrix(c(c(180, 180, -178.68, 178.4, -170, -170, 180) %% 360,
+                           c(45.0, 51.7, 52.82, 65.0, 65.0, 45.0, 45.0)), ncol = 2)
+      )
+    alaska_areas_closure <- list(
+      "GOA_W" = matrix(c(c(-140, -130, -130, -140, -140) %% 360,
+                         c(45.0, 45.0, 65.0, 65.0, 45.0)), ncol = 2)
+      )
+
     shape.data <- shape@data
     id.main <- shape.data$OBJECTID
     bs <- which(with(shape.data, AI_STRATA_ + GOA_STRATA) == 0)
@@ -26,8 +46,8 @@ create_areas <- function(shape = shape.afsc.akcrs,
     shape.chain  <- unionSpatialPolygons(shape.3areas[c(1,3)],
                                          IDs = c(1,1))
 
-    listofpolygons <- lapply(listofareas, function(x) {
-            Polygons(list(Polygon(x)), ID = names(listofareas)[substitute(x)[[3]]])
+    listofpolygons <- lapply(alaska_areas_management, function(x) {
+            Polygons(list(Polygon(x)), ID = names(alaska_areas_management)[substitute(x)[[3]]])
         })
 
     spatialareas <- SpatialPolygons(listofpolygons)
@@ -42,11 +62,8 @@ create_areas <- function(shape = shape.afsc.akcrs,
     for(q in seq_along(id.names)) {
         slot(shape.full@polygons[[q]], "ID") <- id.names[q]
     }
-    if (any(!is.na(subset))) {
-        return(shape.full[which(names(shape.full) %in% subset)])
-    } else {
-        return(shape.full)
-    }
-}
+     return(shape.full[which(names(shape.full) %in% 
+                             names(alaska_areas_management))])
+ }
 
 # endoffile

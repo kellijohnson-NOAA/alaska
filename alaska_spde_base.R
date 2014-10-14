@@ -25,11 +25,10 @@ my.height.map <- 4.5
 my.resolution <- 500
 
 
-getweb <- FALSE
+getweb <- FALSE #If TRUE pull r4kfj off of github
 run.all <- TRUE #logical; save or load(saved) workspace
 
 desired.areas <- c("ai", "goa")
-#desired.spp   <- c("Atka mackerel", "Pacific cod", "walleye pollock")
 desired.spp <- "Pacific cod"
 desired.years <- 1990:2013 #2013 = last year of data, 2013 survey in BS & GOA
 

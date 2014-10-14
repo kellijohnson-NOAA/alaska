@@ -14,15 +14,14 @@
 ###############################################################################
 
 ###############################################################################
-#### Create the mesh
+#### Create the mesh using the projected data so all measurements are in m
 ###############################################################################
-  data.formesh <- eval(as.name(my.data.name))
   ## Create the SPDE/GMRF model, (kappa^2-Delta)(tau x) = W:
-  prdomain <- inla.nonconvex.hull(coordinates(data.formesh),
+  prdomain <- inla.nonconvex.hull(coordinates(eval(as.name(my.data.name))),
                                   -0.05,
                                   resolution = c(40, 15))
 
-  mesh <- inla.mesh.2d(loc = coordinates(data.formesh),
+  mesh <- inla.mesh.2d(loc = coordinates(eval(as.name(my.data.name))),
                        offset = c(-0.06, -0.03),
                        cutoff = 100,
                        max.edge = c(100, 2000), 
@@ -37,40 +36,31 @@
   compile(file.path(dir.data, paste0(my.tmb, ".cpp")))
 
 ###############################################################################
-#### Individual species analysis
+#### Set up the data
 ###############################################################################
-
-for(q in seq_along(desired.spp)){
-# for(q in my.q){
-  curr.spp <- desired.spp[q]
-  logfile.spp <- paste(tolower(substring(unlist(strsplit(curr.spp, " ")), 
-                               1, 1)), collapse = "")
-  data <- eval(as.name(my.data.name))
-  data <- subset(data, SID == race.num[q, 1])
-  # create log file
-  logfile.name <- create_logfile(projectName = paste0("alaska_", logfile.spp),
-                                 projectDir = file.path(my.base, "log"))
-  mesh.yes <- which(data.formesh$SID == race.num[q, 1])
-  Y <- as.vector(data@data$WTCPUE)
+  #Initial values are calculated in the model and placed in year[0]
+  #year[1] is the first year of the data
+  #True years 1990:2013 are converted to 1:24
     n_years <- length(desired.years)
-    year_0 <- year <- factor(data$YEAR, levels = desired.years)
+    year <- factor(data.spp$YEAR, levels = desired.years)
     levels(year) <- 1:n_years
-    levels(year_0) <- 1:n_years - 1
-
-  A.locator <- mesh$idx$loc[mesh.yes]
+  
+  #A.locator is the location of each data point on the mesh
+  #Only some of the mesh nodes are actually filled 
+  #Filled nodes == A.locator.unique
+  #station is used to map 1:numberofnodes to 0:numberofnodes-1
+  #station_map creates a vector to map the 0:numberofusednodes-1
+  #to 0:numberofnodes-1 because the cpp code only predicts for used nodes
+  A.locator <- mesh$idx$loc
     A.locator.unique <- unique(A.locator)[order(unique(A.locator))] 
     station <- A.locator - 1
     station_unique  <- A.locator.unique - 1
-    n_stations <- length(station_unique)
-      
-      newlevels <- 1:spde$n.spde
-      station_map <- factor(A.locator, levels = newlevels)
-      names(newlevels) <- NA
-      names(newlevels)[A.locator.unique] <- 1:(n_stations)
-      station_map <- as.numeric(names(newlevels)[station_map]) - 1
+    mapval <- data.frame(s.unique = station_unique,
+                         map = seq(0, (length(A.locator.unique) - 1)))
+    station_map <- mapval[match(station, mapval$s.unique), "map"]
+  #Obtain the lat / lon (in UTM) coordinates for the used stations
     x_stations <- mesh$loc[A.locator.unique, 1]
     y_stations <- mesh$loc[A.locator.unique, 2]
-
 
 ###############################################################################
 #### TMB
@@ -78,64 +68,78 @@ for(q in seq_along(desired.spp)){
   dyn.load(dynlib(file.path(dir.data, my.tmb)))
   newtonOption(smartsearch = TRUE)
 
-if(my.tmb == "gompertz_kfj"){
-    data.spatial = list(Y = Y, 
-                        year = year,
-                        station_map = station_map,
-                        station_unique = station_unique,
-                        n_stations = n_stations,
-                        n_years = as.integer(n_years + 1),
-                        G0 = spde$param.inla$M0, 
-                        G1 = spde$param.inla$M1, 
-                        G2 = spde$param.inla$M2)
-    parameters.spatial = list(alpha = c(0.0),
-                              phi = 0.0,
-                              log_tau_E = 0.0,
-                              log_tau_O = 0.0,
-                              log_kappa = 0.0,
-                              log_sigma = 0.0,
-                              rho = 0.5, 
-                              Epsilon_input = matrix(rnorm(spde$n.spde * (n_years + 1)),
-                                                     nrow = spde$n.spde,
-                                                     ncol = (n_years + 1)), 
-                              Omega_input = rnorm(spde$n.spde))
+    data.spatial = list(
+      Y = as.vector(data.spp@data$WTCPUE), 
+      year = year,
+      station_map = station_map,
+      station_unique = station_unique,
+      n_stations = length(station_unique),
+      n_years = as.integer(n_years + 1), #Add a year to accommodate init pred
+      G0 = spde$param.inla$M0, 
+      G1 = spde$param.inla$M1, 
+      G2 = spde$param.inla$M2
+      )
+    parameters.spatial = list(
+      alpha = c(0.0),
+      phi = 0.0,
+      log_tau_E = 0.0,
+      log_tau_O = 0.0,
+      log_kappa = 0.0,
+      log_sigma = 0.0,
+      rho = 0.5, 
+      Epsilon_input = matrix(rnorm(spde$n.spde * (n_years + 1)),
+                             nrow = spde$n.spde,
+                             ncol = (n_years + 1)), #nodes x year matrix
+      Omega_input = rnorm(spde$n.spde) #Omega is a vector
+      )
 
     obj <- MakeADFun(data = data.spatial, 
                      parameters = parameters.spatial,
                      random = c("Omega_input", "Epsilon_input"))
-}
 
     obj$fn(obj$par)
     obj$control <- list(trace = 1, parscale = rep(1, 13), REPORT = 1,
-                                reltol = 1e-12, maxit = 300)
+                        reltol = 1e-12, maxit = 300)
     obj$hessian <- F
     opt <- nlminb(obj$par, obj$fn, obj$gr, 
-                  lower = c(rep(-20, 2), rep(-10, 6)), 
-                  upper = c(rep(20, 2), rep(10, 6)),
+                  lower = c(rep(-20, 2), rep(-10, 6)), #lower par bounds
+                  upper = c(rep(20, 2), rep(10, 6)),   #upper par bounds
                   control = list(eval.max = 1e4, iter.max = 1e4))
     report <- try(sdreport(obj))
+
+###############################################################################
+#### Create summaries
+###############################################################################
+
     Report_spatial <- obj$report()
     if(!("condition" %in% names(attributes(report)))) {
       opt[["summary"]] <- summary(report)
     } 
     # spatial indices
-    B_mean_spatial <- opt$summary[which(rownames(opt$summary) == "mean_abundance"),
-                                  "Estimate"]
-    B_conf_spatial <- exp(opt$summary[which(rownames(opt$summary) == "log(mean_abundance)"),
-                                      "Estimate"] %o% rep(1, 2) + 
-                      opt$summary[which(rownames(opt$summary) == "log(mean_abundance)"),
-                                  "Std. Error"] %o% qnorm(c(0.1, 0.9)))
+    B_mean_spatial <- opt$summary[
+      which(rownames(opt$summary) == "mean_abundance"), "Estimate"
+      ]
+    B_conf_spatial <- exp(opt$summary[
+      which(rownames(opt$summary) == "log(mean_abundance)"), "Estimate"] %o% 
+      rep(1, 2) + opt$summary[
+      which(rownames(opt$summary) == "log(mean_abundance)"), "Std. Error"] %o% 
+      qnorm(c(0.1, 0.9)))
 
   # Range of correlation (Lindgren and Rue 2013, immediately before Eq. 4)
-    gmrf_range <- sqrt(8*1)/exp(opt$par["log_kappa"])
+    gmrf_range <- sqrt(8 * 1) / exp(opt$par["log_kappa"])
   # Marginal Standard Deviation  (Lindgren and Rue 2013 Eq. 2)
-    marg_sd_E <- 1 / sqrt(4*pi*exp(2*opt$par["log_tau_E"])*exp(2*opt$par["log_kappa"]))
+    marg_sd_E <- 1 / sqrt(4 * pi * exp(2 * opt$par["log_tau_E"]) * 
+      exp(2 * opt$par["log_kappa"]))
   # Marginal Standard Deviation  (Lindgren and Rue 2013 Eq. 2)
-    marg_sd_O <- 1 / sqrt(4*pi*exp(2*opt$par["log_tau_O"])*exp(2*opt$par["log_kappa"]))
+    marg_sd_O <- 1 / sqrt(4 * pi * exp(2 * opt$par["log_tau_O"]) * 
+      exp(2 * opt$par["log_kappa"]))
 
 ###############################################################################
 #### rpart
 ###############################################################################
+#Rename the stations longitude so that the output is formatted for the article
+#Prune the tree according to significant differences between the relative error
+#Go to http://www.statmethods.net/advstats/cart.html for more info.
 longitude <- x_stations
 stock <- rpart(Report_spatial$Omega ~ longitude)
 stock.original <- stock
@@ -165,24 +169,30 @@ if(length(splits) > 1){
 
 }
 
-
-## Go to http://www.statmethods.net/advstats/cart.html for more info.
 ###############################################################################
 #### save output
 ###############################################################################
-  capture.output(opt, file = file.path("log", logfile.name), append = TRUE)
-  saved <- list("opt" = opt, "obj" = obj,
-                "B_mean_spatial" = B_mean_spatial, "B_conf_spatial" = B_conf_spatial, 
-                "report" = report, "Report_spatial" = Report_spatial, 
-                "mesh" = mesh, "x_stations" = x_stations, "y_stations" = y_stations,
-                "gmrf_range" = gmrf_range, "marg_sd_E" = marg_sd_E,
-                "marg_sd_O" = marg_sd_O, 
-                "stock" = stock, "stock_all" = stock.all, "stock_orig" = stock.orig)
-  save(saved, file = file.path("results", paste0(strsplit(logfile.name, ".", 
-                                                          fixed = TRUE)[[1]][1],
-                                                 ".RData")))
+logfn <- create_logfile(projectName = 
+  paste0("alaska_", paste(tolower(substring(unlist(strsplit(desired.spp, " ")), 1, 1)), 
+         collapse = "")), 
+  projectDir = file.path(my.base, "log")
+  )
 
+  capture.output(opt, file = file.path("log", logfn), append = TRUE)
+  saved <- list(
+    "opt" = opt, "obj" = obj, "B_mean_spatial" = B_mean_spatial, 
+    "B_conf_spatial" = B_conf_spatial, "report" = report, 
+    "Report_spatial" = Report_spatial, "mesh" = mesh, 
+    "x_stations" = x_stations, "y_stations" = y_stations,
+    "gmrf_range" = gmrf_range, "marg_sd_E" = marg_sd_E, "marg_sd_O" = marg_sd_O, 
+    "stock" = stock, "stock_all" = stock.all, "stock_orig" = stock.orig)
+  save(saved, file = 
+    file.path("results", paste0(strsplit(logfile.name, ".", fixed = TRUE)[[1]][1],
+              ".RData")))
 
+###############################################################################
+#### unload the cpp file
+###############################################################################
   # First attempt
   firsttry <- try(dyn.unload(dynlib(file.path(dir.data, my.tmb))),
                   silent = TRUE)
@@ -193,6 +203,5 @@ if(length(splits) > 1){
                    silent = TRUE)
   # Verify that second attempt works
   #getLoadedDLLs() 
-}
 
 #EndOfFile

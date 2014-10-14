@@ -41,15 +41,9 @@ if(run.all == TRUE){
     data.all <- spTransform(data.all, akCRS)
 
   # GIS Analysis
-  source(file.path(my.base, "alaska_areas.R"))
-
   shape.afsc <- readOGR(file.path(dir.data, "stratum"), "strata_geographic")
   shape.afsc.akcrs <- spTransform(shape.afsc, akCRS)
-  shape.noSE <- create_areas(listofareas = alaska_noSE)
-  shape.strait <- create_areas(listofareas = alaska_noSE,
-                               subset = names(alaska_noSE))
-  shape.manage <- create_areas(listofareas = alaska_areas_management,
-                               subset = names(alaska_areas_management))
+  shape.manage <- create_areas(shape = shape.afsc.akcrs)
   data.all$inside <- over(data.all, 
                           as(eval(parse(text = my.shape)), "SpatialPolygons"))
 

@@ -108,8 +108,10 @@ Type objective_function<Type>::operator() ()
     int station_use = CppAD::Integer(station_map(ii));
     int year_use = CppAD::Integer(year(ii));
     Type mean_y = Dji(station_use, year_use);
-    Type var_y = exp(log_sigma);
-    g(2) += 0.5*(log(2.0*M_PI*var_y) + square(log(Y[ii]) - mean_y)/var_y);
+    Type sigma_y = exp(log_sigma);
+    g(2) -= log(1 / (Y[ii] * sigma_y * sqrt(2.0*M_PI)) * exp(-square(log(Y[ii]) - mean_y) / (2 * square(sigma_y))));
+    //g(2) += 0.5*(log(2.0*M_PI*sigma_y) + square(log(Y[ii]) - mean_y)/sigma_y);
+    //g(2) -= dnorm(Y[ii], mean_y, sigma_y, 1);
   }
 
   // Spatial field summaries

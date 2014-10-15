@@ -41,9 +41,8 @@
   #Initial values are calculated in the model and placed in year[0]
   #year[1] is the first year of the data
   #True years 1990:2013 are converted to 1:24
-    n_years <- length(desired.years)
     year <- factor(data.spp$YEAR, levels = desired.years)
-    levels(year) <- 1:n_years
+    levels(year) <- 1:length(desired.years)
   
   #A.locator is the location of each data point on the mesh
   #Only some of the mesh nodes are actually filled 
@@ -74,7 +73,7 @@
       station_map = station_map,
       station_unique = station_unique,
       n_stations = length(station_unique),
-      n_years = as.integer(n_years + 1), #Add a year to accommodate init pred
+      n_years = as.integer(length(desired.years) + 1), #Add a year to accommodate init pred
       G0 = spde$param.inla$M0, 
       G1 = spde$param.inla$M1, 
       G2 = spde$param.inla$M2
@@ -87,9 +86,9 @@
       log_kappa = 0.0,
       log_sigma = 0.0,
       rho = 0.5, 
-      Epsilon_input = matrix(rnorm(spde$n.spde * (n_years + 1)),
+      Epsilon_input = matrix(rnorm(spde$n.spde * (length(desired.years) + 1)),
                              nrow = spde$n.spde,
-                             ncol = (n_years + 1)), #nodes x year matrix
+                             ncol = (length(desired.years) + 1)), #nodes x year matrix
       Omega_input = rnorm(spde$n.spde) #Omega is a vector
       )
 
@@ -142,7 +141,7 @@
 #Go to http://www.statmethods.net/advstats/cart.html for more info.
 longitude <- x_stations
 stock <- rpart(Report_spatial$Omega ~ longitude)
-stock.original <- stock
+stock.orig <- stock
 splits <- rep(NA, (dim(stock$cptable)[1] - 1))
 
 if(length(splits) > 1){
@@ -187,7 +186,7 @@ logfn <- create_logfile(projectName =
     "gmrf_range" = gmrf_range, "marg_sd_E" = marg_sd_E, "marg_sd_O" = marg_sd_O, 
     "stock" = stock, "stock_all" = stock.all, "stock_orig" = stock.orig)
   save(saved, file = 
-    file.path("results", paste0(strsplit(logfile.name, ".", fixed = TRUE)[[1]][1],
+    file.path("results", paste0(strsplit(logfn, ".", fixed = TRUE)[[1]][1],
               ".RData")))
 
 ###############################################################################

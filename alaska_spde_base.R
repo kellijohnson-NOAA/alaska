@@ -34,7 +34,6 @@ desired.years <- 1990:2013 #2013 = last year of data, 2013 survey in BS & GOA
 ###############################################################################
 #### Load packages
 ###############################################################################
-  setwd(my.base)
     dir.results <- file.path(my.base, "results")
     dir.data    <- file.path(my.base, "data")
 

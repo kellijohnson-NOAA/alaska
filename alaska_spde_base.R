@@ -36,6 +36,8 @@ desired.years <- 1990:2013 #2013 = last year of data, 2013 survey in BS & GOA
 ###############################################################################
     dir.results <- file.path(my.base, "results")
     dir.data    <- file.path(my.base, "data")
+    dir.create(dir.results, showWarnings = TRUE)
+    dir.create(dir.data, showWarnings = TRUE)
 
   # Install personal R package: "r4kfj"
   if(getweb == TRUE) {

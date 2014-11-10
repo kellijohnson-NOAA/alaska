@@ -13,17 +13,15 @@
 #### Set initial inputs
 ###############################################################################
 my.data.name    <- "data.spp"
-my.base         <- "c:/alaska"
 my.pars         <- "par(oma = rep(0, 4), mar = c(2, 2.7, 0, 0.5))"
 my.shape        <- "shape.manage"
 my.tmb          <- "gompertz_kfj"
 
 my.filetype <- "png"
 my.width <- c(3.34646, 6.69291) # 85 mm, 170mm
-my.height <- 3.34646
+my.height <- my.width[1]
 my.height.map <- 4.5
 my.resolution <- 500
-
 
 getweb <- FALSE #If TRUE pull r4kfj off of github
 run.all <- TRUE #logical; save or load(saved) workspace

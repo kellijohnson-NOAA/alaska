@@ -16,7 +16,9 @@
 ###############################################################################
 #### Set initial inputs
 ###############################################################################
-setwd("c:/alaska")
+my.base <- "c:/alaska"
+
+setwd(my.base)
 source("alaska_spde_base.R")
 source("alaska_spde_initialize.R")
 source("alaska_spde_analysis.R")

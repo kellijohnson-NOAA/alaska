@@ -9,3 +9,4 @@ TODO file
 7. Read: Lindgren F, Rue H, Lindström J. 2011. An explicit link between Gaussian fields and Gaussian Markov random fields: the stochastic partial differential equation approach [with discussion]. J. R. Stat. Soc. B. 73(4):423–98.
 10. Check JISAO funding project number.
 10. Get NOAA JISAO contribution number.
+11. Check for 2014 data on AKFSC website

@@ -29,6 +29,8 @@ if(run.all == TRUE){
                         )
   
   # Remove entries without station numbers & Japanese trawl data
+  # Read in all files in the dir.data folder that contain 
+  # the areas listed in desired.areas
     data.all <- subset(do.call("rbind",
                                lapply(data.files, read.csv, 
                                       na.strings = -9999)),
@@ -36,6 +38,7 @@ if(run.all == TRUE){
 
     data.all$station <- with(data.all, paste(STATION, STRATUM, sep = "_"))
     data.all$id <- with(data.all, paste(station, SID, sep = "_"))
+  # Add coordinate data to the data.all, using the akCRS projection
     coordinates(data.all) <- with(data.all, cbind("LONGITUDE", "LATITUDE"))
     proj4string(data.all) <- llCRS
     data.all <- spTransform(data.all, akCRS)

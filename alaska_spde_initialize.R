@@ -61,7 +61,15 @@ if(run.all == TRUE){
                       select = c("STATION", "STRATUM", "YEAR",
                                 "DATETIME", "WTCPUE", 
                                 "SID", "station", "id", "inside"))
-
+  temp <- with(data.zero@data, paste(station, YEAR))
+  data.zero.keep <- sapply(split(seq_along(temp), temp), "[", 1)
+  temp <- list()
+  for(spp in seq_along(desired.spp)) {
+    temp[[spp]] <- data.zero[data.zero.keep, ]
+    temp[[spp]]$SID <- race.num$RACE[spp]
+  }
+  data.zero <- do.call("rbind", temp)
+  
   # Subset data 
   data.spp <- subset(data.all, SID %in% race.num$RACE, 
                      select = c("STATION", "STRATUM", "YEAR",

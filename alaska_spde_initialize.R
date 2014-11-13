@@ -50,9 +50,20 @@ if(run.all == TRUE){
   data.all$inside <- over(data.all, 
                           as(eval(parse(text = my.shape)), "SpatialPolygons"))
 
+  # Subset the data for the years and values inside the study area
+  data.all <- subset(data.all, !is.na(inside) & YEAR %in% desired.years)
+
+  # Subset data for those entries where the desired spp was not found
+  # This will be useful for rerunning the model with a small value added
+  # to the tows where the species was not caught to test the sensitivity
+  # to the assumption that I do not need to model the zero tow data
+  data.zero <- subset(data.all, !SID %in% race.num$RACE, 
+                      select = c("STATION", "STRATUM", "YEAR",
+                                "DATETIME", "WTCPUE", 
+                                "SID", "station", "id", "inside"))
+
   # Subset data 
-  data.spp <- subset(data.all, !is.na(inside) & 
-                     SID %in% race.num$RACE & YEAR %in% desired.years, 
+  data.spp <- subset(data.all, SID %in% race.num$RACE, 
                      select = c("STATION", "STRATUM", "YEAR",
                                 "DATETIME", "WTCPUE", 
                                 "SID", "station", "id", "inside"))

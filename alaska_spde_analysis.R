@@ -4,7 +4,7 @@
 ##             Create spde for spatial analysis
 ## Author:     Kelli Faye Johnson
 ## Contact:    kellifayejohnson@gmail.com
-## Date:       2014-10-13
+## Date:       2015-01-05
 ## Comments:   Polygons for the seven areas in Alaska are based on a shape file
 ##             provided by Annie Greig of NOAA (email: angie.greig@noaa.gov).
 ##             Shape file were in arcgis format.
@@ -17,11 +17,11 @@
 #### Create the mesh using the projected data so all measurements are in m
 ###############################################################################
   ## Create the SPDE/GMRF model, (kappa^2-Delta)(tau x) = W:
-  prdomain <- inla.nonconvex.hull(coordinates(eval(as.name(my.data.name))),
+  prdomain <- inla.nonconvex.hull(coordinates(data.spp),
                                   -0.05,
                                   resolution = c(40, 15))
 
-  mesh <- inla.mesh.2d(loc = coordinates(eval(as.name(my.data.name))),
+  mesh <- inla.mesh.2d(loc = coordinates(data.spp),
                        offset = c(-0.06, -0.03),
                        cutoff = 100,
                        max.edge = c(100, 2000), 

@@ -4,7 +4,7 @@
 ##             Create spde for spatial analysis
 ## Author:     Kelli Faye Johnson
 ## Contact:    kellifayejohnson@gmail.com
-## Date:       2014-08-17
+## Date:       2015-01-05
 ## Comments:   Polygons for the seven areas in Alaska are based on a shape file
 ##             provided by Annie Greig of NOAA (email: angie.greig@noaa.gov).
 ##             Shape file were in arcgis format.
@@ -44,11 +44,25 @@ if(run.all == TRUE){
     data.all <- spTransform(data.all, akCRS)
 
   # GIS Analysis
-  shape.afsc <- readOGR(file.path(dir.data, "stratum"), "strata_geographic")
-  shape.afsc.akcrs <- spTransform(shape.afsc, akCRS)
-  shape.manage <- create_areas(shape = shape.afsc.akcrs)
-  data.all$inside <- over(data.all, 
-                          as(eval(parse(text = my.shape)), "SpatialPolygons"))
+  # shape.afsc <- spTransform(readOGR(file.path(dir.data, "stratum"), "strata_geographic"), akCRS)
+  # shape.manage <- create_areas(shape = shape.afsc)
+
+  # Polygons for areas, that cuts off the eastern portion of the gulf of AK
+  # because of the management area.
+  alaska_areas_management <- list(
+      "GOA_W" = matrix(c(c(-140, -170, -170, -140, -140) %% 360,
+                         c(45.0, 45.0, 65.0, 65.0, 45.0)), ncol = 2),
+      "AI" = matrix(c(c(165, 165, -170, -170, 165) %% 360,
+                          c(45.0, 65.0, 65.0, 45.0, 45.0)), ncol = 2)
+      )
+  spatialareas <- SpatialPolygons(lapply(alaska_areas_management, function(x) {
+        Polygons(list(Polygon(x)), 
+                 ID = names(alaska_areas_management)[substitute(x)[[3]]])
+        }))
+    proj4string(spatialareas) <- llCRS
+    spatialareas <- spTransform(spatialareas, akCRS)
+
+  data.all$inside <- over(data.all, spatialareas)
 
   # Subset the data for the years and values inside the study area
   data.all <- subset(data.all, !is.na(inside) & YEAR %in% desired.years)

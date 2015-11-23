@@ -8,7 +8,7 @@
 ## Comments:   
 ###############################################################################
 ###############################################################################
-n.areas <- length(eval(as.name(my.shape)))
+n.areas <- length(unique(data.spp$inside))
 
 shape.colors <- gray(seq(0.1, 0.8, length.out = n.areas), alpha = 0.8)
 shape.names <- names(eval(as.name(my.shape)))

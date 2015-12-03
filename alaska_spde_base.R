@@ -41,8 +41,8 @@ desired.years <- 1990:2015 #2015 = last year of data in the AI
     dir.create(dir.data, showWarnings = FALSE)
 
   # Install personal R package: "r4kfj"
-  if(getweb == TRUE) {
-    devtools::install_github("r4kfj", "kellijohnson")
+  if(getweb) {
+    devtools::install_github("kellijohnson/r4kfj@master")
   }
 
   # Load .R files specific for the alaska analysis, located in "lib" folder

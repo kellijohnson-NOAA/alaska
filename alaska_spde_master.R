@@ -8,7 +8,7 @@
 ## Comments:   Polygons for the areas in Alaska are based on a shape file
 ##             provided by Annie Greig of NOAA (email: angie.greig@noaa.gov).
 ##             Shape file were in arcgis format.
-##             The function create_areas assumes the shapefile is pocentered 
+##             The function create_areas assumes the shapefile is pocentered
 ##             or projected (i.e. not in latlon format)
 ###############################################################################
 ###############################################################################
@@ -16,7 +16,11 @@
 ###############################################################################
 #### Set initial inputs
 ###############################################################################
-my.base <- "c:/alaska"
+my.base <- file.path("c:", "alaska")
+  if (!file.exists(my.base)) {
+    my.base <- file.path("d:", "alaska")
+    if(file.exists(my.base)) stop(paste(my.base, "does not exist"))
+  }
 
 setwd(my.base)
 source("alaska_spde_base.R")

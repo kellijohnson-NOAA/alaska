@@ -63,6 +63,7 @@ desired.years <- 1990:2015 #2015 = last year of data in the AI
   library(INLA)
   load_packages(c("igraph", "maps", "maptools", "mapproj", "Matrix",
                   "plyr", "raster", "rpart", "reshape", "reshape2", "rgdal",
-                  "rgeos", "sos", "sp", "spdep", "stats4", "TMB", "xtable"))
+                  "rgeos", "sos", "sp", "splancs",
+                  "spdep", "stats4", "TMB", "xtable"))
 
   define_projections()

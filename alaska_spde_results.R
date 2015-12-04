@@ -392,7 +392,8 @@ setwd(currwd)
 ## Code that is not currently used
 ## But too good to throw away
 ###############################################################################
-
+NPFMCstrata.afsc <- spTransform(readOGR(file.path(dir.data, "stratum"),
+  "strata_geographic"), akCRS)
 
 
 ###############################################################################

@@ -44,7 +44,6 @@ if(run.all == TRUE){
     data.all <- spTransform(data.all, akCRS)
 
   # GIS Analysis
-  # shape.afsc <- spTransform(readOGR(file.path(dir.data, "stratum"), "strata_geographic"), akCRS)
   # shape.manage <- create_areas(shape = shape.afsc)
 
   # Polygons for areas, that cuts off the eastern portion of the gulf of AK

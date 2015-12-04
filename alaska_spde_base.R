@@ -25,9 +25,6 @@ my.height <- my.width[1]
 my.height.map <- 4.5
 my.resolution <- 500
 
-getweb <- FALSE #If TRUE pull r4kfj off of github
-run.all <- TRUE #logical; save or load(saved) workspace
-
 desired.areas <- c("ai", "goa")
 desired.spp <- "Pacific cod"
 desired.years <- 1990:2015 #2015 = last year of data in the AI
@@ -44,11 +41,27 @@ desired.years <- 1990:2015 #2015 = last year of data in the AI
   if(getweb) {
     devtools::install_github("kellijohnson/r4kfj@master")
   }
-
+  # Install the stable version of INLA
+  install.packages("INLA", repos = "http://www.math.ntnu.no/inla/R/stable")
+  # Install a needed package for rgeos
+  install.packages("gpclib", repos = "http://cran.fhcrc.org/", type = "source")
+  # Install TMB
+  if (file.exists(file.path("c:", "adcomp"))) {
+    old_wd <- getwd()
+    setwd(file.path("c:", "adcomp"))
+    if (getweb) {
+      system("git fetch")
+      system("git rebase origin/master")
+    }
+    remove.packages("TMB")
+    source("install_windows.R")
+    setwd(old_wd)
+  }
   # Load .R files specific for the alaska analysis, located in "lib" folder
-  sapply(dir(file.path(my.base, "lib"), full.names = TRUE), source)
+  ignore <- sapply(dir(file.path(my.base, "lib"), full.names = TRUE), source)
   library("r4kfj")
-  load_packages(c("igraph", "INLA", "maps", "maptools", "mapproj", "Matrix",
+  library(INLA)
+  load_packages(c("igraph", "maps", "maptools", "mapproj", "Matrix",
                   "plyr", "raster", "rpart", "reshape", "reshape2", "rgdal",
                   "rgeos", "sos", "sp", "spdep", "stats4", "TMB", "xtable"))
 

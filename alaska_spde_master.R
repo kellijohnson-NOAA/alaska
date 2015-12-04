@@ -21,8 +21,14 @@ my.base <- file.path("c:", "alaska")
     my.base <- file.path("d:", "alaska")
     if(file.exists(my.base)) stop(paste(my.base, "does not exist"))
   }
-
 setwd(my.base)
+
+getweb <- FALSE #If TRUE pull r4kfj off of github
+run.all <- TRUE #logical; save or load(saved) workspace
+
+###############################################################################
+#### Run analysis
+###############################################################################
 source("alaska_spde_base.R")
 source("alaska_spde_initialize.R")
 source("alaska_spde_analysis.R")

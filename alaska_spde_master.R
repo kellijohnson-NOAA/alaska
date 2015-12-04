@@ -23,8 +23,7 @@ my.base <- file.path("c:", "alaska")
   }
 setwd(my.base)
 
-getweb <- FALSE #If TRUE pull r4kfj off of github
-run.all <- TRUE #logical; save or load(saved) workspace
+getweb <- TRUE #If TRUE pull r4kfj off of github
 
 ###############################################################################
 #### Run analysis

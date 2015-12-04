@@ -8,7 +8,7 @@
 ## Comments:   Polygons for the seven areas in Alaska are based on a shape file
 ##             provided by Annie Greig of NOAA (email: angie.greig@noaa.gov).
 ##             Shape file were in arcgis format.
-##             The function create_areas assumes the shapefile is pocentered 
+##             The function create_areas assumes the shapefile is pocentered
 ##             or projected (i.e. not in latlon format)
 ###############################################################################
 ###############################################################################

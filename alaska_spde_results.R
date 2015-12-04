@@ -5,7 +5,7 @@
 ## Author:     Kelli Faye Johnson
 ## Contact:    kellifayejohnson@gmail.com
 ## Date:       2014-09-18
-## Comments:   
+## Comments:
 ###############################################################################
 ###############################################################################
 n.areas <- length(unique(data.spp$inside))
@@ -33,7 +33,7 @@ library(sp)
 library(gstat)
 
 logfile.spp <- sapply(desired.spp, function(x){
-                      paste(tolower(substring(unlist(strsplit(x, " ")), 
+                      paste(tolower(substring(unlist(strsplit(x, " ")),
                                               1, 1)),
                             collapse = "")
                       })
@@ -54,7 +54,7 @@ my.res <- list()
 for(q in seq_along(desired.spp)){
   load(rdata_files[q])
   assign(logfile.spp[q], saved)
-  my.res[[q]] <- eval(parse(text = logfile.spp[q]))  
+  my.res[[q]] <- eval(parse(text = logfile.spp[q]))
 }
 names(my.res) <- logfile.spp
 
@@ -66,17 +66,17 @@ cat("number of mesh nodes", "\n")
 cat(my.res[[1]]$mesh$n, "\n\n\n")
 cat("Decimal degrees to minutes seconds for stock splits", "\n",
     "of my.res[[1]], which is currently Pacific cod")
-apply(cbind(my.res[[1]]$stock_all$splits[, "index"], 60), 
+apply(cbind(my.res[[1]]$stock_all$splits[, "index"], 60),
           1, function(x) dd2dms(as.vector(x)))
 sink()
 
 ###############################################################################
-## Import shapefile 
+## Import shapefile
 ###############################################################################
-efhCRS <- CRS("+proj = aea +lat_1 = 65.0 +lat_2 = 55.0 
-               +lat_0 = 50.0 +lon_0 = -154.0 
+efhCRS <- CRS("+proj = aea +lat_1 = 65.0 +lat_2 = 55.0
+               +lat_0 = 50.0 +lon_0 = -154.0
                +x_0 = 0 +y_0 = 0 +units = m")
-maps.efh <- readShapePoly(file.path(dir.data, 
+maps.efh <- readShapePoly(file.path(dir.data,
                                     "efh_shapefile_2005", "EFH_2005"),
                           proj4string = efhCRS)
 maps.efh <- spTransform(maps.efh, akCRS)
@@ -84,18 +84,18 @@ maps.efh <- spTransform(maps.efh, akCRS)
 names.nt <- c("Near_Shore_Bristol_No_Trawl", "Northern_BS_ResearchArea",
               "Nunivak_Kusko", "Prib_Hab_Cons_Area", "St_Lawerence", "St_Matts",
               "Modified_Gear_Trawl_Zone", "SE_No_Trawl", "Cook_inlet",
-              "GOA_Type_1", "AI_HCA", "BS_HCA", "GOA_Slope_HCA", 
+              "GOA_Type_1", "AI_HCA", "BS_HCA", "GOA_Slope_HCA",
               "Red_King_Crab_Closure_Area")
 names.nf <- c("Bowers_Ridge", "AK_Seamount_HPA")
 
 for(q in seq_along(names.nt)){
-  assign(paste0("names.nt", "_", q), 
+  assign(paste0("names.nt", "_", q),
          readShapePoly(file.path(dir.data,
                       "alaska_SSLShapefiles", names.nt[q]),
                       proj4string = efhCRS))
 }
 for(q in seq_along(names.nf)){
-  assign(paste0("names.nf", "_", q), 
+  assign(paste0("names.nf", "_", q),
          readShapePoly(file.path(dir.data,
                       "alaska_SSLShapefiles", names.nf[q]), proj4string = efhCRS))
 }
@@ -115,17 +115,17 @@ par(xpd = TRUE, oma = c(1, 0, 0, 0), mar = c(3, 2, 0, 0))
 plot(maps.eez, lty = lty.eez)
 r4kfj::llgridlines(maps.eez, recenter = TRUE, lty = 1, col = col.gridlines)
 for(q in seq_along(names.nt)){
-  plot(eval(parse(text = paste0("names.nt_", q))), 
+  plot(eval(parse(text = paste0("names.nt_", q))),
        col = plot.colours[1], border = plot.colours[1], add = TRUE)
 }
 for(q in seq_along(names.nf)){
-  plot(eval(parse(text = paste0("names.nf_", q))), 
+  plot(eval(parse(text = paste0("names.nf_", q))),
        col = plot.colours[2], border = plot.colours[2], add = TRUE)
 }
 lines(maps.ak, col = plot.colours[2])
 plot(maps.eez, lty = lty.eez, add = TRUE)
 legend(x = -2800000, y = 2800000,
-       c("EEZ", "No trawling", "No fishing", "Alaska Coastal Current", "Alaskan Stream", "North Slope Current"), 
+       c("EEZ", "No trawling", "No fishing", "Alaska Coastal Current", "Alaskan Stream", "North Slope Current"),
        lty = c(lty.eez, 0, 0, lty.currents),
        pch = c(NA, 15, 15, rep(NA, length(lty.currents))),
        col = c("black", plot.colours[1], plot.colours[2], rep("black", length(lty.currents))),
@@ -143,15 +143,15 @@ text(x = -1100000, y = 380000, "Samalga Pass", font = my.font, col = my.textcolo
 text(x = -1800000, y = 350000, "Amchitka\nPass", font = my.font, col = my.textcolour, cex = my.fontsize[1])
 text(x = -2100000, y = 650000, "Buldir Strait", font = my.font, col = my.textcolour, cex = my.fontsize[1])
 
-map.arrows <- data.frame(x = c(1351213, 75106.41, -444787.1, -876262.4, 361313.4,  -1636016,  -1890990, -1976426,  
+map.arrows <- data.frame(x = c(1351213, 75106.41, -444787.1, -876262.4, 361313.4,  -1636016,  -1890990, -1976426,
                                115538.2, -296584, -752666.3, -1037039, -1103498.1, -1806016,  -2024768, -944654.6),
-                         y = c(715993.2, 967678.3, 599844.7, 422556.2, 815718.1, 421632.8, 505505.1, 792254.6, 
+                         y = c(715993.2, 967678.3, 599844.7, 422556.2, 815718.1, 421632.8, 505505.1, 792254.6,
                                968683, 620295, 576070.5, 499378.6, 320066.8, 542503.4, 630913.3 , 546415),
                          curve = rep(c(-0.47, 0.00, 0.50, 0.76, 0.20, 0.78, 0.10, -0.20), 2),
                          lty = rep(c(rep(lty.currents[1], 4), rep(lty.currents[2], 3), rep(lty.currents[3], 1)), 2))
 for(q in 1:(dim(map.arrows)[1] / 2)){
   z <- (dim(map.arrows)[1] / 2) + q
-  igraph:::igraph.Arrows(map.arrows[q, 1], map.arrows[q, 2], map.arrows[z, 1], map.arrows[z, 2], 
+  igraph:::igraph.Arrows(map.arrows[q, 1], map.arrows[q, 2], map.arrows[z, 1], map.arrows[z, 2],
                          h.lwd = 1.5, sh.lwd = 1.5, curve = map.arrows[q, 3], width = 1, size = 0.4,
                          h.lty = 1, sh.lty = map.arrows[q, "lty"])
 }
@@ -163,7 +163,7 @@ make_file_off()
 ## Alaska and survey data: surveyData.png
 ###############################################################################
 # make_file(my.filetype, file.path(dir.results, "surveyData.png"),
-#           width = my.width[2], 
+#           width = my.width[2],
 #           height = my.height.map * length(desired.spp), res = my.resolution)
 par(mfrow = c(length(desired.spp), 1), oma = c(0,0,0,0), mar = c(4,5.5,0,0),
     xpd = TRUE)
@@ -186,12 +186,12 @@ par(mfrow = c(length(desired.spp), 1), oma = c(0,0,0,0), mar = c(4,5.5,0,0),
     plot.text <- paste0("(", letters[q], ")", " ", desired.spp[q])
 
     if(length(desired.spp) > 1) {
-        mtext(plot.text, side = 3, adj = 1, line = my.spp.line, font = my.font, 
+        mtext(plot.text, side = 3, adj = 1, line = my.spp.line, font = my.font,
               col = my.textcolour, cex = 1.5)
       }
   }
   dev.copy(png, file.path(dir.results, "surveyData.png"), units = "in",
-           width = my.width[2], height = my.height.map * length(desired.spp), 
+           width = my.width[2], height = my.height.map * length(desired.spp),
            res = my.resolution)
   dev.off(); dev.off()
 # make_file_off()
@@ -199,7 +199,7 @@ par(mfrow = c(length(desired.spp), 1), oma = c(0,0,0,0), mar = c(4,5.5,0,0),
 ###############################################################################
 #### figure_data
 ###############################################################################
-make_file(my.filetype, file.path(dir.results, "fig_data.png"), 
+make_file(my.filetype, file.path(dir.results, "fig_data.png"),
     width = my.width[2], height = my.height, res = my.resolution)
 data.plot <- subset(data.spp, SID == race.num[1,1] & YEAR %in% desired.years)
 data.plot$year.f <- factor(data.plot$YEAR, levels = desired.years)
@@ -211,22 +211,22 @@ for(y in seq_along(desired.years)){
   col.year[y] <- ifelse(length(grep("ai", temp)) > 0, 1, 2)
 }
 par(mgp = c(1, 0.5, 0), oma = c(0, 0, 0, 0), mar = c(3, 3, 0, 0))
-boxplot(log(WTCPUE) ~ year.f, 
-        data = data.plot,  
+boxplot(log(WTCPUE) ~ year.f,
+        data = data.plot,
         lty = col.year, las = 1, ann = FALSE)
 mtext("year", side = 1, line = 1.5)
 mtext("lnCPUE", side = 2, line = 1.5)
 text(seq_along(desired.years), rep(par("yaxp")[1] - 1, length(desired.years)),
        labels = summary(data.plot$year.f), cex = 0.65)
 text(0.15, par("yaxp")[1] - 1, "n =", cex = 0.65)
-legend("topleft", lty = 1:2, legend = c("GOA", "AIs"), 
+legend("topleft", lty = 1:2, legend = c("GOA", "AIs"),
        bty = "n", horiz = TRUE)
 make_file_off()
 
 ###############################################################################
 #### fig_stock.png
 ###############################################################################
-# make_file(my.filetype, file.path(dir.results, "fig_stock.png"), 
+# make_file(my.filetype, file.path(dir.results, "fig_stock.png"),
 #           width = my.width[1], res = my.resolution)
 par(mfrow = c(length(my.res), 1))
 par(xpd = TRUE, fig = c(0,1,0,1))
@@ -237,7 +237,7 @@ for(q in seq_along(my.res)) {
 
   par(new = TRUE, fig = c(0.2,0.9,0.45,0.95))
   plot(my.res[[q]]$stock_all, uniform = TRUE)
-  text(my.res[[q]]$stock_all, use.n = TRUE, all = FALSE, 
+  text(my.res[[q]]$stock_all, use.n = TRUE, all = FALSE,
        digits = 3, cex = 0.8, splits = TRUE,
        fancy = FALSE, fwidth = 0.6, fheight = 0.75)
 }
@@ -249,16 +249,16 @@ dev.off();dev.off()
 ###############################################################################
 #### Mean abundance
 ###############################################################################
-make_file(my.filetype, file.path(dir.results, "hat_abundance.png"), width = 4, 
+make_file(my.filetype, file.path(dir.results, "hat_abundance.png"), width = 4,
     height=2.5*length(desired.spp), res = my.resolution)
-  par(mfrow = c(length(desired.spp), 1), 
-      mar = c(0, 0, 0, 0), oma = c(3, 3, 0, 0), 
+  par(mfrow = c(length(desired.spp), 1),
+      mar = c(0, 0, 0, 0), oma = c(3, 3, 0, 0),
       mgp = c(1.5,0.5,0), tck = -0.02, xaxs = "i")
   for(q in seq_along(desired.spp)){
     # Load old results
     ylim <- c(0, range(my.res[[q]]$B_conf_spatial)[2])
     xlim <- c(desired.years, rev(desired.years)[1] + 1)
-    plot(1, type = "n", xlab = "", ylab = "", lwd = 3, ylim = ylim, 
+    plot(1, type = "n", xlab = "", ylab = "", lwd = 3, ylim = ylim,
          xlim = range(xlim), log = "", las = 1, xaxt = "n")
     Which = match(c("rho", "phi"), rownames(my.res[[q]]$opt$summary) )
     val <- formatC(round(my.res[[q]]$opt$summary[Which[1], "Estimate"], 3), 3)
@@ -273,9 +273,9 @@ make_file(my.filetype, file.path(dir.results, "hat_abundance.png"), width = 4,
       plot.text <- paste0("(", letters[q], ")", " ", desired.spp[q])
       mtext(plot.text, side = 3, adj = 1, line = -2, font = my.font)
     }
-    polygon(x = c(xlim, rev(xlim)), 
-            y = c(my.res[[q]]$B_conf_spatial[,1], 
-                  rev(my.res[[q]]$B_conf_spatial[,2])), lty = "solid", 
+    polygon(x = c(xlim, rev(xlim)),
+            y = c(my.res[[q]]$B_conf_spatial[,1],
+                  rev(my.res[[q]]$B_conf_spatial[,2])), lty = "solid",
             col=rgb(0, 0, 0, 0.2), border = NA)
     lines(x = xlim, y = my.res[[q]]$B_mean_spatial, lwd = 3)
 
@@ -304,19 +304,19 @@ make_file(my.filetype, file.path(dir.results, "hat_abundance.png"), width = 4,
  axis(1)
  mtext(side = 1, "years", outer = TRUE, line = 2)
  mtext(side = 2, expression(bar(lnBiomass)), outer = TRUE, line = 1.5)
- legend("bottomright", c(paste("longitude >=",  
+ legend("bottomright", c(paste("longitude >=",
                                round(my.res[[q]]$stock$splits[1, "index"], 2)),
-                         paste("longitude <", 
+                         paste("longitude <",
                                round(my.res[[q]]$stock$splits[1, "index"], 2))),
         lty = c(2, 3), bty = "n")
-make_file_off() 
+make_file_off()
 
 
 ###############################################################################
 #### fig spatial variation in productivity
 ###############################################################################
 
-plot.coords <- data.frame("x" = my.res[[q]]$x_stations, 
+plot.coords <- data.frame("x" = my.res[[q]]$x_stations,
                           "y" = my.res[[q]]$y_stations,
                           "omega" = my.res[[q]]$Report_spatial[["Omega"]])
 coordinates(plot.coords) <- ~ x + y
@@ -340,7 +340,7 @@ par(oma = c(0,0,0,0), mar = c(0,0,0,0))
 image(idw["var1.pred"], col= gray.colors(101),
       ylim = c(0, 1500))
 plot(ak, add = TRUE, col = "white")
-abline(v = my.res[[1]]$stock_orig$splits[, "index"], 
+abline(v = my.res[[1]]$stock_orig$splits[, "index"],
        lty = c(1, rep(2, dim(my.res[[1]]$stock_orig$splits)[1])))
 # r4kfj::llgridlines(ak, recenter = TRUE)
 par(new = TRUE)
@@ -348,7 +348,7 @@ plot.new()
 par(oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0))
 plot.window(xlim = round(range(idw["var1.pred"]@data), 1), ylim = c(0, 1))
 points(x = seq(round(range(idw["var1.pred"]@data)[1], 1),
-               round(range(idw["var1.pred"]@data)[2], 1), 
+               round(range(idw["var1.pred"]@data)[2], 1),
                length.out = 101),
        y = rep(0.33, 101), col = gray.colors(101), pch = 15, cex = 1.2)
 axis(1, line = -5.4, cex.axis = 0.5, mgp = c(0.3, 0.25, 0))
@@ -373,7 +373,7 @@ table_temp <- data.frame("Description" =
                 "process error variance", "productivity variance",
                 "spatial correlation", "observation error variance",
                 "density dependence"),
-              "Symbol" = 
+              "Symbol" =
               c("$\\alpha1$", "$\\phi1$", "$\\sum_{E}$", "$\\sum_{\\Omega}$",
                 "$\\kappa$", "$\\sigma_{\\epsilon}$", "$\\rho$"))
 table_pars <- cbind(table_temp, table_pars)
@@ -428,11 +428,11 @@ par(mfrow = c(length(desired.spp), 1), oma = c(0,5,0,0), mar = c(4,5.5,0,0),
     text(x = -1000000, y = 1300000, "Bering \n Sea", font = my.font, col = my.textcolour, cex = my.fontsize[2])
     text(x = -1200000, y = 250000, "Aleutian Islands", font = my.font, col = my.textcolour, cex = my.fontsize[2])
     text(x = 600000, y = 500000, "Gulf of \n Alaska", font = my.font, col = my.textcolour, cex = my.fontsize[2])
-    points(do.call("rbind", my.coords), 
+    points(do.call("rbind", my.coords),
            pch = points.shape, cex = abs(growth*15))
       plot.text <- paste0("(", letters[q], ")", " ", desired.spp[q])
       if(length(desired.spp) > 1){
-            mtext(plot.text, side = 3, adj = 1, line = my.spp.line, font = my.font, 
+            mtext(plot.text, side = 3, adj = 1, line = my.spp.line, font = my.font,
                   col = my.textcolour, cex = 1.5)
           }
       if(q == 1){
@@ -452,7 +452,7 @@ make_file_off()
 table_data <- apply(race.num, 1, function(d) {
     data <- subset(data.spp, SID == d & YEAR %in% desired.years)
     area <- do.call("rbind", strsplit(rownames(data@data), ".", fixed = TRUE))[, 1]
-    temp <- list("ai" = data[grep("i", area), ], 
+    temp <- list("ai" = data[grep("i", area), ],
                  "goa" = data[grep("o", area), ])
 
     data.mid <- lapply(temp, function(x) {
@@ -471,7 +471,7 @@ table_data <- do.call("rbind", lapply(table_data, function(d) {
               }))
 colnames(table_data)[match("meanCPUE", colnames(table_data))] <- "$\\bar{CPUE}$"
 
-table_data$year <- factor(table_data$year, min(as.numeric(as.character(table_data$year))) : 
+table_data$year <- factor(table_data$year, min(as.numeric(as.character(table_data$year))) :
                                            max(as.numeric(as.character(table_data$year))))
 table_data <- table_data[order(table_data$species, table_data$year), ]
 xtable_data <- xtable(table_data, digits = c(0,0,0,0,0,2))
@@ -504,10 +504,10 @@ if(dim(my.res[[r]]$stock$frame)[1] > 1){
                     y = mean(my.res[[r]]$y_stations))
   pos <- SpatialPoints(pos, proj4string = akCRS)
   posll <- spTransform(pos, llCRS)
-  
+
   df.stock[[r]]$name <- c(desired.spp[r],
-                          paste0(c(">=", "<"), 
-                                 round(coordinates(posll)[1, 1], 
+                          paste0(c(">=", "<"),
+                                 round(coordinates(posll)[1, 1],
                                               digits = 2)))
 } else {df.stock[[r]]$name <- desired.spp[r]}
 df.stock[[r]] <- df.stock[[r]][, c("name", "n", "yval", "dev", "complexity")]
@@ -516,7 +516,7 @@ df.stock[[r]] <- df.stock[[r]][, c("name", "n", "yval", "dev", "complexity")]
 colnames(df.stock) <- c("name", "n", "mean sigmaO", "dev", "complexity")
 
 df.stock.xtable <- xtable(df.stock)
- print(df.stock.xtable, type = "html", 
+ print(df.stock.xtable, type = "html",
        file = file.path(dir.results, "stock.html"),
        include.colnames = TRUE, include.rownames = FALSE,
        html.table.attributes = getOption("xtable.html.table.attributes",
@@ -533,9 +533,9 @@ df.stock.xtable <- xtable(df.stock)
 
     # Omega
     Omega_est <- Report_spatial[["Omega"]]
-      Rel <- ((Omega_est - min(Omega_est)) / 
+      Rel <- ((Omega_est - min(Omega_est)) /
               diff(range(Omega_est)))
-    png(file = file.path(dir.results, paste0("Omega_est_", logfile.spp,".png")), 
+    png(file = file.path(dir.results, paste0("Omega_est_", logfile.spp,".png")),
         width = 4, height = 4, res = 200, units = "in")
 
       plot(eval(parse(text = my.shape)), ylim = y.lim, xlim = x.lim,
@@ -545,7 +545,7 @@ df.stock.xtable <- xtable(df.stock)
         box(bty = "o", lwd = 2)
         legend("topleft", legend = c("high", "low"), bty = "n",
                pch = 20, col = col.use[c(length(col.use), 1)])
-        r4kfj::llgridlines(eval(parse(text = my.shape)), recenter = TRUE)        
+        r4kfj::llgridlines(eval(parse(text = my.shape)), recenter = TRUE)
     dev.off()
 
     # Equilibrium field
@@ -554,14 +554,14 @@ df.stock.xtable <- xtable(df.stock)
     Epsilon_est <- Report_spatial[["Epsilon"]]
     Nrow <- ceiling(sqrt(n_years))
     Ncol <- ceiling(n_years/Nrow)
-    png(file = file.path(dir.results, paste0("Epsilon_est_", logfile.spp, ".png")), 
+    png(file = file.path(dir.results, paste0("Epsilon_est_", logfile.spp, ".png")),
         width = 2 * Ncol, height = 2 * Nrow, res = 200, units = "in")
       par(mfrow = c(Nrow, Ncol), mar = c(0, 0, 0, 0), mgp = c(1.5, 0.5, 0), tck = -0.02)
       for(i in 1:n_years){
         Rel = ((Epsilon_est[, i] - min(Epsilon_est[, i])) / diff(range(Epsilon_est[, i])))
       plot(eval(parse(text = my.shape)), ylim = y.lim, xlim = x.lim,
            col = "grey90", border = "grey90", main = "", mar = c(0, 0, 2.5, 0))
-        points(x = x_stations, y = y_stations, pch = 20, 
+        points(x = x_stations, y = y_stations, pch = 20,
                col = col.use[round(length(col.use)*Rel)])
         box(bty = "o", lwd = 2)
         if(i == 1){
@@ -574,7 +574,7 @@ df.stock.xtable <- xtable(df.stock)
     D_est <- Report_spatial[["Dji"]]
     Nrow <- ceiling(sqrt(n_years))
     Ncol <- ceiling(n_years / Nrow)
-    png(file = file.path(dir.results, paste0("D_est_", logfile.spp, ".png")), 
+    png(file = file.path(dir.results, paste0("D_est_", logfile.spp, ".png")),
         width = 2 * Ncol, height = 2 * Nrow, res = 200, units = "in")
       par(mfrow = c(Nrow, Ncol), mar = c(0, 0, 0, 0), mgp = c(1.5, 0.5, 0), tck = -0.02)
       for(i in 1:n_years){
@@ -586,7 +586,7 @@ df.stock.xtable <- xtable(df.stock)
         if(i == 1){
           legend("topleft", legend = c("high", "low"), bty = "n",
                  pch = 20, col = col.use[c(length(col.use), 1)])
-        }         
+        }
       }
     dev.off()
 
@@ -649,27 +649,27 @@ x.lim = c( -121, -117 )  # range(Data[,"Lon..DDD.DDDDD."])
 Omega_range = c(-1.2,0.9)
 redblue2 <- colorRampPalette(colors=(c("red","purple","blue","green","yellow")))
 Seq = seq(-1.2,0.9,length=5)
-png(file.path(DateFile, "Omega_all.png"), width = 1 * 3, 
+png(file.path(DateFile, "Omega_all.png"), width = 1 * 3,
     height = 2.5 * length(SpeciesSet), res = 200, units = "in")
-  par(mfrow=c(length(SpeciesSet), 1), mar = c(0,0,0,0), mgp = c(1.5,0.5,0), 
+  par(mfrow=c(length(SpeciesSet), 1), mar = c(0,0,0,0), mgp = c(1.5,0.5,0),
       tck = -0.02, oma = c(3,3,1.5,0), xaxs = "i")
   for(SpeciesI in 1:length(SpeciesSet)){
     spp = SpeciesSet[SpeciesI]   # Rho = 0.98, 0.94, 0.53/0.29
     load(file = paste0(DateFile, "/Save_spatial_", spp, ".RData"))
-    if(TRUE){ 
+    if(TRUE){
       saved[["x_stations"]] = x_stations
       saved[["y_stations"]] = y_stations
       saved[["mesh"]] = mesh
-    } 
+    }
     Omega_est = saved$Report_spatial[["Omega"]][saved$mesh$idx$loc]
     print(range(Omega_est))
     Rel = ((Omega_est[saved$mesh$idx$loc]-min(Omega_est[saved$mesh$idx$loc]))/diff(range(Omega_est[saved$mesh$idx$loc])))
     #Rel = (Omega_est - min(Omega_range)) / diff(Omega_range)
     map("worldHires", ylim=y.lim, xlim=x.lim, col="grey90", fill=T, mar=c(0,0,0,0), main="", myborder=0.01) # myborder is buffer around limits
-    points(x=saved$x_stations, y=saved$y_stations, pch=20, 
+    points(x=saved$x_stations, y=saved$y_stations, pch=20,
            col = redblue2(21)[round(21*Rel)])
     print( table( round(21*Rel) ))
-    if(SpeciesI==length(SpeciesSet)) axis(1)                                                                    # mar=c(0,0,2,3), 
+    if(SpeciesI==length(SpeciesSet)) axis(1)                                                                    # mar=c(0,0,2,3),
     axis(2)
     box(bty="o",lwd=1)
   }
@@ -685,7 +685,7 @@ png(file.path(DateFile,"Omega_all_GLM.png"), width=1*3, height=2.5*length(Specie
     map("worldHires", ylim=y.lim, xlim=x.lim, col="grey90", fill=T, mar=c(0,0,0,0), main="", myborder=0.01) # myborder is buffer around limits
     #points(x=saved$x_stations, y=saved$y_stations, pch=20, col=redblue2(21)[round(21*Rel)])
     print( table( round(21*Rel) ))
-    if(SpeciesI==length(SpeciesSet)) axis(1)                                                                    # mar=c(0,0,2,3), 
+    if(SpeciesI==length(SpeciesSet)) axis(1)                                                                    # mar=c(0,0,2,3),
     axis(2)
     box(bty="o",lwd=1)
     # GLM
@@ -706,7 +706,7 @@ png(file.path(DateFile,"Omega_all_GLM.png"), width=1*3, height=2.5*length(Specie
     Rel = round(21*Rel)
     Rel = ifelse(Rel>21,21,Rel)
     Rel = ifelse(Rel<1,1,Rel)
-    points( y=Data[Match,"Lat..DD.DDDDD."], x=Data[Match,"Lon..DDD.DDDDD."], pch=20, col=redblue2(21)[Rel] )  
+    points( y=Data[Match,"Lat..DD.DDDDD."], x=Data[Match,"Lon..DDD.DDDDD."], pch=20, col=redblue2(21)[Rel] )
   }
   mtext(side=1, "Longitude", line=1.5, outer=TRUE)
   mtext(side=2, "Latitude", line=1.5, outer=TRUE)

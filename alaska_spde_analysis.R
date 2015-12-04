@@ -17,7 +17,7 @@
 #### Create the mesh using the projected data so all measurements are in m
 ###############################################################################
   ## Create the SPDE/GMRF model, (kappa^2-Delta)(tau x) = W:
-  prdomain <- inla.nonconvex.hull(coordinates(data.spp),
+  prdomain <- inla.nonconvex.hull(coordinates(data.all),
                                   -0.05,
                                   resolution = c(40, 15))
 

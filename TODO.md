@@ -9,5 +9,4 @@ TODO file
 4. Plot the mean log abundance for each stock behind the plot for the overall mean log abundance, I am going to have to change what is placed in the report, to get at the predicted abundance for each station in a given year.
 5. Check the pruning algorithm.
 6. Read: Lindgren F, Rue H, Lindström J. 2011. An explicit link between Gaussian fields and Gaussian Markov random fields: the stochastic partial differential equation approach [with discussion]. J. R. Stat. Soc. B. 73(4):423–98.
-7. Check JISAO funding project number.
-8. Get NOAA JISAO contribution number.
+7. Get NOAA JISAO contribution number.

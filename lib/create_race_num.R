@@ -9,18 +9,19 @@
 #' the RACE numbers for.
 #' @export
 
-create_race_num <- function(dir = dir.data, 
+create_race_num <- function(dir = dir.data,
                             filename = "EBS_RACE_Look_2012.csv",
                             speciesnames){
     my.file <- file.path(dir, filename)
     if (!file.exists(my.file)) {
-        stop(paste("The file either does not exist \n", 
+        stop(paste("The file either does not exist \n",
                    "or the wrong PATH was specified",
                    "PATH = ", my.file))
     }
     lookup.table <- read.csv(my.file)
-    race.table <- subset(lookup.table, COMMON %in% speciesnames,
-                         select = c("RACE"))
+    race.table <- data.frame(
+      lookup.table[lookup.table$COMMON %in% speciesnames, "RACE"])
+    colnames(race.table) <- "RACE"
     if (dim(race.table)[1] != length(speciesnames)) {
         stop(paste("One or more of the specified species names",
                    "were not in the specified lookup table."))

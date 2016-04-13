@@ -56,6 +56,9 @@ desired.years <- 1990:2015 #2015 = last year of data in the AI
     remove.packages("TMB")
     source("install_windows.R")
     setwd(old_wd)
+    rm(old_wd)
+  } else {
+    stop("TMB is not installed on this computer.")
   }
   # Load .R files specific for the alaska analysis, located in "lib" folder
   ignore <- sapply(dir(file.path(my.base, "lib"), full.names = TRUE), source)

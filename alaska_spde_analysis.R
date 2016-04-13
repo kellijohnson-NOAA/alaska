@@ -36,7 +36,7 @@
 ###############################################################################
   #Initial values are calculated in the model and placed in year[0]
   #year[1] is the first year of the data
-  #True years 1990:2013 are converted to 1:24
+  #True years are converted to 1:...
     year <- factor(data.spp$YEAR, levels = desired.years)
     levels(year) <- 1:length(desired.years)
 

@@ -38,7 +38,7 @@ desired.years <- 1990:2015 #2015 = last year of data in the AI
     dir.create(dir.data, showWarnings = FALSE)
 
   # Install personal R package: "r4kfj"
-  if(getweb) {
+  if (getweb) {
     devtools::install_github("kellijohnson/r4kfj@master")
   }
   # Install the stable version of INLA

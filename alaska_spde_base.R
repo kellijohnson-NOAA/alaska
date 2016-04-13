@@ -37,14 +37,14 @@ desired.years <- 1990:2015 #2015 = last year of data in the AI
     dir.create(dir.results, showWarnings = FALSE)
     dir.create(dir.data, showWarnings = FALSE)
 
-  # Install personal R package: "r4kfj"
   if (getweb) {
+    # Install personal R package: "r4kfj"
     devtools::install_github("kellijohnson/r4kfj@master")
+    # Install the stable version of INLA
+    install.packages("INLA", repos = "http://www.math.ntnu.no/inla/R/stable")
+    # Install a needed package for rgeos
+    install.packages("gpclib", repos = "http://cran.fhcrc.org/", type = "source")
   }
-  # Install the stable version of INLA
-  install.packages("INLA", repos = "http://www.math.ntnu.no/inla/R/stable")
-  # Install a needed package for rgeos
-  install.packages("gpclib", repos = "http://cran.fhcrc.org/", type = "source")
   # Install TMB
   if (file.exists(file.path("c:", "adcomp"))) {
     old_wd <- getwd()

@@ -64,7 +64,7 @@ desired.years <- 1990:2015 #2015 = last year of data in the AI
   ignore <- sapply(dir(file.path(my.base, "lib"), full.names = TRUE), source)
   library("r4kfj")
   library(INLA)
-  load_packages(c("igraph", "maps", "maptools", "mapproj", "Matrix",
+  load_packages(c("gstat", "igraph", "maps", "maptools", "mapproj", "Matrix",
                   "plyr", "raster", "rpart", "reshape", "reshape2", "rgdal",
                   "rgeos", "sos", "sp", "splancs",
                   "spdep", "stats4", "TMB", "xtable"))

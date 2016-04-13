@@ -24,13 +24,6 @@ col.gridlines <- "dark gray"
 lty.eez <- 2
 lty.currents <- c(1, 3, 4)
 plot.colours <- c("light gray", "dark gray")
-###############################################################################
-## load packages
-###############################################################################
-library(maptools)
-library(rgdal)
-library(sp)
-library(gstat)
 
 logfile.spp <- sapply(desired.spp, function(x){
                       paste(tolower(substring(unlist(strsplit(x, " ")),

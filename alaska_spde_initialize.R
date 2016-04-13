@@ -5,11 +5,10 @@
 ## Author:     Kelli Faye Johnson
 ## Contact:    kellifayejohnson@gmail.com
 ## Date:       2016-04-13
-## Comments:   Polygons for the seven areas in Alaska are based on a shape file
-##             provided by Annie Greig of NOAA (email: angie.greig@noaa.gov).
+## Comments:   Alaska polygons are based on a shape file provided by
+##             Annie Greig of NOAA (email: angie.greig@noaa.gov).
 ##             Shape file were in arcgis format.
-##             The function create_areas assumes the shapefile is pocentered
-##             or projected (i.e. not in latlon format)
+##             http://www.afsc.noaa.gov/RACE/groundfish/survey_data/data.htm
 ###############################################################################
 ###############################################################################
 

@@ -138,7 +138,7 @@
 longitude <- x_stations
 stock <- rpart(Report_spatial$Omega ~ longitude)
 stock.orig <- stock
-splits <- rep(NA, (dim(stock$cptable)[1] - 1))
+splits <- rep(NA, dim(stock$cptable)[1] - 1)
 
 if(length(splits) > 1){
   for(i in 1:(dim(stock$cptable)[1] - 1)){

@@ -73,9 +73,9 @@ sink()
 ###############################################################################
 ## Import shapefile
 ###############################################################################
-efhCRS <- CRS("+proj = aea +lat_1 = 65.0 +lat_2 = 55.0
-               +lat_0 = 50.0 +lon_0 = -154.0
-               +x_0 = 0 +y_0 = 0 +units = m")
+efhCRS <- CRS("+proj=aea +lat_1=65.0 +lat_2=55.0
+               +lat_0=50.0 +lon_0=-154.0
+               +x_0=0 +y_0=0 +units=m")
 maps.efh <- readShapePoly(file.path(dir.data,
                                     "efh_shapefile_2005", "EFH_2005"),
                           proj4string = efhCRS)

@@ -31,9 +31,11 @@
   # the areas listed in desired.areas
   # Remove entries without station numbers & Japanese trawl data
   # Remove early years
-  data.all <- subset(do.call("rbind",
-    lapply(data.files, read.csv, na.strings = -9999)),
-    STATION != "" & VESSEL < 500 & YEAR %in% desired.years)
+  data.all <- do.call("rbind",
+    lapply(data.files, read.csv, na.strings = -9999))
+  data.all <- data.all[data.all$YEAR %in% desired.years, ]
+  data.all <- data.all[data.all$VESSEL < 500, ]
+  data.all <- data.all[data.all$STATION != "", ]
   data.all$station <- with(data.all, paste(STATION, STRATUM, sep = "_"))
   data.all$id <- with(data.all, paste(station, SID, sep = "_"))
 
@@ -52,13 +54,14 @@
       )
   spatialareas <- SpatialPolygons(sapply(seq_along(alaska_areas_management),
     function(x, y = alaska_areas_management) {
-    Polygons(list(Polygon(y[x])), ID = names(y)[x])}))
+    Polygons(list(Polygon(y[x])), ID = names(y)[x])
+    }))
     proj4string(spatialareas) <- llCRS
     spatialareas <- spTransform(spatialareas, akCRS)
 
   # Subset the data for the years and values inside the study area
   data.all$inside <- over(data.all, spatialareas)
-  data.all <- subset(data.all, !is.na(inside))
+  data.all <- data.all[!is.na(data.all$inside), ]
 
   # Subset data for those entries where the desired spp was not found
   # This will be useful for rerunning the model with a small value added
@@ -66,15 +69,14 @@
   # to the assumption that I do not need to model the zero tow data
   data.zero <- list()
   for (spp in seq_along(desired.spp)) {
-    data.zero[[spp]] <- subset(data.all, !SID %in% race.num$RACE[spp],
-      select = keepcolumns)
-    data.zero[[spp]]@data$keep <- !duplicated(with(data.zero[[spp]]@data,
-      paste(station, YEAR)))
-    data.zero[[spp]] <- subset(data.zero[[spp]], keep, select = keepcolumns)
+    data.zero[[spp]] <- data.all[!data.all$SID %in% race.num$RACE[spp],
+      keepcolumns]
+    data.zero[[spp]] <- data.zero[[spp]][
+      !duplicated(data.zero[[spp]]@data[, c("STATION", "STRATUM", "YEAR")]), ]
     data.zero[[spp]]@data$WTCPUE <- 0
     data.zero[[spp]]@data$SID <- race.num$RACE[spp]
   }
   data.zero <- do.call("rbind", data.zero)
 
   # Subset data
-  data.spp <- subset(data.all, SID %in% race.num$RACE, select = keepcolumns)
+  data.spp <- data.all[data.all$SID %in% race.num$RACE, keepcolumns]

@@ -65,7 +65,8 @@ desired.years <- 1990:2015 #2015 = last year of data in the AI
   library("r4kfj")
   library(INLA)
   load_packages(c("gstat", "igraph", "maps", "maptools", "mapproj", "Matrix",
-    "plyr", "RandomFields", "raster", "rpart", "reshape", "reshape2", "rgdal",
+    "plyr", "RandomFields",
+    "RANN", "raster", "rpart", "reshape", "reshape2", "rgdal",
     "rgeos", "sos", "sp", "splancs",
     "spdep", "stats4", "TMB", "xtable"))
 

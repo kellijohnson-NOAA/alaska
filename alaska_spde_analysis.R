@@ -38,7 +38,7 @@
   #year[1] is the first year of the data
   #True years are converted to 1:...
     year <- factor(data.spp$YEAR, levels = desired.years)
-    levels(year) <- 1:length(desired.years)
+    levels(year) <- 1:length(levels(year))
 
   #A.locator is the location of each data point on the mesh
   #Only some of the mesh nodes are actually filled

@@ -20,7 +20,7 @@ Type objective_function<Type>::operator() ()
                                // should only be used with Dji
   DATA_VECTOR(station_unique); // Points to used portions of RE vector
                                // should only be used with "_input"
-  DATA_INTEGER(n_stations)     // Number of stations
+  DATA_INTEGER(n_x)            // Number of stations
   DATA_INTEGER(n_years)        // Number of years including init
 
   // SPDE objects
@@ -63,32 +63,32 @@ Type objective_function<Type>::operator() ()
 
   // Likelihood contribution from observations
   vector<Type> mean_abundance(n_years);
-  matrix<Type> Dji(n_stations, n_years);
+  matrix<Type> Dji(n_x, n_years);
   // May want to remove lnB_stations as it is just the transpose
   // of Dji
-  matrix<Type> lnB_stations(n_years, n_stations);
-  matrix<Type> Epsilon(n_stations, n_years);
-  vector<Type> Omega(n_stations);
-  vector<Type> Equil(n_stations);
+  matrix<Type> lnB_stations(n_years, n_x);
+  matrix<Type> Epsilon(n_x, n_years);
+  vector<Type> Omega(n_x);
+  vector<Type> Equil(n_x);
 
   // calculate theoretical equilibrium for each
   // node that is occupied
   ii = 0;
-  for (int j = 0; j < n_stations; j++){
+  for (int j = 0; j < n_x; j++){
     int station_use = CppAD::Integer(station_unique(j));
     Omega(j) = Omega_input(station_use) / exp(log_tau_O);
     Equil(j) = alpha(0) + Omega(j) / (1 - rho);
   }
 
   // Initial year
-  for (int j = 0; j < n_stations; j++){
+  for (int j = 0; j < n_x; j++){
     int station_use = CppAD::Integer(station_unique(j));
     Epsilon(j, 0) = Epsilon_input(station_use, 0) / exp(log_tau_E);
     Dji(j, 0) = phi + (alpha(0) + Omega_input(station_use) / exp(log_tau_O)) / (1 - rho) + Epsilon_input(station_use, 0) / exp(log_tau_E);
   }
   // Recursive formula for subsequent years
   for (int i = 1; i < n_years; i++){
-    for (int j = 0; j < n_stations; j++){
+    for (int j = 0; j < n_x; j++){
       int station_use = CppAD::Integer(station_unique(j));
       Epsilon(j, i) = Epsilon_input(station_use, i) / exp(log_tau_E);
       Dji(j, i) = alpha(0) + Omega_input(station_use) / exp(log_tau_O) + Dji(j, i - 1) * rho + Epsilon_input(station_use, i) / exp(log_tau_E);
@@ -101,11 +101,11 @@ Type objective_function<Type>::operator() ()
   g(2) = 0;
   for (int i = 0; i < n_years; i++){
     mean_abundance(i) = 0;
-    for (int j = 0; j < n_stations; j++){
+    for (int j = 0; j < n_x; j++){
       lnB_stations(i, j) = Dji(j, i);
       mean_abundance[i] = mean_abundance[i] + exp(Dji(j, i));
     }
-    mean_abundance[i] = mean_abundance[i] / n_stations;
+    mean_abundance[i] = mean_abundance[i] / n_x;
   }
 
   // Probability of data

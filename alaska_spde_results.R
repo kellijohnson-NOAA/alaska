@@ -617,10 +617,9 @@ png(file.path(DateFile,"Abundance_all.png"), width=1*3, height=2.5*length(Specie
     Which = match( c("rho","phi"), rownames(saved$opt$summary) )
     text(x=2003+4, y=Ylim[2], pos=1, col="red", labels=paste(formatC(round(saved$opt$summary[Which[1],"Estimate"],3),3)," (",formatC(round(saved$opt$summary[Which[1],"Std. Error"],3),3),")\n",formatC(round(saved$opt$summary[Which[2],"Estimate"],3),3)," (",formatC(round(saved$opt$summary[Which[2],"Std. Error"],3),3),")\n",formatC(round(2*saved$opt$objective+2*length(saved$opt),1),-1),sep=""))
     n_years = length(unique(Data$Year))
-    n_stations = length(unique(Data$Site))
-    Ymat = matrix(NA, nrow=n_stations, ncol=n_years)
+    Ymat = matrix(NA, nrow=length(unique(Data$Site)), ncol=n_years)
     for(YearI in 1:n_years){
-    for(SiteI in 1:n_stations){
+    for(SiteI in 1:length(unique(Data$Site))){
       Which = which(Data$Year==unique(Data$Year)[YearI]&Data$Site==unique(Data$Site)[SiteI])
       if(length(Which)>=1) Ymat[SiteI,YearI] = Data[Which[1],logfile.spp]
     }}
@@ -683,10 +682,9 @@ png(file.path(DateFile,"Omega_all_GLM.png"), width=1*3, height=2.5*length(Specie
     box(bty="o",lwd=1)
     # GLM
     n_years = length(unique(Data$Year))
-    n_stations = length(unique(Data$Site))
-    Ymat = matrix(NA, nrow=n_stations, ncol=n_years)
+    Ymat = matrix(NA, nrow=length(unique(Data$Site)), ncol=n_years)
     for(YearI in 1:n_years){
-    for(SiteI in 1:n_stations){
+    for(SiteI in 1:length(unique(Data$Site))){
       Which = which(Data$Year==unique(Data$Year)[YearI]&Data$Site==unique(Data$Site)[SiteI])
       if(length(Which)>=1) Ymat[SiteI,YearI] = Data[Which[1],spp]
     }}
@@ -695,7 +693,7 @@ png(file.path(DateFile,"Omega_all_GLM.png"), width=1*3, height=2.5*length(Specie
     Year = as.vector(col(Ymat))
     ( Glm = glm(Y ~ 0 + factor(Site) + factor(Year), family="poisson") )
     Match = match(unique(Data$Site),Data$Site)
-    Rel = (Glm$coef[1:n_stations] - mean(Glm$coef[1:n_stations])) / diff(Omega_range)
+    Rel = (Glm$coef[1:length(unique(Data$Site))] - mean(Glm$coef[1:length(unique(Data$Site))])) / diff(Omega_range)
     Rel = round(21*Rel)
     Rel = ifelse(Rel>21,21,Rel)
     Rel = ifelse(Rel<1,1,Rel)
@@ -725,10 +723,9 @@ for(SpeciesI in 1:length(SpeciesSet)){
     text(x=2003+4, y=Ylim[2], pos=1, col="red", labels=paste(formatC(round(saved$opt$summary[Which[1],"Estimate"],3),3)," (",formatC(round(saved$opt$summary[Which[1],"Std. Error"],3),3),")\n",formatC(round(saved$opt$summary[Which[2],"Estimate"],3),3)," (",formatC(round(saved$opt$summary[Which[2],"Std. Error"],3),3),")\n",formatC(round(2*saved$opt$objective+2*length(saved$opt),1),-1),sep=""))
    # GLM
     n_years = length(unique(Data$Year))
-    n_stations = length(unique(Data$Site))
-    Ymat = matrix(NA, nrow=n_stations, ncol=n_years)
+    Ymat = matrix(NA, nrow = length(unique(Data$Site)), ncol=n_years)
     for(YearI in 1:n_years){
-    for(SiteI in 1:n_stations){
+    for(SiteI in 1:length(unique(Data$Site))){
       Which = which(Data$Year==unique(Data$Year)[YearI]&Data$Site==unique(Data$Site)[SiteI])
       if(length(Which)>=1) Ymat[SiteI,YearI] = Data[Which[1],spp]
     }}

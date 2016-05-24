@@ -68,7 +68,7 @@
       year = year,
       station_map = station_map,
       station_unique = station_unique,
-      n_stations = length(station_unique),
+      n_x = length(station_unique),
       n_years = as.integer(length(desired.years) + 1), #Add a year to accommodate init pred
       G0 = spde$param.inla$M0,
       G1 = spde$param.inla$M1,

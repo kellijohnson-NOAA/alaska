@@ -64,7 +64,7 @@
   newtonOption(smartsearch = TRUE)
 
     data.spatial = list(
-      Y = as.vector(data.spp@data$WTCPUE),
+      c_i = as.vector(data.spp@data$WTCPUE),
       year = year,
       station_map = station_map,
       station_unique = station_unique,

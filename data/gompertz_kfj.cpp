@@ -14,8 +14,8 @@ Type square(Type x){return x*x;}
 template<class Type>
 Type objective_function<Type>::operator() ()
 {
-  DATA_VECTOR(Y);       	     // Count data
-  DATA_VECTOR(year);           // values of 1:24 for every Y
+  DATA_VECTOR(c_i);       	   // Count data
+  DATA_VECTOR(year);           // values of 1:24 for every c_i
   DATA_VECTOR(station_map);    // Points into RE vector for every pred
                                // should only be used with Dji
   DATA_VECTOR(station_unique); // Points to used portions of RE vector
@@ -110,14 +110,14 @@ Type objective_function<Type>::operator() ()
 
   // Probability of data
   // year ranges from 1:24 because year 0 has no observed data
-  for(int ii = 0; ii < Y.size(); ii++){
+  for(int ii = 0; ii < c_i.size(); ii++){
     int station_use = CppAD::Integer(station_map(ii));
     int year_use = CppAD::Integer(year(ii));
     Type mean_y = Dji(station_use, year_use);
     Type sigma_y = exp(log_sigma);
-    g(2) -= log(1 / (Y[ii] * sigma_y * sqrt(2.0*M_PI)) * exp(-square(log(Y[ii]) - mean_y) / (2 * square(sigma_y))));
-    //g(2) += 0.5*(log(2.0*M_PI*sigma_y) + square(log(Y[ii]) - mean_y)/sigma_y);
-    //g(2) -= dnorm(Y[ii], mean_y, sigma_y, 1);
+    g(2) -= log(1 / (c_i[ii] * sigma_y * sqrt(2.0*M_PI)) * exp(-square(log(c_i[ii]) - mean_y) / (2 * square(sigma_y))));
+    //g(2) += 0.5*(log(2.0*M_PI*sigma_y) + square(log(c_i[ii]) - mean_y)/sigma_y);
+    //g(2) -= dnorm(c_i[ii], mean_y, sigma_y, 1);
   }
 
   // Spatial field summaries

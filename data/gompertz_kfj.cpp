@@ -41,7 +41,8 @@ Type objective_function<Type>::operator() ()
 
   using namespace density;
   int i, ii, j, station_use, year_use;
-  vector<Type> g(3);
+  Type jnll = 0;
+  vector<Type> jnll_comp(3);
 
   Type kappa2 = exp(2.0 * log_kappa);
   Type kappa4 = kappa2 * kappa2;
@@ -54,12 +55,12 @@ Type objective_function<Type>::operator() ()
   using namespace density;
   // Compute the random effects matrix for process error
   // initial year is included in the [0] index
-  g(0) = 0;
+  jnll_comp(0) = 0;
   for (int i = 0; i < n_years; i++){
-    g(0) += GMRF(Q)(Epsilon_input.col(i));
+    jnll_comp(0) += GMRF(Q)(Epsilon_input.col(i));
   }
   // Compute the random effects vector for the spatial field
-  g(1) = GMRF(Q)(Omega_input);
+  jnll_comp(1) = GMRF(Q)(Omega_input);
 
   // Likelihood contribution from observations
   vector<Type> mean_abundance(n_years);
@@ -98,7 +99,7 @@ Type objective_function<Type>::operator() ()
   // calculate the mean abundance over all occupied stations
   // in each given year, including predicted init year
   // mean abundance is on the same scale as the data
-  g(2) = 0;
+  jnll_comp(2) = 0;
   for (int i = 0; i < n_years; i++){
     mean_abundance(i) = 0;
     for (int j = 0; j < n_x; j++){
@@ -115,9 +116,9 @@ Type objective_function<Type>::operator() ()
     int year_use = CppAD::Integer(year(ii));
     Type mean_y = Dji(station_use, year_use);
     Type sigma_y = exp(log_sigma);
-    g(2) -= log(1 / (c_i[ii] * sigma_y * sqrt(2.0*M_PI)) * exp(-square(log(c_i[ii]) - mean_y) / (2 * square(sigma_y))));
-    //g(2) += 0.5*(log(2.0*M_PI*sigma_y) + square(log(c_i[ii]) - mean_y)/sigma_y);
-    //g(2) -= dnorm(c_i[ii], mean_y, sigma_y, 1);
+    jnll_comp(2) -= log(1 / (c_i[ii] * sigma_y * sqrt(2.0*M_PI)) * exp(-square(log(c_i[ii]) - mean_y) / (2 * square(sigma_y))));
+    //jnll_comp(2) += 0.5*(log(2.0*M_PI*sigma_y) + square(log(c_i[ii]) - mean_y)/sigma_y);
+    //jnll_comp(2) -= dnorm(c_i[ii], mean_y, sigma_y, 1);
   }
 
   // Spatial field summaries
@@ -135,6 +136,6 @@ Type objective_function<Type>::operator() ()
   ADREPORT(mean_abundance);
   ADREPORT(Dji);
 
-  Type g_sum = sum(g);
-  return g_sum;
+  jnll = jnll_comp.sum();
+  return jnll;
 }

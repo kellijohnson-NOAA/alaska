@@ -117,8 +117,6 @@ Type objective_function<Type>::operator() ()
     Type mean_y = Dji(station_use, year_use);
     Type sigma_y = exp(log_sigma);
     jnll_comp(2) -= log(1 / (c_i[ii] * sigma_y * sqrt(2.0*M_PI)) * exp(-square(log(c_i[ii]) - mean_y) / (2 * square(sigma_y))));
-    //jnll_comp(2) += 0.5*(log(2.0*M_PI*sigma_y) + square(log(c_i[ii]) - mean_y)/sigma_y);
-    //jnll_comp(2) -= dnorm(c_i[ii], mean_y, sigma_y, 1);
   }
 
   // Spatial field summaries

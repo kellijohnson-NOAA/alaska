@@ -1,5 +1,11 @@
-// Space time 
+// Space time
 #include <TMB.hpp>
+
+/* Detecting NAs */
+template <class Type>
+bool isNA(Type x) {
+  return R_IsNA(asDouble(x));
+}
 
 /* Parameter transform */
 template <class Type>
@@ -13,9 +19,9 @@ Type objective_function<Type>::operator() ()
   DATA_VECTOR(station_map);    // Points into RE vector for every pred
                                // should only be used with Dji
   DATA_VECTOR(station_unique); // Points to used portions of RE vector
-                               // should only be used with "_input"	
-  DATA_INTEGER(n_stations)     // Number of stations 
-  DATA_INTEGER(n_years)        // Number of years including init 
+                               // should only be used with "_input"
+  DATA_INTEGER(n_stations)     // Number of stations
+  DATA_INTEGER(n_years)        // Number of years including init
 
   // SPDE objects
   DATA_SPARSE_MATRIX(G0);
@@ -36,7 +42,7 @@ Type objective_function<Type>::operator() ()
   using namespace density;
   int i, ii, j, station_use, year_use;
   vector<Type> g(3);
-     
+
   Type kappa2 = exp(2.0 * log_kappa);
   Type kappa4 = kappa2 * kappa2;
   Type pi = 3.141592;
@@ -65,7 +71,7 @@ Type objective_function<Type>::operator() ()
   vector<Type> Omega(n_stations);
   vector<Type> Equil(n_stations);
 
-  // calculate theoretical equilibrium for each 
+  // calculate theoretical equilibrium for each
   // node that is occupied
   ii = 0;
   for (int j = 0; j < n_stations; j++){
@@ -73,9 +79,9 @@ Type objective_function<Type>::operator() ()
     Omega(j) = Omega_input(station_use) / exp(log_tau_O);
     Equil(j) = alpha(0) + Omega(j) / (1 - rho);
   }
-  
+
   // Initial year
-  for (int j = 0; j < n_stations; j++){ 
+  for (int j = 0; j < n_stations; j++){
     int station_use = CppAD::Integer(station_unique(j));
     Epsilon(j, 0) = Epsilon_input(station_use, 0) / exp(log_tau_E);
     Dji(j, 0) = phi + (alpha(0) + Omega_input(station_use) / exp(log_tau_O)) / (1 - rho) + Epsilon_input(station_use, 0) / exp(log_tau_E);
@@ -87,7 +93,7 @@ Type objective_function<Type>::operator() ()
       Epsilon(j, i) = Epsilon_input(station_use, i) / exp(log_tau_E);
       Dji(j, i) = alpha(0) + Omega_input(station_use) / exp(log_tau_O) + Dji(j, i - 1) * rho + Epsilon_input(station_use, i) / exp(log_tau_E);
     }
-  }    
+  }
 
   // calculate the mean abundance over all occupied stations
   // in each given year, including predicted init year
@@ -95,11 +101,11 @@ Type objective_function<Type>::operator() ()
   g(2) = 0;
   for (int i = 0; i < n_years; i++){
     mean_abundance(i) = 0;
-    for (int j = 0; j < n_stations; j++){ 
+    for (int j = 0; j < n_stations; j++){
       lnB_stations(i, j) = Dji(j, i);
-      mean_abundance[i] = mean_abundance[i] + exp(Dji(j, i));          
+      mean_abundance[i] = mean_abundance[i] + exp(Dji(j, i));
     }
-    mean_abundance[i] = mean_abundance[i] / n_stations;      
+    mean_abundance[i] = mean_abundance[i] / n_stations;
   }
 
   // Probability of data
@@ -128,7 +134,7 @@ Type objective_function<Type>::operator() ()
   ADREPORT(log(mean_abundance));
   ADREPORT(mean_abundance);
   ADREPORT(Dji);
-  
+
   Type g_sum = sum(g);
   return g_sum;
 }

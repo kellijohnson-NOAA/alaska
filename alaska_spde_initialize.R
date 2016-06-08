@@ -16,7 +16,6 @@
 #### Set initial inputs
 ###############################################################################
 # Must set my.base or have loaded in R
-my.pars      <- "par(oma = rep(0, 4), mar = c(2, 2.7, 0, 0.5))"
 my.tmb       <- "gompertz_kfj"
 
 my.filetype <- "png"

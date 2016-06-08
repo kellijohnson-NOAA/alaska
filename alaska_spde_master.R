@@ -29,6 +29,8 @@ getweb <- TRUE #If TRUE pull r4kfj off of github
 #### Run analysis
 ###############################################################################
 source("alaska_spde_initialize.R")
+source("alaska_spde_data.R")
+
 source("alaska_spde_analysis.R")
 
 source("alaska_spde_results.R")

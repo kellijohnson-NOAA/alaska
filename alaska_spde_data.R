@@ -40,6 +40,10 @@ data.all <- data.all[data.all$VESSEL < 500, ]
 data.all <- data.all[data.all$STATION != "", ]
 data.all$station <- with(data.all, paste(STATION, STRATUM, sep = "_"))
 data.all$id <- with(data.all, paste(station, SID, sep = "_"))
+temp <- data.all[!data.all$SID %in% race.num$RACE, ]
+temp <- temp[!duplicated(with(temp, paste(YEAR, station))), ]
+temp$WTCPUE <- 0; temp$SID <- race.num$RACE
+data.all <- rbind(data.all[data.all$SID %in% race.num$RACE, ], temp); rm(temp)
 
 # Add coordinate data to the data.all, using the akCRS projection
 coordinates(data.all) <- with(data.all, cbind("LONGITUDE", "LATITUDE"))
@@ -64,21 +68,3 @@ spatialareas <- SpatialPolygons(sapply(seq_along(alaska_areas_management),
 # Subset the data for the years and values inside the study area
 data.all$inside <- over(data.all, spatialareas)
 data.all <- data.all[!is.na(data.all$inside), ]
-
-# Subset data for those entries where the desired spp was not found
-# This will be useful for rerunning the model with a small value added
-# to the tows where the species was not caught to test the sensitivity
-# to the assumption that I do not need to model the zero tow data
-data.zero <- list()
-for (spp in seq_along(desired.spp)) {
-  data.zero[[spp]] <- data.all[!data.all$SID %in% race.num$RACE[spp],
-    keepcolumns]
-  data.zero[[spp]] <- data.zero[[spp]][
-    !duplicated(data.zero[[spp]]@data[, c("STATION", "STRATUM", "YEAR")]), ]
-  data.zero[[spp]]@data$WTCPUE <- 0
-  data.zero[[spp]]@data$SID <- race.num$RACE[spp]
-}
-data.zero <- do.call("rbind", data.zero)
-
-# Subset data
-data.spp <- data.all[data.all$SID %in% race.num$RACE, keepcolumns]

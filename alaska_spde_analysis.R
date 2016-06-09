@@ -34,11 +34,8 @@
 ###############################################################################
 #### Set up the data
 ###############################################################################
-  #Initial values are calculated in the model and placed in year[0]
-  #year[1] is the first year of the data
-  #True years are converted to 1:...
-    year <- factor(data.spp$YEAR, levels = desired.years)
-    levels(year) <- 1:length(levels(year))
+  #Initial values are calculated in the model and placed in t_i[0]
+  #t_i[1] is the first year of the data
 
   #A.locator is the location of each data point on the mesh
   #Only some of the mesh nodes are actually filled
@@ -52,7 +49,6 @@
     station_unique  <- A.locator.unique - 1
     mapval <- data.frame(s.unique = station_unique,
                          map = seq(0, (length(A.locator.unique) - 1)))
-    station_map <- mapval[match(station, mapval$s.unique), "map"]
   #Obtain the lat / lon (in UTM) coordinates for the used stations
     x_stations <- mesh$loc[A.locator.unique, 1]
     y_stations <- mesh$loc[A.locator.unique, 2]
@@ -63,50 +59,62 @@
   dyn.load(dynlib(file.path(dir.data, my.tmb)))
   newtonOption(smartsearch = TRUE)
 
-    data.spatial = list(
-      c_i = as.vector(data.spp@data$WTCPUE),
-      year = year,
-      station_map = station_map,
-      station_unique = station_unique,
-      n_x = length(station_unique),
-      n_years = as.integer(length(desired.years) + 1), #Add a year to accommodate init pred
-      G0 = spde$param.inla$M0,
-      G1 = spde$param.inla$M1,
-      G2 = spde$param.inla$M2
-      )
-    parameters.spatial = list(
-      alpha = c(0.0),
-      phi = 0.0,
-      log_tau_E = 0.0,
-      log_tau_O = 0.0,
-      log_kappa = 0.0,
-      log_sigma = 0.0,
-      rho = 0.5,
-      Epsilon_input = matrix(rnorm(spde$n.spde * (length(desired.years) + 1)),
-                             nrow = spde$n.spde,
-                             ncol = (length(desired.years) + 1)), #nodes x year matrix
-      Omega_input = rnorm(spde$n.spde) #Omega is a vector
-      )
+  X_xp <- matrix(1, ncol = 1, nrow = mesh$n)
 
-    obj <- MakeADFun(data = data.spatial,
-                     parameters = parameters.spatial,
-                     random = c("Omega_input", "Epsilon_input"))
+  data.spatial = list(
+    n_x = mesh$n,
+    n_t = length(desired.years),
+    n_p = ncol(X_xp),
 
-    obj$fn(obj$par)
-    obj$control <- list(trace = 1, parscale = rep(1, 13), REPORT = 1,
-                        reltol = 1e-12, maxit = 300)
-    obj$hessian <- F
-    opt <- nlminb(obj$par, obj$fn, obj$gr,
-                  lower = c(rep(-20, 2), rep(-10, 6)), #lower par bounds
-                  upper = c(rep(20, 2), rep(10, 6)),   #upper par bounds
-                  control = list(eval.max = 1e4, iter.max = 1e4))
-    report <- try(sdreport(obj))
+    x_s = mesh$idx$loc - 1,
+
+    c_i = as.vector(data.spp@data$WTCPUE),
+    s_i = mapval[match(station, mapval$s.unique), "map"],
+    t_i = factor(data.spp$YEAR, levels = desired.years,
+      labels = 1:length(desired.years)),
+
+    X_xp = X_xp,
+
+    G0 = spde$param.inla$M0,
+    G1 = spde$param.inla$M1,
+    G2 = spde$param.inla$M2
+    )
+
+  parameters.spatial = list(
+    alpha = c(0.0),
+    phi = 0.0,
+    log_tau_E = 1.0,
+    log_tau_O = 1.0,
+    log_kappa = 0.0,
+    rho = 0.5,
+    Epsilon_input = matrix(rnorm(spde$n.spde * data.spatial$n_t + 1),
+      nrow = spde$n.spde, ncol = data.spatial$n_t + 1),
+    Omega_input = rnorm(spde$n.spde)
+    )
+
+  obj <- MakeADFun(data = data.spatial,
+    parameters = parameters.spatial,
+    random = c("Omega_input", "Epsilon_input"),
+    hessian = FALSE,
+    DLL = my.tmb)
+
+  obj$fn(obj$par)
+  obj$control <- list(trace = 1, parscale = rep(1, 13), REPORT = 1,
+    reltol = 1e-12, maxit = 300)
+  obj$hessian <- F
+  opt <- nlminb(obj$par, obj$fn, obj$gr,
+    lower = c(rep(-20, 2), rep(-10, 6)), #lower par bounds
+    upper = c(rep(20, 2), rep(10, 6)),   #upper par bounds
+    control = list(eval.max = 1e4, iter.max = 1e4))
+  # Obtain standard errors
+  Report <- obj$report()
+  report <- try(sdreport(obj))
 
 ###############################################################################
 #### Create summaries
 ###############################################################################
 
-    Report_spatial <- obj$report()
+    Report <- obj$report()
     if(!("condition" %in% names(attributes(report)))) {
       opt[["summary"]] <- summary(report)
     }
@@ -136,7 +144,7 @@
 #Prune the tree according to significant differences between the relative error
 #Go to http://www.statmethods.net/advstats/cart.html for more info.
 longitude <- x_stations
-stock <- rpart(Report_spatial$Omega ~ longitude)
+stock <- rpart(Report$Omega ~ longitude)
 stock.orig <- stock
 splits <- rep(NA, dim(stock$cptable)[1] - 1)
 
@@ -177,7 +185,7 @@ logfn <- create_logfile(projectName =
   saved <- list(
     "opt" = opt, "obj" = obj, "B_mean_spatial" = B_mean_spatial,
     "B_conf_spatial" = B_conf_spatial, "report" = report,
-    "Report_spatial" = Report_spatial, "mesh" = mesh,
+    "Report" = Report, "mesh" = mesh,
     "x_stations" = x_stations, "y_stations" = y_stations,
     "gmrf_range" = gmrf_range, "marg_sd_E" = marg_sd_E, "marg_sd_O" = marg_sd_O,
     "stock" = stock, "stock_all" = stock.all, "stock_orig" = stock.orig)

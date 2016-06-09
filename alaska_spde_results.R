@@ -311,7 +311,7 @@ make_file_off()
 
 plot.coords <- data.frame("x" = my.res[[q]]$x_stations,
                           "y" = my.res[[q]]$y_stations,
-                          "omega" = my.res[[q]]$Report_spatial[["Omega"]])
+                          "omega" = my.res[[q]]$Report[["Omega"]])
 coordinates(plot.coords) <- ~ x + y
 proj4string(plot.coords) <- akCRS
 plot.grid  <- SpatialGrid(GridTopology(cellcentre.offset = bbox(plot.coords)[, "min"],
@@ -525,7 +525,7 @@ df.stock.xtable <- xtable(df.stock)
     col.use <- rev(heat.colors(100)[26:75])
 
     # Omega
-    Omega_est <- Report_spatial[["Omega"]]
+    Omega_est <- Report[["Omega"]]
       Rel <- ((Omega_est - min(Omega_est)) /
               diff(range(Omega_est)))
     png(file = file.path(dir.results, paste0("Omega_est_", logfile.spp,".png")),
@@ -542,9 +542,9 @@ df.stock.xtable <- xtable(df.stock)
     dev.off()
 
     # Equilibrium field
-    Equil_est = Report_spatial[["Equil"]]
+    Equil_est = Report[["Equil"]]
     # Epsilon
-    Epsilon_est <- Report_spatial[["Epsilon"]]
+    Epsilon_est <- Report[["Epsilon"]]
     Nrow <- ceiling(sqrt(n_years))
     Ncol <- ceiling(n_years/Nrow)
     png(file = file.path(dir.results, paste0("Epsilon_est_", logfile.spp, ".png")),
@@ -564,7 +564,7 @@ df.stock.xtable <- xtable(df.stock)
       }
     dev.off()
 
-    D_est <- Report_spatial[["Dji"]]
+    D_est <- Report[["Dji"]]
     Nrow <- ceiling(sqrt(n_years))
     Ncol <- ceiling(n_years / Nrow)
     png(file = file.path(dir.results, paste0("D_est_", logfile.spp, ".png")),
@@ -592,7 +592,7 @@ df.stock.xtable <- xtable(df.stock)
     dev.off()
     # Compare my calculations and TMB
     plot(y = colMeans(exp(D_est)), x = B_mean_spatial)
-    #rowMeans( exp(Report_spatial[["Dji"]]) )
+    #rowMeans( exp(Report[["Dji"]]) )
   }
 
 
@@ -653,7 +653,7 @@ png(file.path(DateFile, "Omega_all.png"), width = 1 * 3,
       saved[["y_stations"]] = y_stations
       saved[["mesh"]] = mesh
     }
-    Omega_est = saved$Report_spatial[["Omega"]][saved$mesh$idx$loc]
+    Omega_est = saved$Report[["Omega"]][saved$mesh$idx$loc]
     print(range(Omega_est))
     Rel = ((Omega_est[saved$mesh$idx$loc]-min(Omega_est[saved$mesh$idx$loc]))/diff(range(Omega_est[saved$mesh$idx$loc])))
     #Rel = (Omega_est - min(Omega_range)) / diff(Omega_range)

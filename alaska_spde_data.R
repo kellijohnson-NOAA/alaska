@@ -21,7 +21,10 @@ keepcolumns <- c("STATION", "STRATUM", "YEAR", "DATETIME", "WTCPUE",
 
 # create a vector of file names containing needed data
 # Read in all of the raw data in the dir.data
-race.num <- create_race_num(speciesnames = desired.spp)
+race.num <- read.csv(file.path(dir.data, "EBS_RACE_Look_2012.csv"))
+race.num <- data.frame(race.num[race.num$COMMON %in% desired.spp, "RACE"])
+colnames(race.num) <- "RACE"
+row.names(race.num) <- desired.spp
 
 data.files <- dir(file.path(dir.data, "all.data"),
   pattern = paste0(desired.areas, collapse = "|"), full.names = TRUE)

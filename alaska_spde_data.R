@@ -38,12 +38,17 @@ data.all <- do.call("rbind",
 data.all <- data.all[data.all$YEAR %in% desired.years, ]
 data.all <- data.all[data.all$VESSEL < 500, ]
 data.all <- data.all[data.all$STATION != "", ]
+
+# Assign all other species to a weight of zero
+# Remove duplicate stations such that the final data set has
+# both positive and zero tows for the species of interest
+data.all$WTCPUE[!data.all$SID %in% race.num$RACE] <- 0
+data.all$NUMCPUE[!data.all$SID %in% race.num$RACE] <- 0
+data.all$SID[!data.all$SID %in% race.num$RACE] <- race.num$RACE + 1
 data.all$station <- with(data.all, paste(STATION, STRATUM, sep = "_"))
 data.all$id <- with(data.all, paste(station, SID, sep = "_"))
-temp <- data.all[!data.all$SID %in% race.num$RACE, ]
-temp <- temp[!duplicated(with(temp, paste(YEAR, station))), ]
-temp$WTCPUE <- 0; temp$SID <- race.num$RACE
-data.all <- rbind(data.all[data.all$SID %in% race.num$RACE, ], temp); rm(temp)
+data.all <- data.all[order(data.all$YEAR, data.all$DATETIME, data.all$id), ]
+data.all <- data.all[!duplicated(with(data.all, paste(YEAR, station))), ]
 
 # Add coordinate data to the data.all, using the akCRS projection
 coordinates(data.all) <- with(data.all, cbind("LONGITUDE", "LATITUDE"))

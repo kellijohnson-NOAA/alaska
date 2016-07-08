@@ -102,11 +102,11 @@ dyn.load(dynlib(file.path(dir.data, my.tmb)))
 #### TMB
 ###############################################################################
 # Build inputs
-  X_xp <- matrix(1, ncol = 1, nrow = spde$n)
+  X_xp <- matrix(1, ncol = 1, nrow = spde$n.spde)
 
   data = list(
     n_i = NROW(data.all@data)
-    n_x = spde$n,
+    n_x = spde$n.spde,
     n_t = length(desired.years),
     n_p = NCOL(X_xp),
 
@@ -131,9 +131,9 @@ dyn.load(dynlib(file.path(dir.data, my.tmb)))
     log_tau_O = 1.0,
     log_kappa = 0.0,
     rho = 0.5,
-    Epsilon_input = matrix(rnorm(spde$n * data$n_t),
-      nrow = spde$n, ncol = data$n_t),
-    Omega_input = rnorm(spde$n)
+    Epsilon_input = matrix(rnorm(spde$n.spde * data$n_t),
+      nrow = spde$n.spde, ncol = data$n_t),
+    Omega_input = rnorm(spde$n.spde)
     )
 
   obj <- MakeADFun(data = data,

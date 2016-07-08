@@ -110,7 +110,7 @@ dyn.load(dynlib(file.path(dir.data, my.tmb)))
     n_t = length(desired.years),
     n_p = NCOL(X_xp),
 
-    x_s = spde$idx$loc - 1,
+    x_s = mesh$idx$loc - 1,
 
     c_i = as.vector(data.all@data$WTCPUE),
     s_i = mapval[match(station, mapval$s.unique), "map"],

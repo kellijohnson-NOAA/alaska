@@ -6,9 +6,35 @@ bool isNA(Type x){
   return R_IsNA(asDouble(x));
 }
 
+// dlognorm
+template<class Type>
+Type dlognorm(Type x, Type log_mean, Type log_sd, int give_log=false){
+  Type Return;
+  if(give_log==false) Return = dnorm( log(x), log_mean, exp(log_sd), false) / x;
+  if(give_log==true) Return = dnorm( log(x), log_mean, exp(log_sd), true) - log(x);
+  return Return;
+}
+
+template<class Type>
+Type d_poisson_lognormal(Type x, Type log_mean, Type log_sd, Type log_clustersize, int give_log=false){
+  Type Return;
+  Type log_notencounterprob = -1 * exp(log_mean) / exp(log_clustersize);
+  Type encounterprob = 1 - exp( log_notencounterprob );
+  if( x==0 ){
+    Return = log_notencounterprob;
+  }else{
+    Return = log(encounterprob) + dlognorm( x, log_mean-log(encounterprob), log_sd, true );
+  }
+  if( give_log==true){ return Return; }else{ return exp(Return); }
+}
+
 template<class Type>
 Type objective_function<Type>::operator() ()
 {
+  // Options
+  DATA_IVECTOR( Options_vec );
+  // Slot 0:  Observation model (0=Poisson;  1=Poisson-lognormal)
+
   // Indices
   DATA_INTEGER( n_i );         // Total number of observations
   DATA_INTEGER( n_x );         // Number of vertices in SPDE mesh
@@ -34,6 +60,7 @@ Type objective_function<Type>::operator() ()
   PARAMETER(log_tau_O);      // log-inverse SD of Omega
   PARAMETER(log_kappa);      // Controls range of spatial variation
   PARAMETER(rho);            // Autocorrelation (i.e. density dependence)
+  PARAMETER_VECTOR( theta_z ); // Parameters governing measurement error
 
   // Random effects
   PARAMETER_ARRAY(Epsilon_input);  // Spatial process variation
@@ -77,13 +104,28 @@ Type objective_function<Type>::operator() ()
 
   // Likelihood contribution from observations
   vector<Type> log_chat_i(n_i);
+  vector<Type> jnll_i(n_i);
+  jnll_i.setZero();
+  vector<Type> log_notencounterprob_i(n_i);
+  vector<Type> encounterprob_i(n_i);
+  vector<Type> tmp_i(n_i);
   for (int i=0; i<n_i; i++){
     log_chat_i(i) = phi*pow(rho,t_i(i)) + Epsilon_xt(x_s(s_i(i)),t_i(i)) + (eta_x(x_s(s_i(i))) + Omega_x(x_s(s_i(i))) ) / (1-rho);
     if( !isNA(c_i(i)) ){
-      jnll_comp(2) -= dpois( c_i(i), exp(log_chat_i(i)), true );
+      if(Options_vec(0)==0) jnll_i(i) -= dpois( c_i(i), exp(log_chat_i(i)), true );
+      if(Options_vec(0)==1) jnll_i(i) -= d_poisson_lognormal( c_i(i), log_chat_i(i), theta_z(0), theta_z(1), true );
     }
   }
+  jnll_comp(2) = jnll_i.sum();
   jnll = jnll_comp.sum();
+
+  // Exploration
+  REPORT(alpha);
+  REPORT(phi);
+  REPORT(log_tau_E);
+  REPORT(log_tau_O);
+  REPORT(log_kappa);
+  REPORT(theta_z);
 
   // Diagnostics
   REPORT( jnll_comp );
@@ -100,6 +142,9 @@ Type objective_function<Type>::operator() ()
   REPORT( Epsilon_xt );
   REPORT( Omega_x );
   REPORT( Equil_x );
+  // Diagnostics
+  REPORT( log_chat_i );
+  REPORT( jnll_i );
 
   return jnll;
 }

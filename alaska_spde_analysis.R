@@ -147,8 +147,8 @@ dyn.load(dynlib(file.path(dir.data, my.tmb)))
 newtonOption(obj, smartsearch = TRUE)
 
   opt <- nlminb(obj$par, obj$fn, gradient = obj$gr,
-    lower = c(rep(-200, 5), -0.999), #lower par bounds
-    upper = c(rep(200, 5), 0.999),    #upper par bounds
+    lower = c(rep(-200, 5), -0.999, rep(-200, 2)), #lower par bounds
+    upper = c(rep(200, 5), 0.999, rep(200, 2)),    #upper par bounds
     control = list(eval.max = 1e4, iter.max = 1e4, trace = 1))
   opt[["final_gradient"]] <- obj$gr(opt$par)
 

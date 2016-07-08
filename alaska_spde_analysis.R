@@ -158,7 +158,6 @@ newtonOption(obj, smartsearch = TRUE)
 #### Create summaries
 ###############################################################################
 
-    Report <- obj$report()
     if(!("condition" %in% names(attributes(report)))) {
       opt[["summary"]] <- summary(report)
     }

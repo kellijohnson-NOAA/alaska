@@ -108,7 +108,7 @@ dyn.load(dynlib(file.path(dir.data, my.tmb)))
     n_i = NROW(data.all@data)
     n_x = spde$n,
     n_t = length(desired.years),
-    n_p = ncol(X_xp),
+    n_p = NCOL(X_xp),
 
     x_s = spde$idx$loc - 1,
 

@@ -12,15 +12,15 @@ Type objective_function<Type>::operator() ()
   // Indices
   DATA_INTEGER( n_i );         // Total number of observations
   DATA_INTEGER( n_x );         // Number of vertices in SPDE mesh
-  DATA_INTEGER( n_t );          // Number of years
-  DATA_INTEGER( n_p );          	// number of columns in covariate matrix X
+  DATA_INTEGER( n_t );         // Number of years
+  DATA_INTEGER( n_p );         // Number of columns in covariate matrix X
 
   // Data
   DATA_IVECTOR( x_s );	      // Association of each station with a given vertex in SPDE mesh
   DATA_VECTOR( c_i );       	// Count data
-  DATA_IVECTOR( s_i );        // Station for each sample
+  DATA_IVECTOR( s_i );        // Station for each sample 0:(# of used unique stations - 1)
   DATA_IVECTOR( t_i );        // Time for each sample
-  DATA_MATRIX( X_xp );		            // Covariate design matrix
+  DATA_MATRIX( X_xp );		    // Covariate design matrix
 
   // SPDE objects
   DATA_SPARSE_MATRIX(G0);
@@ -33,7 +33,7 @@ Type objective_function<Type>::operator() ()
   PARAMETER(log_tau_E);      // log-inverse SD of Epsilon
   PARAMETER(log_tau_O);      // log-inverse SD of Omega
   PARAMETER(log_kappa);      // Controls range of spatial variation
-  PARAMETER(rho);             // Autocorrelation (i.e. density dependence)
+  PARAMETER(rho);            // Autocorrelation (i.e. density dependence)
 
   // Random effects
   PARAMETER_ARRAY(Epsilon_input);  // Spatial process variation

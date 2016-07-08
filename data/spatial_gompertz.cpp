@@ -119,14 +119,6 @@ Type objective_function<Type>::operator() ()
   jnll_comp(2) = jnll_i.sum();
   jnll = jnll_comp.sum();
 
-  // Exploration
-  REPORT(alpha);
-  REPORT(phi);
-  REPORT(log_tau_E);
-  REPORT(log_tau_O);
-  REPORT(log_kappa);
-  REPORT(theta_z);
-
   // Diagnostics
   REPORT( jnll_comp );
   REPORT( jnll );

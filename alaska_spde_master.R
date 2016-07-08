@@ -21,7 +21,7 @@ my.base <- file.path("c:", "alaska")
   }
 setwd(my.base)
 
-getweb <- TRUE #If TRUE pull r4kfj off of github
+getweb <- FALSE #If TRUE pull r4kfj off of github
 
 ###############################################################################
 #### Run analysis

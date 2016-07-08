@@ -13,7 +13,7 @@
 # Set initial inputs
 ###############################################################################
 # Must set my.base or have loaded in R
-my.tmb       <- "gompertz_kfj"
+my.tmb       <- "spatial_gompertz"
 
 my.filetype <- "png"
 my.width <- c(3.34646, 6.69291) # 85 mm, 170mm

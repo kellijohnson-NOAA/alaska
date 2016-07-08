@@ -187,7 +187,7 @@ newtonOption(obj, smartsearch = TRUE)
 #Prune the tree according to significant differences between the relative error
 #Go to http://www.statmethods.net/advstats/cart.html for more info.
 longitude <- x_stations
-stock <- rpart(Report$Omega ~ longitude)
+stock <- rpart(Report$Omega ~ mesh$loc[, 1])
 stock.orig <- stock
 splits <- rep(NA, dim(stock$cptable)[1] - 1)
 

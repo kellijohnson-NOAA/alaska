@@ -42,8 +42,8 @@ data.all <- data.all[data.all$STATION != "", ]
 # Assign all other species to a weight of zero
 # Remove duplicate stations such that the final data set has
 # both positive and zero tows for the species of interest
-data.all$WTCPUE[!data.all$SID %in% race.num$RACE] <- 0
-data.all$NUMCPUE[!data.all$SID %in% race.num$RACE] <- 0
+data.all$WTCPUE[!data.all$SID %in% race.num$RACE] <- NA
+data.all$NUMCPUE[!data.all$SID %in% race.num$RACE] <- NA
 data.all$SID[!data.all$SID %in% race.num$RACE] <- race.num$RACE + 1
 data.all$station <- with(data.all, paste(STATION, STRATUM, sep = "_"))
 data.all$id <- with(data.all, paste(station, SID, sep = "_"))

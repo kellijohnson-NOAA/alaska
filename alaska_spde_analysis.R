@@ -153,6 +153,7 @@ newtonOption(obj, smartsearch = TRUE)
   # Obtain standard errors
   Report <- obj$report()
   report <- try(sdreport(obj))
+unlist(Report[c('Range','SigmaO','SigmaU','SigmaE','rho')])
 
 ###############################################################################
 #### Create summaries
@@ -161,15 +162,6 @@ newtonOption(obj, smartsearch = TRUE)
     if(!("condition" %in% names(attributes(report)))) {
       opt[["summary"]] <- summary(report)
     }
-    # spatial indices
-    B_mean_spatial <- opt$summary[
-      which(rownames(opt$summary) == "mean_abundance"), "Estimate"
-      ]
-    B_conf_spatial <- exp(opt$summary[
-      which(rownames(opt$summary) == "log(mean_abundance)"), "Estimate"] %o%
-      rep(1, 2) + opt$summary[
-      which(rownames(opt$summary) == "log(mean_abundance)"), "Std. Error"] %o%
-      qnorm(c(0.1, 0.9)))
 
   # Range of correlation (Lindgren and Rue 2013, immediately before Eq. 4)
     gmrf_range <- sqrt(8 * 1) / exp(opt$par["log_kappa"])

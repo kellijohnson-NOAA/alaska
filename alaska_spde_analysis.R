@@ -115,7 +115,7 @@ dyn.load(dynlib(file.path(dir.data, my.tmb)))
     c_i = as.vector(data.all@data$WTCPUE),
     s_i = mapval[match(station, mapval$s.unique), "map"],
     t_i = factor(data.all@data$YEAR, levels = desired.years,
-      labels = 1:length(desired.years)) - 1,
+      labels = 1:length(desired.years) - 1),
 
     X_xp = X_xp,
 

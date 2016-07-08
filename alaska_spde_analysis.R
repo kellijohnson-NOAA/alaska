@@ -105,7 +105,7 @@ dyn.load(dynlib(file.path(dir.data, my.tmb)))
   X_xp <- matrix(1, ncol = 1, nrow = spde$n.spde)
 
   data = list(
-    n_i = NROW(data.all@data)
+    n_i = NROW(data.all@data),
     n_x = spde$n.spde,
     n_t = length(desired.years),
     n_p = NCOL(X_xp),

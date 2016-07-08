@@ -211,27 +211,6 @@ if(length(splits) > 1){
 }
 
 ###############################################################################
-#### save output
-###############################################################################
-logfn <- create_logfile(projectName =
-  paste0("alaska_", paste(tolower(substring(unlist(strsplit(desired.spp, " ")), 1, 1)),
-         collapse = "")),
-  projectDir = file.path(my.base, "log")
-  )
-
-  capture.output(opt, file = file.path("log", logfn), append = TRUE)
-  saved <- list(
-    "opt" = opt, "obj" = obj, "B_mean_spatial" = B_mean_spatial,
-    "B_conf_spatial" = B_conf_spatial, "report" = report,
-    "Report" = Report, "mesh" = mesh,
-    "x_stations" = x_stations, "y_stations" = y_stations,
-    "gmrf_range" = gmrf_range, "marg_sd_E" = marg_sd_E, "marg_sd_O" = marg_sd_O,
-    "stock" = stock, "stock_all" = stock.all, "stock_orig" = stock.orig)
-  save(saved, file =
-    file.path("results", paste0(strsplit(logfn, ".", fixed = TRUE)[[1]][1],
-              ".RData")))
-
-###############################################################################
 #### unload the cpp file
 ###############################################################################
   # First attempt

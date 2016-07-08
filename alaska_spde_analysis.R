@@ -154,8 +154,9 @@ newtonOption(obj, smartsearch = TRUE)
 
   # Obtain standard errors
   Report <- obj$report()
+  rm(report)
   report <- try(sdreport(obj))
-unlist(Report[c('Range','SigmaO','SigmaU','SigmaE','rho')])
+unlist(Report[c('Range', 'SigmaO', 'SigmaE', 'rho')])
 
 ###############################################################################
 #### Create summaries

@@ -75,7 +75,6 @@ spde <- inla.spde2.matern(mesh)
 file.remove(paste0(file.path(dir.data, my.tmb), c(".o", ".dll")))
 compile(file.path(dir.data, paste0(my.tmb, ".cpp")))
 dyn.load(dynlib(file.path(dir.data, my.tmb)))
-newtonOption(smartsearch = TRUE)
 
 ###############################################################################
 #### Set up the data
@@ -143,6 +142,7 @@ newtonOption(smartsearch = TRUE)
     hessian = FALSE,
     DLL = my.tmb)
 
+newtonOption(obj, smartsearch = TRUE)
   opt <- nlminb(obj$par, obj$fn, obj$gr,
     lower = c(rep(-20, 2), rep(-10, 3), -0.999), #lower par bounds
     upper = c(rep(20, 2), rep(10, 3), 0.999),    #upper par bounds

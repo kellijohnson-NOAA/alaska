@@ -141,6 +141,7 @@ dyn.load(dynlib(file.path(dir.data, my.tmb)))
   obj <- MakeADFun(data = data,
     parameters = parameters,
     random = c("Epsilon_input", "Omega_input"),
+    map = NULL,
     hessian = FALSE,
     DLL = my.tmb)
 

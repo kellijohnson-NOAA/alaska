@@ -144,7 +144,7 @@ dyn.load(dynlib(file.path(dir.data, my.tmb)))
     hessian = FALSE,
     DLL = my.tmb)
 
-newtonOption(obj, smartsearch = TRUE)
+newtonOption(obj, smartsearch = FALSE)
 
   opt <- nlminb(obj$par, obj$fn, gradient = obj$gr,
     lower = c(rep(-200, 5), -0.999, rep(-200, 2)), #lower par bounds

@@ -182,11 +182,18 @@ unlist(Report[c('Range', 'SigmaO', 'SigmaE', 'rho')])
 #Rename the stations longitude so that the output is formatted for the article
 #Prune the tree according to significant differences between the relative error
 #Go to http://www.statmethods.net/advstats/cart.html for more info.
-stock <- rpart(Report$Omega ~ mesh$loc[, 1])
+stock <- rpart(Report$Omega ~ mesh$loc[, 1], method = "anova")
 stock.orig <- stock
+stock <- prune(stock.orig,
+  cp = stock.orig$cptable[which.min(stock.orig$cptable[,"xerror"]),"CP"])
+
+temp.coords <- data.frame(x = stock$splits[, "index"],
+  y = rep(mean(y_stations), dim(stock$splits)[1]))
   coordinates(temp.coords) <- ~ x + y
   proj4string(temp.coords) <- akCRS
   temp.coords <- spTransform(temp.coords, llCRS)
+stock$splits[, "index"] <- temp.coords@coords[, "x"]
+  levels(stock$frame$var) <- c("<leaf>", "longitude")
 
 ###############################################################################
 #### unload the cpp file

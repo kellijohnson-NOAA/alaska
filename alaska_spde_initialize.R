@@ -62,10 +62,11 @@ if (file.exists(file.path("c:", "adcomp"))) {
 ignore <- sapply(dir(file.path(my.base, "lib"), full.names = TRUE), source)
 library("r4kfj")
 library(INLA)
-load_packages(c("gstat", "igraph", "maps", "maptools", "mapproj", "Matrix",
+load_packages(c("cluster", "fpc", "ggplot2", "gstat", "igraph",
+  "maps", "maptools", "mapproj", "Matrix",
   "plyr", "RandomFields",
-  "RANN", "raster", "rpart", "reshape", "reshape2", "rgdal",
-  "rgeos", "sos", "sp", "splancs",
+  "RANN", "raster", "rpart", "rpart.plot", "reshape", "reshape2", "rgdal",
+  "rgeos", "sos", "sp", "SPODT", "splancs",
   "spdep", "stats4", "TMB", "xtable"))
 
 define_projections()

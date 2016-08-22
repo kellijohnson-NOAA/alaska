@@ -62,7 +62,7 @@ if (file.exists(file.path("c:", "adcomp"))) {
 ignore <- sapply(dir(file.path(my.base, "lib"), full.names = TRUE), source)
 library("r4kfj")
 library(INLA)
-load_packages(c("cluster", "fpc", "ggplot2", "gstat", "igraph",
+load_packages(c("cluster", "fields", "fpc", "ggplot2", "gstat", "igraph",
   "maps", "maptools", "mapproj", "Matrix",
   "plyr", "RandomFields",
   "RANN", "raster", "rpart", "rpart.plot", "reshape", "reshape2", "rgdal",

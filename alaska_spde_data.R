@@ -34,7 +34,13 @@ data.files <- dir(file.path(dir.data, "all.data"),
 # Remove entries without station numbers & Japanese trawl data
 # Remove early years
 data.all <- do.call("rbind",
-  lapply(data.files, read.csv, na.strings = -9999))
+  lapply(data.files, function(x) {
+  data <- read.csv(x, na.strings = -9999)
+  title <- strsplit(basename(x), "\\.")[[1]][1]
+  title <- gsub("[[:digit:]]|[[:punct:]]", "", title)
+  data$survey <- rep(title, dim(data)[1])
+  return(data)
+}))
 data.all <- data.all[data.all$YEAR %in% desired.years, ]
 data.all <- data.all[data.all$VESSEL < 500, ]
 data.all <- data.all[data.all$STATION != "", ]

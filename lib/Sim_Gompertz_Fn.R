@@ -24,16 +24,16 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   model_O <- RMgauss(var = SD_O^2, scale = SpatialScale)
   model_E <- RMgauss(var = SD_E^2, scale = SpatialScale)
 
-  # Simulate Omega
+  # Simulate Omega to obtain an estimate of spatial variation for each location
   Omega <- RFsimulate(model = model_O,
-    x = Loc[, 'x'], y = Loc[, 'y'])@data[, 1]
+    x = Loc[, "x"], y = Loc[, "y"])@data[, 1]
 
   # Simulate Epsilon
   Epsilon <- array(NA, dim = c(n_stations, n_years))
   for(t in 1:n_years) {
     Epsilon[, t] <- RFsimulate(
       model = model_E,
-      x = Loc[, 'x'], y = Loc[, 'y']
+      x = Loc[, "x"], y = Loc[, "y"]
       )@data[, 1]
   }
 

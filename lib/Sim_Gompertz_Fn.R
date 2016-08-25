@@ -3,8 +3,9 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   rho = 0.5, logMeanDens = 1, Loc = NULL, projection = akCRS,
   slope = 0.5, weightvals = c(10, 2)) {
 
-  # Parameters
-  if(is.null(phi)) phi <- rnorm(1, mean = 0, sd = 1)
+  #### Parameters
+  # Determine the starting position from equilibrium
+  if (is.null(phi)) phi <- rnorm(1, mean = 0, sd = 1)
   alpha <- logMeanDens * (1 - rho)
 
   # Spatial model

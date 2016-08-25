@@ -8,10 +8,18 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   if (is.null(phi)) phi <- rnorm(1, mean = 0, sd = 1)
   alpha <- logMeanDens * (1 - rho)
 
-  # Spatial model
-  if(is.null(Loc)) Loc <- cbind(
-    "x" = runif(n_stations, min = 0, max = 1),
-    "y" = runif(n_stations, min = 0, max = 1))
+  #### Spatial model
+  # Randomly generate the locations if a matrix is not given
+  if(is.null(Loc)) {
+    Loc <- cbind(
+      "x" = runif(n_stations, min = 0, max = 1),
+      "y" = runif(n_stations, min = 0, max = 1 / length(alpha)))
+  } else {
+    # If locations are given, determine how many stations and
+    # set column names
+    n_stations <- dim(Loc)[1]
+    if (!any(colnames(Loc) %in% c("x", "y"))) colnames(Loc) <- c("x", "y")
+  }
 
   model_O <- RMgauss(var = SD_O^2, scale = SpatialScale)
   model_E <- RMgauss(var = SD_E^2, scale = SpatialScale)

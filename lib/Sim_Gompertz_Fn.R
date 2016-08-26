@@ -79,7 +79,9 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
     #, 'Lon..DDD.DDDDD.' = Loc[s, 1], 'Lat..DD.DDDDD.' = Loc[s, 2])
     DF <- rbind(DF, Tmp)
   }}
-  DF$Simulated_weight <- sapply(DF$Simulated_example, function(x) {
+
+  DF <- as.data.frame(DF)
+  DF$Simulated_weight <- sapply(DF[, "Simulated_example"], function(x) {
     temp <- rlnorm(x, mean = weightvals[1], sd = weightvals[2])
     temp <- log(temp * exp(weightvals[2]^2 / 2))
     return(sum(temp))

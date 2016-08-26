@@ -86,10 +86,8 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
     temp <- log(temp * exp(weightvals[2]^2 / 2))
     return(sum(temp))
   })
-
-  DF <- cbind(DF, 'Longitude' = Loc[DF[, 'Site'], 1],
-    'Latitude' = Loc[DF[, 'Site'], 2])
-  DF <- data.frame(DF, row.names = NULL)
+  DF$Longitude <- Loc[DF[, "Site"], 1]
+  DF$Latitude <- Loc[DF[, "Site"], 2]
 
   # Return stuff
   Sim_List <- list("DF" = DF, "phi" = phi, "Loc" = Loc,

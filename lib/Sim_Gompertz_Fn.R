@@ -68,16 +68,13 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   }
 
   # Simulate data
-  DF <- NULL
+  DF <- array(NA, dim = c(n_stations * n_years, 3),
+    dimnames = list(NULL, c("Site", "Year", "Simulated_example")))
   for(s in 1:n_stations) {
   for(t in 1:n_years) {
-    Tmp <- c(
-      "Site" = s,
-      "Year" = t,
-      "Simulated_example" = rpois(1, lambda = exp(Theta[s, t] + SD_extra*rnorm(1))),
-      "Simulated_weight" = NA)
-    #, 'Lon..DDD.DDDDD.' = Loc[s, 1], 'Lat..DD.DDDDD.' = Loc[s, 2])
-    DF <- rbind(DF, Tmp)
+    counter <- ifelse(s == 1 & t == 1, 1, counter + 1)
+    DF[counter, ] <- c(s, t,
+      rpois(1, lambda = exp(Theta[s, t] + SD_extra*rnorm(1))))
   }}
 
   DF <- as.data.frame(DF)

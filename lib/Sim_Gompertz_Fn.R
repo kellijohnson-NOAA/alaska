@@ -32,6 +32,10 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   proj4string(pol) <- projection
   pol <- gBuffer(pol, width = 1.50)
 
+  # scale determines the distance at which correlation declines to ~10% of
+  # the maximum observed correlation
+  # Estimates of "Range" should scale linearly with scale because
+  # Range = sqrt(8)/exp(logkappa)
   model_O <- RMgauss(var = SD_O^2, scale = SpatialScale)
   model_E <- RMgauss(var = SD_E^2, scale = SpatialScale)
 

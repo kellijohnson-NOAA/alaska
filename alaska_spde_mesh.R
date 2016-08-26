@@ -62,10 +62,6 @@ prdomain <- inla.nonconvex.hull(coordinates(data.all),
 #   Critical when we have some very close points, either for
 #   point locations or on the domain boundary.
 mesh <- calc_mesh(locations = coordinates(data.all))
-  offset = c(-0.06, -0.03),
-  cutoff = 100,
-  max.edge = c(100, 2000),
-  boundary = prdomain)
 spde <- mesh$spde
 mesh <- mesh$mesh
 

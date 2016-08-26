@@ -31,6 +31,10 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   pol <- as(extent(Loc), "SpatialPolygons")
   proj4string(pol) <- projection
   pol <- gBuffer(pol, width = 1.50)
+  # Create SpatialPoints from Loc data
+  points <- as.data.frame(Loc)
+  coordinates(points) <- ~ x + y
+  proj4string(points) <- projection
 
   # scale determines the distance at which correlation declines to ~10% of
   # the maximum observed correlation

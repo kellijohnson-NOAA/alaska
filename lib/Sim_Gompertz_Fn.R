@@ -6,7 +6,11 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   #### Parameters
   # Determine the starting position from equilibrium
   if (is.null(phi)) phi <- rnorm(1, mean = 0, sd = 1)
+
+  # Calculate the mean growth rate for each subpopulation
+  # If all values are the same, then condense alpha to the first value
   alpha <- logMeanDens * (1 - rho)
+  if (length(unique(alpha)) == 1) alpha <- alpha[1]
 
   #### Spatial model
   # Randomly generate the locations if a matrix is not given

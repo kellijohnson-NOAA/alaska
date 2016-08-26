@@ -58,6 +58,37 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
       )@data[, 1]
   }
 
+  # Determine which subpopulation each location belongs to
+  # Find the outer boundaries
+  cuts <- unlist(attributes(extent(pol))[c("xmin", "xmax")])
+  latlimits <- unlist(attributes(extent(pol))[c("ymin", "ymax")]) * c(0.2, 1.8)
+  # Use quantile to cut into one region per alpha value
+  cuts <- floor(quantile(cuts, seq(0, 1, length.out = length(alpha) + 1)))
+  # Remove the first value because it represents the lower Longitude limit
+  # independent of the number of alpha values
+  cuts <- cuts[-1]
+  # Create spatial lines for each cut
+  if (length(cuts) > 1) {
+    # Remove the last value because it represents the higher Longitude limit
+    cuts <- cuts[-length(cuts)]
+    lines <- SpatialLines(lapply(cuts, function(x) {
+      angle <- sample(c(1, runif(1, min = 1 - slope, max = 1 + slope)), 2)
+      Lines(Line(cbind(x * angle, latlimits)),
+        ID = parent.frame()$i[])
+      }))
+    proj4string(lines) <- projection
+
+    # create a very thin polygon for each intersected line
+    blpi <- gBuffer(gIntersection(pol, lines, byid = TRUE),
+      byid = TRUE, width = 0.000001)
+    proj4string(blpi) <- projection
+    # split pol with each thin polygon
+    dpi <- gDifference(pol, blpi, byid = FALSE, drop_lower_td = TRUE)
+    proj4string(dpi) <- projection
+    # Determine which polygon each point is in
+    group <- over(points, disaggregate(dpi))
+  } else { group <- rep(1, length.out = NROW(Loc)) }
+
   # Calculate Psi
   Theta <- array(NA, dim = c(n_stations, n_years))
   for (s in 1:n_stations) {
@@ -89,7 +120,8 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
 
   # Return stuff
   Sim_List <- list("DF" = DF, "phi" = phi, "Loc" = Loc,
-    "Omega" = Omega, "Epsilon" = Epsilon, "Theta" = Theta)
+    "Omega" = Omega, "Epsilon" = Epsilon, "Theta" = Theta,
+    "alpha" = alpha, "cuts" = cuts, "group" = group)
 
   return(Sim_List)
 }

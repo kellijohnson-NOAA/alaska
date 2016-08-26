@@ -60,12 +60,13 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
 
   # Calculate Psi
   Theta <- array(NA, dim = c(n_stations, n_years))
+  for (s in 1:n_stations) {
   for(t in 1:n_years) {
-    if(t == 1) Theta[, t] <-
-      phi + Epsilon[, t] + (alpha + Omega)/(1 - rho)
-    if(t >= 2) Theta[, t] <-
-      rho * Theta[, t - 1] + alpha + Omega + Epsilon[, t]
-  }
+    if(t == 1) Theta[s, t] <-
+      phi + Epsilon[s, t] + (alpha[group[s]] + Omega[s])/(1 - rho)
+    if(t >= 2) Theta[s, t] <-
+      rho * Theta[s, t - 1] + alpha[group[s]] + Omega[s] + Epsilon[s, t]
+  }}
 
   # Simulate data
   DF <- array(NA, dim = c(n_stations * n_years, 3),

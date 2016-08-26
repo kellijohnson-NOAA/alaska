@@ -14,6 +14,8 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
 
   #### Spatial model
   # Randomly generate the locations if a matrix is not given
+  # such that each polygon is approximately square, and if there is
+  # only one alpha value then the spatial landscape is 1 x 1
   if (is.null(Loc)) {
     Loc <- cbind(
       "x" = runif(n_stations, min = 0, max = 1),
@@ -21,8 +23,9 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   } else {
     # If locations are given, determine how many stations and
     # set column names
-    n_stations <- dim(Loc)[1]
-    if (!any(colnames(Loc) %in% c("x", "y"))) colnames(Loc) <- c("x", "y")
+    n_stations <- NROW(Loc)
+    if (NCOL(Loc) != 2) stop("Loc does not have two columns")
+    colnames(Loc) <- c("x", "y")
   }
 
   model_O <- RMgauss(var = SD_O^2, scale = SpatialScale)

@@ -10,7 +10,7 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
 
   #### Spatial model
   # Randomly generate the locations if a matrix is not given
-  if(is.null(Loc)) {
+  if (is.null(Loc)) {
     Loc <- cbind(
       "x" = runif(n_stations, min = 0, max = 1),
       "y" = runif(n_stations, min = 0, max = 1 / length(alpha)))

@@ -44,6 +44,8 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   model_E <- RMgauss(var = SD_E^2, scale = SpatialScale)
 
   # Simulate Omega to obtain an estimate of spatial variation for each location
+  # todo: May need to only supply locations that are in a single alpha region
+  #       such that Omega is not correlated across boundaries
   Omega <- RFsimulate(model = model_O,
     x = Loc[, "x"], y = Loc[, "y"])@data[, 1]
 

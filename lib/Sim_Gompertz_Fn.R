@@ -27,6 +27,10 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
     if (NCOL(Loc) != 2) stop("Loc does not have two columns")
     colnames(Loc) <- c("x", "y")
   }
+  # Create a polygon with a buffer around the locations
+  pol <- as(extent(Loc), "SpatialPolygons")
+  proj4string(pol) <- projection
+  pol <- gBuffer(pol, width = 1.50)
 
   model_O <- RMgauss(var = SD_O^2, scale = SpatialScale)
   model_E <- RMgauss(var = SD_E^2, scale = SpatialScale)

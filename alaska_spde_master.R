@@ -30,7 +30,10 @@ source("alaska_spde_initialize.R")
 source("alaska_spde_data.R")
 source("alaska_spde_mesh.R")
 
-source("alaska_spde_analysis.R")
+# Simulations
+source("alaska_simulation_SpatialScale.R")
 
+# Analysis
+source("alaska_spde_analysis.R")
 source("alaska_spde_results.R")
 

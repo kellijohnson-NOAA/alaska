@@ -46,17 +46,18 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   # Simulate Omega to obtain an estimate of spatial variation for each location
   # todo: May need to only supply locations that are in a single alpha region
   #       such that Omega is not correlated across boundaries
+  RFoptions(spConform = FALSE)
   Omega <- RFsimulate(model = model_O,
-    x = Loc[, "x"], y = Loc[, "y"])@data[, 1]
+    x = Loc[, "x"], y = Loc[, "y"])
 
   # Simulate Epsilon
   Epsilon <- array(NA, dim = c(n_stations, n_years))
   for(t in 1:n_years) {
     Epsilon[, t] <- RFsimulate(
       model = model_E,
-      x = Loc[, "x"], y = Loc[, "y"]
-      )@data[, 1]
+      x = Loc[, "x"], y = Loc[, "y"])
   }
+  RFoptions(spConform = TRUE)
 
   # Determine which subpopulation each location belongs to
   # Find the outer boundaries

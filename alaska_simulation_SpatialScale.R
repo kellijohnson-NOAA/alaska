@@ -126,14 +126,17 @@ rm(obj)
 
 png(file.path(dir.results, "SpatialScale_Range.png"), units = "in",
   width = my.width[2], height = my.width[2], res = my.resolution)
-temp <- data.frame("scale" = true, "range" = sapply(Reports, "[[", "Range"))[34:49, ]
+temp <- data.frame("scale" = true, "range" = sapply(Reports, "[[", "Range"))
+# Select only those models with a rho having < 40% RE
+temp <- temp[which(sapply(Reports, "[[", "rho") < (0.3 * 0.5 + 0.5)), ]
 with(temp, plot(scale, range, las = 1,
   xlab = "spatial scale supplied to \"RMgauss()\" (km)", ylab = ""))
 temp <- lm(range ~ scale, data = temp)
 abline(temp)
 mtext(side = 2, line = 2.2, expression(range == ~ hat(sqrt(8)/kappa)))
-mtext(side = 3, line = -2,
-  paste("slope =", paste(round(summary(temp)$coefficients[2, 1:2], 5), collapse = ", se = ")))
+legend("bottomright", bty = "n",
+  legend = paste("slope =", paste(round(summary(temp)$coefficients[2, 1:2], 5),
+  collapse = ", se = ")))
 rm(temp)
 dev.off()
 

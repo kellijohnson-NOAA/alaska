@@ -36,7 +36,7 @@ sim_data <- Sim_Gompertz_Fn(
   SD_E = error,
   SD_extra = 0.0,
   rho = 0.5,
-  logMeanDens = c(4.0),
+  logMeanDens = c(2.0),
   phi = 0.0,
   Loc = coordinates(data.all[sample(NROW(data.all), 1000), ]),
   projection = akCRS,

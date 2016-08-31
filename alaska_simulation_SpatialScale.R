@@ -21,20 +21,7 @@ true <- c(seq(200, 2000, by = 50))
 ###############################################################################
 #### Unload and load cpp
 ###############################################################################
-# First attempt
-firsttry <- try(dyn.unload(dynlib(file.path(my.tmb))), silent = TRUE)
-# Garbage Collection
-if(is(firsttry, "try-error")) gc()
-# Second attempt
-secondtry <- try(dyn.unload(dynlib(file.path(my.tmb))), silent = TRUE)
-# Verify that second attempt works
-#getLoadedDLLs()
-ignore <- file.copy(file.path(dir.data, paste0(my.tmb, ".cpp")),
-  paste0(my.tmb, ".cpp"))
-
-# Compile
-compile(paste0(my.tmb, ".cpp"))
-dyn.load(dynlib(my.tmb))
+calc_cpp(cpp = my.tmb, loc = dir.data)
 
 for (i_scale in true) {
   set.seed(10)

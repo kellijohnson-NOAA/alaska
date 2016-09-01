@@ -16,7 +16,7 @@ findlocal <- function(object, projection = akCRS) {
   if (NROW(object$segm$int$idx) > 0) {
     main <- points[object$segm$int$idx[, 1], ]
   } else {
-    main <- points[-object$segm$bnd$idx[, 1], ]
+    stop("No interior band is available for the provided mesh")
   }
 
   # Create a polygon of the main points

@@ -31,6 +31,9 @@ source("alaska_spde_data.R")
 source("alaska_spde_mesh.R")
 source("alaska_shapefiles.R")
 
+# Initial figure
+source("alaska_alaskamap.R")
+
 # Simulations
 source("alaska_simulation_SpatialScale.R")
 

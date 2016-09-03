@@ -26,6 +26,20 @@ desired.spp <- "Pacific cod"
 desired.years <- 1990:2015 #2015 = last year of data in the AI
 
 ###############################################################################
+#### Initial inputs for plots
+###############################################################################
+my.textcolour <- "black"
+my.font <- 2
+my.fontsize <- c(0.4, 0.7)
+
+my.spp.line <- -5
+col.gridlines <- "dark gray"
+
+lty.eez <- 2
+lty.currents <- c(1, 3, 4)
+plot.colours <- c("light gray", "dark gray")
+
+###############################################################################
 #### Load packages
 ###############################################################################
 dir.results <- file.path(my.base, "results")

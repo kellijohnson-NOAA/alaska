@@ -10,20 +10,7 @@
 ###############################################################################
 n.areas <- length(unique(data.spp$inside))
 
-shape.colors <- gray(seq(0.1, 0.8, length.out = n.areas), alpha = 0.8)
-shape.names <- names(eval(as.name(my.shape)))
-shape.ext   <- strsplit(my.shape, ".", fixed = TRUE)[[1]][2]
 
-my.textcolour <- "black"
-my.font <- 2
-my.fontsize <- c(0.4, 0.7)
-
-my.spp.line <- -5
-col.gridlines <- "dark gray"
-
-lty.eez <- 2
-lty.currents <- c(1, 3, 4)
-plot.colours <- c("light gray", "dark gray")
 
 logfile.spp <- sapply(desired.spp, function(x){
                       paste(tolower(substring(unlist(strsplit(x, " ")),

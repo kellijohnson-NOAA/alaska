@@ -110,6 +110,8 @@ Type objective_function<Type>::operator() ()
   vector<Type> encounterprob_i(n_i);
   vector<Type> tmp_i(n_i);
   for (int i=0; i<n_i; i++){
+    // t_i(i) is actually the timestep - 1 b/c indexing starts at zero
+    // rho^0 == 1, and thus the population starts at phi
     log_chat_i(i) = phi*pow(rho,t_i(i)) + Epsilon_xt(x_s(s_i(i)),t_i(i)) + (eta_x(x_s(s_i(i))) + Omega_x(x_s(s_i(i))) ) / (1-rho);
     if( !isNA(c_i(i)) ){
       if(Options_vec(0)==0) jnll_i(i) -= dpois( c_i(i), exp(log_chat_i(i)), true );

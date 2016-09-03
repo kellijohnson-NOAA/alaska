@@ -139,6 +139,7 @@ Type objective_function<Type>::operator() ()
   // Diagnostics
   REPORT( log_chat_i );
   REPORT( jnll_i );
+  REPORT( theta_z );
 
   return jnll;
 }

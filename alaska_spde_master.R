@@ -29,6 +29,7 @@ getweb <- FALSE #If TRUE pull r4kfj off of github
 source("alaska_spde_initialize.R")
 source("alaska_spde_data.R")
 source("alaska_spde_mesh.R")
+source("alaska_shapefiles.R")
 
 # Simulations
 source("alaska_simulation_SpatialScale.R")

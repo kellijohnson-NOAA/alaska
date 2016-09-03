@@ -1,11 +1,13 @@
 ###############################################################################
 ###############################################################################
-## Purpose:    Stock analysis of cod in Alaska
-##             Create spde for spatial analysis
-## Author:     Kelli Faye Johnson
-## Contact:    kellifayejohnson@gmail.com
-## Date:       2014-09-18
-## Comments:
+## Purpose:  Stock analysis of cod in Alaska
+##           Create spde for spatial analysis
+## Author:   Kelli Faye Johnson
+## Contact:  kellifayejohnson@gmail.com
+## Date:     2014-09-18
+## Comments: use \code{calc_table} to create word tables.
+##           Latex and pandoc notes:
+##           1. parameter names == "$\\sigma_{\\epsilon}$"
 ###############################################################################
 ###############################################################################
 n.areas <- length(unique(data.spp$inside))
@@ -340,31 +342,7 @@ axis(2)
 #### TABLES ####
 ################
 ###############################################################################
-#### table_pars
 ###############################################################################
-table_pars <- lapply(my.res, function(x) x$opt$summary[1:7, ])
-for(q in seq_along(table_pars)){
-  colnames(table_pars[[q]]) <- paste(names(table_pars)[q],
-                                      colnames(table_pars[[q]]))
-  }
-table_pars <- as.data.frame(do.call("cbind", table_pars))
-table_temp <- data.frame("Description" =
-              c("mean productivity", "initial condition",
-                "process error variance", "productivity variance",
-                "spatial correlation", "observation error variance",
-                "density dependence"),
-              "Symbol" =
-              c("$\\alpha1$", "$\\phi1$", "$\\sum_{E}$", "$\\sum_{\\Omega}$",
-                "$\\kappa$", "$\\sigma_{\\epsilon}$", "$\\rho$"))
-table_pars <- cbind(table_temp, table_pars)
-xtable_pars <- xtable(table_pars)
-digits(xtable_pars) <- 4
-print(xtable_pars, file = file.path(dir.results, "table_pars.tex"),
-      include.rownames = FALSE, sanitize.text.function = function(x){x})
-currwd <- getwd()
-setwd(dir.results)
-system("pandoc table_pars.tex -o table_pars.docx")
-setwd(currwd)
 
 
 

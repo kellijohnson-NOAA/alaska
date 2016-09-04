@@ -32,10 +32,7 @@ legend(x = -2800000, y = 2800000,
   col = c("black", plot.colours[1], plot.colours[2], rep("black", length(lty.currents))),
   bty = "n",
   cex = my.fontsize[1], pt.cex = 1.2)
-text(x = 200000, y = 1800000, "Alaska", font = my.font, col = my.textcolour, cex = my.fontsize[2])
-text(x = -1000000, y = 1300000, "Bering \n Sea", font = my.font, col = my.textcolour, cex = my.fontsize[2])
-text(x = -1200000, y = 250000, "Aleutian Islands", font = my.font, col = my.textcolour, cex = my.fontsize[2])
-text(x = 600000, y = 500000, "Gulf of \n Alaska", font = my.font, col = my.textcolour, cex = my.fontsize[2])
+label_major(font = my.font, colour = my.textcolour, size = my.fontsize[2])
 text(x = 1300000, y = 500000, "Dixon \nEntrance", font = my.font, col = my.textcolour, cex = my.fontsize[1])
 ## TODO:
 ## 2. Add lines for the currents, where the current is specified w/ a line type

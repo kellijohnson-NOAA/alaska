@@ -21,6 +21,6 @@ lines(maps.ak, col = plot.colours[2])
 r4kfj::llgridlines(maps.eez, recenter = TRUE, lty = 1, col = col.gridlines)
 label_major(font = my.font, colour = my.textcolour, size = my.fontsize[2])
 
-dev.copy(png, file.path(dir.results, "AlaskaMesh.png"), units = "in",
+dev.copy(png, file.path(dir.results, "fig_mesh.png"), units = "in",
   width = my.width[2], height = my.height.map, res = my.resolution)
 dev.off(); dev.off()

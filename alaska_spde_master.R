@@ -35,6 +35,7 @@ source("alaska_shapefiles.R")
 source("alaska_alaskamap.R")
 source("alaska_alaskadata.R")
 source("alaska_fig_data.R")
+source("alaska_fig_mesh.R")
 
 # Simulations
 source("alaska_simulation_SpatialScale.R")

@@ -12,18 +12,8 @@ findlocal <- function(object, projection = akCRS) {
   coordinates(points) <- ~ x + y
   proj4string(points) <- projection
 
-  # Find points in the main part of the mesh
-  if (NROW(object$segm$int$idx) > 0) {
-    main <- points[object$segm$int$idx[, 1], ]
-  } else {
-    stop("No interior band is available for the provided mesh")
-  }
-
   # Create a polygon of the main points
-  poly <- SpatialPolygons(list(
-    Polygons(list(Polygon(list(main@coords), hole = FALSE)),
-    "bound")))
-  proj4string(poly) <- proj4string(main)
+  poly <- calc_meshbound(mesh = object, projection = projection)$poly
 
   # Find which points are inside polygon
   return(ifelse(is.na(over(points, poly)), FALSE, TRUE))

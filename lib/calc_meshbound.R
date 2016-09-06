@@ -1,3 +1,12 @@
+#' Determine the points that creeate the inner boundary for an \code{inla.mesh}
+#' object. The boundary is typically delineated by a blue line.
+#'
+#' @param mesh An \code{inla.mesh} object.
+#' @param projection The projection you would like to use for the resulting
+#' polygon. The default is \code{NULL}, and if \code{projection = NULL}, then
+#' the function will return unprojected points and empty objects for the
+#' two types of polygons.
+#'
 calc_meshbound <- function(mesh, projection = NULL) {
 
   if (class(mesh) != "inla.mesh") {

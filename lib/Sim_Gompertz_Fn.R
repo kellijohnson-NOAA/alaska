@@ -123,7 +123,7 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
     pol_grouptrue <- sp::disaggregate(dpi)
   } else {
       group <- rep(1, length.out = NROW(Loc))
-      pol_grouptrue <- NULL
+      pol_grouptrue <- pol_studyarea
   }
 
 ###############################################################################

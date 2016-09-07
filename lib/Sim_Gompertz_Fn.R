@@ -64,24 +64,24 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   # the maximum observed correlation
   # Estimates of "Range" should scale linearly with scale because
   # Range = sqrt(8)/exp(logkappa)
-  model_O <- RMgauss(var = SD_O^2, scale = SpatialScale)
-  model_E <- RMgauss(var = SD_E^2, scale = SpatialScale)
+  model_O <- RandomFields::RMgauss(var = SD_O^2, scale = SpatialScale)
+  model_E <- RandomFields::RMgauss(var = SD_E^2, scale = SpatialScale)
 
   # Simulate Omega to obtain an estimate of spatial variation for each location
   # todo: May need to only supply locations that are in a single alpha region
   #       such that Omega is not correlated across boundaries
-  RFoptions(spConform = FALSE)
-  Omega <- RFsimulate(model = model_O,
+  RandomFields::RFoptions(spConform = FALSE)
+  Omega <- RandomFields::RFsimulate(model = model_O,
     x = Loc[, "x"], y = Loc[, "y"])
 
   # Simulate Epsilon
   Epsilon <- array(NA, dim = c(n_stations, n_years))
   for(t in 1:n_years) {
-    Epsilon[, t] <- RFsimulate(
+    Epsilon[, t] <- RandomFields::RFsimulate(
       model = model_E,
       x = Loc[, "x"], y = Loc[, "y"])
   }
-  RFoptions(spConform = TRUE)
+  RandomFields::RFoptions(spConform = TRUE)
 
   # Determine which subpopulation each location belongs to
   # Find the outer boundaries
@@ -96,7 +96,7 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   if (length(cuts) > 1) {
     # Remove the last value because it represents the higher Longitude limit
     cuts <- cuts[-length(cuts)]
-    lines <- SpatialLines(lapply(cuts, function(x) {
+    lines <- sp::SpatialLines(lapply(cuts, function(x) {
       angle <- sample(c(1, runif(1, min = 1 - slope, max = 1 + slope)), 2)
       Lines(Line(cbind(x * angle, latlimits)),
         ID = parent.frame()$i[])
@@ -104,11 +104,12 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
     proj4string(lines) <- projection
 
     # create a very thin polygon for each intersected line
-    blpi <- gBuffer(gIntersection(pol, lines, byid = TRUE),
+    blpi <- rgeos::gBuffer(gIntersection(pol_studyarea, lines, byid = TRUE),
       byid = TRUE, width = 0.000001)
     proj4string(blpi) <- projection
-    # split pol with each thin polygon
-    dpi <- gDifference(pol, blpi, byid = FALSE, drop_lower_td = TRUE)
+    # split pol_studyarea with each thin polygon
+    dpi <- rgeos::gDifference(pol_studyarea, blpi,
+      byid = FALSE, drop_lower_td = TRUE)
     proj4string(dpi) <- projection
     # Determine which polygon each point is in
     group <- over(points, disaggregate(dpi))

@@ -1,9 +1,31 @@
+#' Simulate data from a Gompertz population dynamics model
+#'
+#' @param n_years The number of years you want data for
+#' @param n_stations The number of stations you want samples for
+#' @param phi The fraction from equilibrium you want to start from
+#' The default is to start at a random \code{rnorm(1, mean = 0, sd = 1)}
+#' start value.
+#' @param SpatialScale The scale of the spatial random effects, must be
+#' in the same units as the locations
+#' @param SD_O The marginal variance of Omega.
+#' @param SD_E The marginal variance of temporal and spatial process error.
+#' @param SD_extra
+#' @param rho Density-dependence
+#' @param logMeanDens
+#' @param Loc
+#' @param projection
+#' @param slope
+#' @param weightvals
+#'
 Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   SpatialScale = 0.1, SD_O = 0.5, SD_E = 1.0, SD_extra = 1.0,
   rho = 0.5, logMeanDens = 1, Loc = NULL, projection = akCRS,
   slope = 0.5, weightvals = c(10, 2)) {
 
-  #### Parameters
+###############################################################################
+## Parameters
+###############################################################################
+  # Save the input list to access later
   # Determine the starting position from equilibrium
   if (is.null(phi)) phi <- rnorm(1, mean = 0, sd = 1)
 
@@ -12,7 +34,9 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   alpha <- logMeanDens * (1 - rho)
   if (length(unique(alpha)) == 1) alpha <- alpha[1]
 
-  #### Spatial model
+###############################################################################
+## Spatial model
+###############################################################################
   # Randomly generate the locations if a matrix is not given
   # such that each polygon is approximately square, and if there is
   # only one alpha value then the spatial landscape is 1 x 1

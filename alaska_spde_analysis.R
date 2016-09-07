@@ -97,7 +97,8 @@ newtonOption(obj, smartsearch = FALSE)
   Report <- obj$report()
   rm(report)
   report <- try(sdreport(obj))
-unlist(Report[c('Range', 'SigmaO', 'SigmaE', 'rho')])
+  unlist(Report[c('Range', 'SigmaO', 'SigmaE', 'rho', 'theta_z')])
+
 
 ###############################################################################
 #### Create summaries

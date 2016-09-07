@@ -104,14 +104,15 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   if (length(cuts) > 1) {
     # Remove the last value because it represents the higher Longitude limit
     cuts <- cuts[-length(cuts)]
-    lines <- sp::SpatialLines(lapply(cuts, function(x) {
+    lines_grouptrue <- sp::SpatialLines(lapply(cuts, function(x) {
       angle <- sample(c(1, runif(1, min = 1 - slope, max = 1 + slope)), 2)
       Lines(Line(cbind(x * angle, latlimits)),
         ID = parent.frame()$i[])
       }))
-    proj4string(lines) <- projection
+    proj4string(lines_grouptrue) <- projection
     # create a very thin polygon for each intersected line
-    blpi <- rgeos::gBuffer(gIntersection(pol_studyarea, lines, byid = TRUE),
+    blpi <- rgeos::gBuffer(
+      rgeos::gIntersection(pol_studyarea, lines_grouptrue, byid = TRUE),
       byid = TRUE, width = 0.000001)
     proj4string(blpi) <- projection
     # split pol_studyarea with each thin polygon
@@ -124,6 +125,7 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   } else {
       group <- rep(1, length.out = NROW(Loc))
       pol_grouptrue <- pol_studyarea
+      lines_grouptrue <- NULL
   }
 
 ###############################################################################
@@ -164,7 +166,7 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
     "Omega" = Omega, "Epsilon" = Epsilon, "Theta" = Theta,
     "alpha" = alpha, "cuts" = cuts, "group" = group,
     "pol_studyarea" = pol_studyarea, "pol_grouptrue" = pol_grouptrue,
-    "input" = input)
+    "input" = input, "lines_grouptrue" = lines_grouptrue)
 
   return(Sim_List)
 }

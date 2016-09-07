@@ -26,6 +26,11 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
 ## Parameters
 ###############################################################################
   # Save the input list to access later
+  input <- list("phi" = phi, "SpatialScale" = SpatialScale,
+    "SD_O" = SD_O, "SD_E" = SD_E, "SD_extra" = SD_extra, "rho" = rho,
+    "logMeanDens" = logMeanDens, "projection" = projection,
+    "slope" = slope, "weightvals" = weightvals)
+
   # Determine the starting position from equilibrium
   if (is.null(phi)) phi <- rnorm(1, mean = 0, sd = 1)
 
@@ -52,9 +57,12 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
     colnames(Loc) <- c("x", "y")
   }
   # Create a polygon with a buffer around the locations
-  pol <- as(extent(Loc), "SpatialPolygons")
-  proj4string(pol) <- projection
-  pol <- gBuffer(pol, width = 1.50)
+  pol_studyarea <- as(raster::extent(Loc), "SpatialPolygons")
+  proj4string(pol_studyarea) <- projection
+  # Find a new polygon that is 10% bigger
+  pol_studyarea <- calc_areabuffer(pol_studyarea, ratio = 1.1,
+    precision = 0.001)
+
   # Create SpatialPoints from Loc data
   points <- as.data.frame(Loc)
   coordinates(points) <- ~ x + y
@@ -85,8 +93,8 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
 
   # Determine which subpopulation each location belongs to
   # Find the outer boundaries
-  cuts <- unlist(attributes(extent(pol))[c("xmin", "xmax")])
-  latlimits <- unlist(attributes(extent(pol))[c("ymin", "ymax")]) * c(0.2, 1.8)
+  cuts <- unlist(attributes(extent(pol_studyarea))[c("xmin", "xmax")])
+  latlimits <- unlist(attributes(extent(pol_studyarea))[c("ymin", "ymax")]) * c(0.0, 1.8)
   # Use quantile to cut into one region per alpha value
   cuts <- floor(quantile(cuts, seq(0, 1, length.out = length(alpha) + 1)))
   # Remove the first value because it represents the lower Longitude limit
@@ -102,7 +110,6 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
         ID = parent.frame()$i[])
       }))
     proj4string(lines) <- projection
-
     # create a very thin polygon for each intersected line
     blpi <- rgeos::gBuffer(gIntersection(pol_studyarea, lines, byid = TRUE),
       byid = TRUE, width = 0.000001)
@@ -112,17 +119,25 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
       byid = FALSE, drop_lower_td = TRUE)
     proj4string(dpi) <- projection
     # Determine which polygon each point is in
-    group <- over(points, disaggregate(dpi))
-  } else { group <- rep(1, length.out = NROW(Loc)) }
+    group <- over(points, sp::disaggregate(dpi))
+    pol_grouptrue <- sp::disaggregate(dpi)
+  } else {
+      group <- rep(1, length.out = NROW(Loc))
+      pol_grouptrue <- NULL
+  }
 
-  # Calculate Psi
+###############################################################################
+## Calculate Psi
+###############################################################################
   Theta <- array(NA, dim = c(n_stations, n_years))
   for (s in 1:n_stations) {
   for(t in 1:n_years) {
     if(t == 1) Theta[s, t] <- as.numeric(
-      phi + Epsilon[s, t] + (alpha[group[s]] + Omega[s])/(1 - rho))
+      phi + Epsilon[s, t] + (alpha[group[s]] + Omega[s])/(1 - rho)
+      )
     if(t >= 2) Theta[s, t] <- as.numeric(
-      rho * Theta[s, t - 1] + alpha[group[s]] + Omega[s] + Epsilon[s, t])
+      rho * Theta[s, t - 1] + alpha[group[s]] + Omega[s] + Epsilon[s, t]
+      )
   }}
 
   # Simulate data
@@ -147,7 +162,9 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   # Return stuff
   Sim_List <- list("DF" = DF, "phi" = phi, "Loc" = Loc,
     "Omega" = Omega, "Epsilon" = Epsilon, "Theta" = Theta,
-    "alpha" = alpha, "cuts" = cuts, "group" = group)
+    "alpha" = alpha, "cuts" = cuts, "group" = group,
+    "pol_studyarea" = pol_studyarea, "pol_grouptrue" = pol_grouptrue,
+    "input" = input)
 
   return(Sim_List)
 }

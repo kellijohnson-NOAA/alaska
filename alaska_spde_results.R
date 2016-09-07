@@ -227,7 +227,7 @@ make_file_off()
 # create the table_data dataframe
   f <- function(x) c(mean(x), length(x))
 table_data <- apply(race.num, 1, function(d) {
-    data <- subset(data.spp, SID == d & YEAR %in% desired.years)
+    data <- subset(data.all, SID == d & YEAR %in% desired.years)
     area <- do.call("rbind", strsplit(rownames(data@data), ".", fixed = TRUE))[, 1]
     temp <- list("ai" = data[grep("i", area), ],
                  "goa" = data[grep("o", area), ])
@@ -301,7 +301,7 @@ df.stock.xtable <- xtable(df.stock)
 
 
 
- # Calculate esimates of random effects (RE)
+ # Calculate estimates of random effects (RE)
   if(TRUE){
 
     y.lim <- range(mesh$loc[, 2])

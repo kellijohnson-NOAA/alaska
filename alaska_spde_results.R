@@ -10,35 +10,6 @@
 ##           1. parameter names == "$\\sigma_{\\epsilon}$"
 ###############################################################################
 ###############################################################################
-n.areas <- length(unique(data.spp$inside))
-
-
-
-logfile.spp <- sapply(desired.spp, function(x){
-                      paste(tolower(substring(unlist(strsplit(x, " ")),
-                                              1, 1)),
-                            collapse = "")
-                      })
-logfile.spp <- logfile.spp[order(logfile.spp)]
-###############################################################################
-#### Read in results data
-###############################################################################
-rdata_files <- dir(dir.results, pattern = "log", full.names = TRUE)
-rdata_species <- do.call("rbind", strsplit(rdata_files, "_"))[, 2]
-rdata_files <- rdata_files[rdata_species %in% logfile.spp]
-for(q in seq_along(logfile.spp)){
-  all <- grep(logfile.spp[q], rdata_files)
-  remove <- rev(order(file.info(rdata_files[all])$mtime))[-1]
-  rdata_files <- rdata_files[-all[remove]]
-}
-
-my.res <- list()
-for(q in seq_along(desired.spp)){
-  load(rdata_files[q])
-  assign(logfile.spp[q], saved)
-  my.res[[q]] <- eval(parse(text = logfile.spp[q]))
-}
-names(my.res) <- logfile.spp
 
 ###############################################################################
 #### Results

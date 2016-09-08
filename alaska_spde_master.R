@@ -37,6 +37,8 @@ source("alaska_alaskadata.R")
 source("alaska_fig_data.R")
 source("alaska_fig_mesh.R")
 
+source("alaska_cleanup.R")
+
 # Simulations
 source("alaska_simulation_SpatialScale.R")
 

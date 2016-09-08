@@ -33,6 +33,15 @@ read_results <- function(data = NULL, report = NULL,
     report <- Report
   }
 
+  # Combine data and report into a single list, such that the function
+  # can return everything that is imported.
+  # At a minimum the user must supply a \code{report} object.
+  if (!is.list(report)) {stop("report must be a list")}
+  # Remove the mesh object from data because it is just a replicate of
+  # the mesh that is provided in report$mesh
+  if (!is.null(data)) data <- data[-which(names(data) == "mesh")]
+  results <- append(data, report)
+
 ###############################################################################
 ## Subset the data based on the interior of the mesh
 ###############################################################################
@@ -68,12 +77,6 @@ read_results <- function(data = NULL, report = NULL,
     max(report[["Omega_x"]]), length.out = 100)
 
   results$info <- info
-  results$alpha <- data$alpha
-  results$SigmaO <- report$SigmaO
-  results$SigmaE <- report$SigmaE
-  results$rho <- report$rho
-  results$mesh <- data$mesh
-  results$group <- data$group
   results$localboundaries <- localboundaries
   results$loc_true <- data$Loc
 

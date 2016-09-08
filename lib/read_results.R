@@ -41,6 +41,7 @@ read_results <- function(data = NULL, report = NULL,
   # the mesh that is provided in report$mesh
   if (!is.null(data)) data <- data[-which(names(data) == "mesh")]
   results <- append(data, report)
+  rm(data); rm(report)
 
 ###############################################################################
 ## Subset the data based on the interior of the mesh
@@ -52,7 +53,7 @@ read_results <- function(data = NULL, report = NULL,
   info <- data.frame(
     "x" = results$mesh$loc[, 1],
     "y" = results$mesh$loc[, 2],
-    "omega" = report[["Omega_x"]],
+    "omega" = results[["Omega_x"]],
     "clustering" = NA)
   # Subset by those inside the blue line
   info <- info[localboundaries, ]
@@ -65,20 +66,20 @@ read_results <- function(data = NULL, report = NULL,
     cellsize = c(size, size), cells.dim = dimension))
 
   # Calculate the mesh points that are in each true group
-  if (is.null(data$pol_grouptrue)) {
+  if (is.null(results$pol_grouptrue)) {
     info@data$true <- 1
-  } else {info@data$true <- over(info, data$pol_grouptrue)}
+  } else {info@data$true <- over(info, results$pol_grouptrue)}
 
 ###############################################################################
 ## Save information to the results list
 ###############################################################################
   # Create a vector of breaks for the estimated values of Omega
-  results$breaks <- seq(min(report[["Omega_x"]]),
-    max(report[["Omega_x"]]), length.out = 100)
+  results$breaks <- seq(min(results[["Omega_x"]]),
+    max(results[["Omega_x"]]), length.out = 100)
 
   results$info <- info
   results$localboundaries <- localboundaries
-  results$loc_true <- data$Loc
+  names(results)[which(names(results) == "Loc")] <- "loc_true"
 
   return(results)
 }

@@ -19,6 +19,8 @@ maps.efh <- readShapePoly(file.path(dir.data,
                                     "efh_shapefile_2005", "EFH_2005"),
                           proj4string = efhCRS)
 maps.efh <- spTransform(maps.efh, akCRS)
+save(maps.efh, file = file.path(dir.data, "maps.efh.RData"))
+rm(maps.efh)
 
 names.nt <- c("Near_Shore_Bristol_No_Trawl", "Northern_BS_ResearchArea",
               "Nunivak_Kusko", "Prib_Hab_Cons_Area", "St_Lawerence", "St_Matts",

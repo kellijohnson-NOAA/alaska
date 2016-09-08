@@ -1,7 +1,7 @@
 .SyncArchive/**
 data/**
 ignore/**
-ms/alaska_ms_2014????.pdf
+ms/alaska_ms_20*
 references/**
 results/**
 simulation**

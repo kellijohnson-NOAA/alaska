@@ -27,6 +27,7 @@ The following code will run the analysis, but it is dependent on how far
 you assume a neighbor can be from another point, and was thus not investigated any further.
 # library(AMOEBA)
 # res <- AMOEBA(output$info@data$omega, dnearneigh(coordinates(output$info), 0, 0.10), 1, 1)
+12. export more information out of the .cpp file
 
 # Notes
 

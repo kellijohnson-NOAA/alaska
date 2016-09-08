@@ -9,6 +9,8 @@
 ###############################################################################
 ###############################################################################
 
+load(file.path(dir.data, "names.RData"))
+
 png(filename = file.path(dir.results, "AlaskaMap.png"),
   width = my.width[2], height = my.height.map, res = my.resolution, units = "in")
 
@@ -23,6 +25,8 @@ for(q in seq_along(names.nf)){
   plot(eval(parse(text = paste0("names.nf_", q))),
        col = plot.colours[2], border = plot.colours[2], add = TRUE)
 }
+rm(list = ls(pattern = "names\\.n[[:alpha:]]_[[:digit:]]"))
+
 lines(maps.ak, col = plot.colours[2])
 plot(maps.eez, lty = lty.eez, add = TRUE)
 legend(x = -2800000, y = 2800000,

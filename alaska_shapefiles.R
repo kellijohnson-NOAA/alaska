@@ -39,6 +39,10 @@ for(q in seq_along(names.nf)){
     readShapePoly(file.path(dir.data,
     "alaska_SSLShapefiles", names.nf[q]), proj4string = efhCRS))
 }
+save(list = ls(pattern = "names\\.n[[:alpha:]]_[[:digit:]]"),
+  file = file.path(dir.data, "names.RData"))
+rm(list = ls(pattern = "names\\.n[[:alpha:]]_[[:digit:]]"))
+
 maps.eez <- readShapeSpatial(file.path(dir.data, "USMaritimeLimitsAndBoundaries",
   "USMaritimeAlaskaEEZ"), proj4string = efhCRS)
 maps.ak <- readShapeSpatial(file.path(dir.data, "USMaritimeLimitsAndBoundaries",

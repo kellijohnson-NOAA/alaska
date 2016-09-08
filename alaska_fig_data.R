@@ -41,3 +41,4 @@ text(seq_along(desired.years), rep(par("yaxp")[1] * 1.35, length(desired.years))
 legend("topleft", lty = 1:2, legend = c("AIs", "GOA"),
        bty = "n", horiz = TRUE)
 dev.off()
+rm(data.plot, label, col.year)

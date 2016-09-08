@@ -75,6 +75,7 @@ spatialareas <- SpatialPolygons(sapply(seq_along(alaska_areas_management),
   }))
   proj4string(spatialareas) <- llCRS
   spatialareas <- spTransform(spatialareas, akCRS)
+rm(alaska_areas_management)
 
 # Subset the data for the years and values inside the study area
 data.all$inside <- over(data.all, spatialareas)

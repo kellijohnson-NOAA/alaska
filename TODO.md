@@ -1,33 +1,48 @@
 # TODO
 
-1. Find the true mean weight and standard deviation of cod because 
+1. Find the true mean weight and standard deviation of cod because
 the data is given in in CPUE, which makes the weight not a true weight.
 2. Simplify the simulation. JTT does not think that I need to do as many simulations as what are currently included.
 2. Make sure equations are the same as JTT equations.
    - I believe I am using his code, but I should double check.
-3. gstat: a spatial r package that will facilitate mapping of spatial predictions using a inverse linear distance kriging algorithm.
-4. Plot the mean log abundance for each stock behind the plot for the overall mean log abundance, I am going to have to change what is placed in the report, to get at the predicted abundance for each station in a given year.
-6. Read: Lindgren F, Rue H, Lindström J. 2011. An explicit link between Gaussian fields and Gaussian Markov random fields: the stochastic partial differential equation approach [with discussion]. J. R. Stat. Soc. B. 73(4):423–98.
+3. gstat: a spatial r package that will facilitate mapping of spatial predictions
+using a inverse linear distance kriging algorithm.
+4. Plot the mean log abundance for each stock behind the plot for the overall mean log abundance,
+I am going to have to change what is placed in the report to get at the predicted
+abundance for each station in a given year.
+5. Check the pruning algorithm.
+6. Read: Lindgren F, Rue H, Lindström J. 2011.
+An explicit link between Gaussian fields and Gaussian Markov random fields:
+the stochastic partial differential equation approach [with discussion]. J. R. Stat. Soc. B. 73(4):423–98.
 7. Get NOAA JISAO contribution number.
-8. @Mueter2005 also states why years prior to 1993 should be removed 
-because of a lack of standardized gear, and they suggest that 
+8. @Mueter2005 also states why years prior to 1993 should be removed
+because of a lack of standardized gear, and they suggest that
 only trawls with a performance of satisfactory should be included, but I am
 not sure how to find out which trawls are and are not satisfactory.
 9. Rerun the analysis with the SE Alaska no-trawl zone kept in
+10. Perform bias correction on the exponentiated abundances.
+11. Spatial clusters were attempted with a multidirectional optimum ecotope-based algorithm,
+which uses nearest neighbors and a dependent variable to determine clusters.
+The following code will run the analysis, but it is dependent on how far
+you assume a neighbor can be from another point, and was thus not investigated any further.
+# library(AMOEBA)
+# res <- AMOEBA(output$info@data$omega, dnearneigh(coordinates(output$info), 0, 0.10), 1, 1)
 
 # Notes
 
 ## 20140426 Kerim Aydin
 * Many time-series analyzes are available for the Bering Sea, but an analysis of the Gulf of Alaska are fewer. Therefore, the study will be a good counter-point to available analyses.
 * AIs have a strong longitudinal gradient
-* AIs house the western stock of stellar sea lions, which are endangered, while the eastern stock is no longer endangered. 
+* AIs house the western stock of stellar sea lions, which are endangered, while the eastern stock is no longer endangered.
 * It would be good to look at community composition trends and see if and how they have changed over time. Furthermore, if there are trends between groups as well as trends within groups. In the AIs, cod is more of a keystone predator than in other areas, making for a situation with greater effects for the same level of a perturbation.
 * Quota management for cod in the AIs is highly contentious
 
 ## References
 * Ivonne Ortiz - dissertation looked at the food web in 2 degree blocks
-* Goundie, E. T., David, A. S., and Trites, A. W. 2015. Low prey abundance leads to less efficient foraging behavior in Steller sea lions. Journal of Experimental Biology and Ecology, 470:70-77. 
+* Goundie, E. T., David, A. S., and Trites, A. W. 2015. Low prey abundance leads to less efficient foraging behavior in Steller sea lions. Journal of Experimental Biology and Ecology, 470:70-77.
 * Hui, T. C. Y., Gryba, R. Gregr, J., and Trites, A. W. 2015. Assessment of competition between fisheries and Steller sea lions in Alaska based on estimated prey biomass, fisheries removals and predator foraging behaviour. PLOS ONE 10(5), e0123786.
 * Jansen, T., Kristensen, K., Kainge, P., Durholtz, D., Strømme, T., Thygesen, U. H., Wilhelm, M. R., Kathena, J., Fairweather, T. P., Paulus, S., Degel, H., Lipinski, M. R., and Beyer, J. E. 2016. Migration, distribution and population (stock) structure of shallow-water hake (*Merluccius capensis*) in the Benguela Current Large Marine Ecosystem inferred using a geostatistical population model. Fisheries Research, 179: 156-167.
-* Rushing, C. S., Ryder, T. B., Scarpignato, A. L., Saracco, J. F., and Marra, P. P. 2015. Using demographic attributes from long-term monitoring data to delineate natural populations structure. Journal of Applied Ecology, 
+* Rushing, C. S., Ryder, T. B., Scarpignato, A. L., Saracco, J. F., and Marra, P. P. 2015. Using demographic attributes from long-term monitoring data to delineate natural populations structure. Journal of Applied Ecology,
 * Thorson, J. T., Jannot, J., and Somers, K. 2016. Using spatio-temporal models of population growth and movement to monitor overlap between human impacts and fish populations. Journal of Applied Ecology, 00: 00-00.
+
+

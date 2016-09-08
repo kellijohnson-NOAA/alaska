@@ -25,6 +25,7 @@ for(y in seq_along(desired.years)){
   temp <- subset(data.plot, YEAR == desired.years[y])@data[1, "survey"]
   col.year[y] <- ifelse(length(grep("ai", temp)) > 0, 1, 2)
 }
+rm(temp)
 
 # Create label of the number of positive tows / all tows
 label <- paste(summary(data.plot$year.f),

@@ -45,5 +45,8 @@ rm(list = ls(pattern = "names\\.n[[:alpha:]]_[[:digit:]]"))
 
 maps.eez <- readShapeSpatial(file.path(dir.data, "USMaritimeLimitsAndBoundaries",
   "USMaritimeAlaskaEEZ"), proj4string = efhCRS)
+save(maps.eez, file = file.path(dir.data, "maps.eez.RData"))
+
 maps.ak <- readShapeSpatial(file.path(dir.data, "USMaritimeLimitsAndBoundaries",
   "alaska_coast"), proj4string = efhCRS)
+save(maps.ak, file = file.path(dir.data, "maps.ak.RData"))

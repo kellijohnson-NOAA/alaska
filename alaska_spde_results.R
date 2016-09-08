@@ -16,133 +16,61 @@
 ###############################################################################
 sink(file.path(dir.results, "spde_results.txt"), append = FALSE)
 cat("number of mesh nodes", "\n")
-cat(my.res[[1]]$mesh$n, "\n\n\n")
-cat("Decimal degrees to minutes seconds for stock splits", "\n",
-    "of my.res[[1]], which is currently Pacific cod")
-apply(cbind(my.res[[1]]$stock_all$splits[, "index"], 60),
-          1, function(x) dd2dms(as.vector(x)))
+cat(mesh$n, "\n\n\n")
 sink()
 
 ###############################################################################
+#### est_spatialclusters
+#### plot the spatial clusters for the alaska data
 ###############################################################################
-#### fig_stock.png
-###############################################################################
-# make_file(my.filetype, file.path(dir.results, "fig_stock.png"),
-#           width = my.width[1], res = my.resolution)
-par(mfrow = c(length(my.res), 1))
-par(xpd = TRUE, fig = c(0,1,0,1))
-for(q in seq_along(my.res)) {
-  plotcp(my.res[[q]]$stock_all, las = 1, upper = "splits")
-  points(tail(my.res[[q]]$stock$cptable, 1)[, c("nsplit", "xerror")] + c(1, 0),
-         col = "black", pch = 19, cex = 3)
-
-  par(new = TRUE, fig = c(0.2,0.9,0.45,0.95))
-  plot(my.res[[q]]$stock_all, uniform = TRUE)
-  text(my.res[[q]]$stock_all, use.n = TRUE, all = FALSE,
-       digits = 3, cex = 0.8, splits = TRUE,
-       fancy = FALSE, fwidth = 0.6, fheight = 0.75)
-}
-dev.copy(png, file.path(dir.results, "fig_stock.png"),
-         res = my.resolution)
-dev.off();dev.off()
-#make_file_off()
-
-###############################################################################
-#### Mean abundance
-###############################################################################
-make_file(my.filetype, file.path(dir.results, "hat_abundance.png"), width = 4,
-    height=2.5*length(desired.spp), res = my.resolution)
-  par(mfrow = c(length(desired.spp), 1),
-      mar = c(0, 0, 0, 0), oma = c(3, 3, 0, 0),
-      mgp = c(1.5,0.5,0), tck = -0.02, xaxs = "i")
-  for(q in seq_along(desired.spp)){
-    # Load old results
-    ylim <- c(0, range(my.res[[q]]$B_conf_spatial)[2])
-    xlim <- c(desired.years, rev(desired.years)[1] + 1)
-    plot(1, type = "n", xlab = "", ylab = "", lwd = 3, ylim = ylim,
-         xlim = range(xlim), log = "", las = 1, xaxt = "n")
-    Which = match(c("rho", "phi"), rownames(my.res[[q]]$opt$summary) )
-    val <- formatC(round(my.res[[q]]$opt$summary[Which[1], "Estimate"], 3), 3)
-    se <- formatC(round(my.res[[q]]$opt$summary[Which[1], "Std. Error"], 3), 3)
-    mtext(side = 1, adj = 0, line = -1.5, text = bquote(rho == .(val) (.(se))))
-    val <- formatC(round(my.res[[q]]$opt$summary[Which[2],
-                               "Estimate"], 3), 3)
-    se <- formatC(round(my.res[[q]]$opt$summary[Which[2],
-                               "Std. Error"], 3), 3)
-    mtext(side = 1, adj = 0, line = -2.5, text = bquote(phi == .(val) (.(se))))
-    if(length(desired.spp) > 1){
-      plot.text <- paste0("(", letters[q], ")", " ", desired.spp[q])
-      mtext(plot.text, side = 3, adj = 1, line = -2, font = my.font)
-    }
-    polygon(x = c(xlim, rev(xlim)),
-            y = c(my.res[[q]]$B_conf_spatial[,1],
-                  rev(my.res[[q]]$B_conf_spatial[,2])), lty = "solid",
-            col=rgb(0, 0, 0, 0.2), border = NA)
-    lines(x = xlim, y = my.res[[q]]$B_mean_spatial, lwd = 3)
-
-  Dji <- my.res[[q]]$opt$summary[rownames(opt$summary) == "Dji", ]
-  stockset <- my.res[[q]]$stock$where
-  Dji <- cbind(rep(xlim, each = length(stockset)), Dji)
-  colnames(Dji)[1] <- "year"
-
-  stock.1 <- Dji[my.res[[q]]$stock$where == unique(stockset)[1], ]
-  stock.1[, "Estimate"] <- exp(stock.1[, "Estimate"])
-  stock.1.u <- tapply(stock.1[, "Estimate"], stock.1[, "year"], mean)
-  stock.lines <- list(stock.1.u)
-  if(length(stockset) > 1){
-    stock.2 <- Dji[my.res[[q]]$stock$where == unique(stockset)[2], ]
-    stock.2[, "Estimate"] <- exp(stock.2[, "Estimate"])
-    stock.2.u <- tapply(stock.2[, "Estimate"], stock.2[, "year"], mean)
-    stock.lines[[2]] <- stock.2.u
-    lines(x = xlim,
-          y = tapply(stock.1[, "Estimate"], stock.1[, "year"], mean),
-          lty = 2)
-    lines(x = xlim,
-          y = tapply(stock.2[, "Estimate"], stock.2[, "year"], mean),
-          lty = 3)
-  }
- }
- axis(1)
- mtext(side = 1, "years", outer = TRUE, line = 2)
- mtext(side = 2, expression(bar(lnBiomass)), outer = TRUE, line = 1.5)
- legend("bottomright", c(paste("longitude >=",
-                               round(my.res[[q]]$stock$splits[1, "index"], 2)),
-                         paste("longitude <",
-                               round(my.res[[q]]$stock$splits[1, "index"], 2))),
-        lty = c(2, 3), bty = "n")
-make_file_off()
-
+png(file.path(dir.results, "est_spatialclusters.png"))
+plot(plotgroups,
+     col = plotgroups@data$clustering,
+  pch = 1)
+  # , cex = plotgroups@data$omega)
+plot.inla.mesh(mesh, col = "white", main = "",
+  t.sub = 1:nrow(mesh$graph$tv),
+  lwd = 1,
+  rgl = ,,
+  size = 2,
+  draw.vertices = FALSE,
+  vertex.color = "black",
+  draw.edges = FALSE, # If FALSE, no connecting lines
+  edge.color = rgb(0.3, 0.3, 0.3),
+  draw.segments = FALSE, # If FALSE, no blue line,
+  add = TRUE
+)
+plot(spTransform(maps.ak, akCRS), add = TRUE)
+plot(est$lines[c(1:3,8:11)], add = TRUE, lwd = 1.5)
+# points(data.all, cex = par()$cex * 0.25)
+dev.off()
 
 ###############################################################################
 #### fig spatial variation in productivity
 ###############################################################################
-
-plot.coords <- data.frame("x" = my.res[[q]]$x_stations,
-                          "y" = my.res[[q]]$y_stations,
-                          "omega" = my.res[[q]]$Report[["Omega"]])
-coordinates(plot.coords) <- ~ x + y
-proj4string(plot.coords) <- akCRS
-plot.grid  <- SpatialGrid(GridTopology(cellcentre.offset = bbox(plot.coords)[, "min"],
-                                       cellsize = c(50, 50),
-                                       cells.dim = c(62, 17)),
-                          proj4string = akCRS)
+plot.grid  <- SpatialGrid(GridTopology(cellcentre.offset = bbox(plotall)[, "min"],
+  cellsize = c(50, 50), cells.dim = c(62, 17)), proj4string = akCRS)
 
 us <- getData("GADM", country="USA", level=1)
 # extract states (need to uppercase everything)
 ak <- us[match(toupper("Alaska"), toupper(us$NAME_1)),]
 ak <- spTransform(ak, akCRS)
 
-# bubble(plot.coords, "omega")
-idw <- krige(omega ~ 1, plot.coords, plot.grid)
+# bubble(plotall, "omega")
+idw <- krige(omega ~ 1, plotall, plot.grid)
 
-make_file(my.filetype, file.path(dir.results, "fig_omega.png"),
-          width = my.width, height = my.height, res = my.resolution)
+png(filename = file.path(dir.results, "fig_omega.png"),
+  width = my.width, height = my.height, res = my.resolution,
+  units = "in")
 par(oma = c(0,0,0,0), mar = c(0,0,0,0))
+plot(spTransform(est$lines, akCRS))
 image(idw["var1.pred"], col= gray.colors(101),
-      ylim = c(0, 1500))
-plot(ak, add = TRUE, col = "white")
-abline(v = my.res[[1]]$stock_orig$splits[, "index"],
-       lty = c(1, rep(2, dim(my.res[[1]]$stock_orig$splits)[1])))
+      ylim = c(0, 1500), add = TRUE)
+plot(spTransform(us, akCRS), add = TRUE)
+plot(spTransform(est$lines, akCRS), add = TRUE)
+
+# todo: add the stock delineations here
+
 # r4kfj::llgridlines(ak, recenter = TRUE)
 par(new = TRUE)
 plot.new()
@@ -151,17 +79,95 @@ plot.window(xlim = round(range(idw["var1.pred"]@data), 1), ylim = c(0, 1))
 points(x = seq(round(range(idw["var1.pred"]@data)[1], 1),
                round(range(idw["var1.pred"]@data)[2], 1),
                length.out = 101),
-       y = rep(0.33, 101), col = gray.colors(101), pch = 15, cex = 1.2)
-axis(1, line = -5.4, cex.axis = 0.5, mgp = c(0.3, 0.25, 0))
-make_file_off()
+       y = rep(0.2, 101), col = gray.colors(101), pch = 15, cex = 1.2)
+axis(1, line = -3.4, cex.axis = 0.5, mgp = c(0.3, 0.25, 0))
+dev.off()
 
-plot(crop.image(idw["var1.pred"], rbind( c(-2000, 300),
-             c(500, 1200))))
-axis(2)
-#### TABLES ####
-################
 ###############################################################################
+#### Mean abundance
 ###############################################################################
+temp <- data.frame("mesh"=as.numeric(names(localboundaries[localboundaries])),
+  "pop" = est$spatial@partition)
+pops <- data.frame("year" = as.numeric(data$t_i) + desired.years[1] - 1,
+  "mesh" = data$s_i,
+  "est" = exp(Report$log_chat_i),
+  "inside" = data$s_i %in% which(localboundaries == TRUE))
+pops <- pops[pops$inside == TRUE, ]
+pops$pop <- temp$pop[match(pops$mesh, temp$mesh)]
+pops$pop.f <- factor(pops$pop, levels = unique(pops$pop),
+  labels = c("AIs", "transition", "GOA"))
+
+png(file.path(dir.results, "est_subpopulationtrajectory.png"),
+  height = 4, width = 4, units = "in", res = my.resolution)
+ggplot(aggregate(est ~ year + pop.f, data = pops, sum),
+  aes(x = year, y = est)) +
+  geom_line(aes(group = pop.f, linetype = pop.f)) +
+  ylab("CPUE estimates per subpopulation") +
+  theme_bw() +
+  my.theme
+dev.off()
+
+# png(filename = file.path(dir.results, "hat_abundance.png"), width = 4,
+#   height = 2.5 * length(desired.spp), res = my.resolution, units = "in")
+#   par(mfrow = c(length(desired.spp), 1),
+#       mar = c(0, 0, 0, 0), oma = c(3, 3, 0, 0),
+#       mgp = c(1.5,0.5,0), tck = -0.02, xaxs = "i")
+#   for(q in seq_along(desired.spp)){
+#     # Load old results
+#     ylim <- c(0, range(my.res[[q]]$B_conf_spatial)[2])
+#     xlim <- c(desired.years, rev(desired.years)[1] + 1)
+#     plot(1, type = "n", xlab = "", ylab = "", lwd = 3, ylim = ylim,
+#          xlim = range(xlim), log = "", las = 1, xaxt = "n")
+#     Which = match(c("rho", "phi"), rownames(my.res[[q]]$opt$summary) )
+#     val <- formatC(round(my.res[[q]]$opt$summary[Which[1], "Estimate"], 3), 3)
+#     se <- formatC(round(my.res[[q]]$opt$summary[Which[1], "Std. Error"], 3), 3)
+#     mtext(side = 1, adj = 0, line = -1.5, text = bquote(rho == .(val) (.(se))))
+#     val <- formatC(round(my.res[[q]]$opt$summary[Which[2],
+#                                "Estimate"], 3), 3)
+#     se <- formatC(round(my.res[[q]]$opt$summary[Which[2],
+#                                "Std. Error"], 3), 3)
+#     mtext(side = 1, adj = 0, line = -2.5, text = bquote(phi == .(val) (.(se))))
+#     if(length(desired.spp) > 1){
+#       plot.text <- paste0("(", letters[q], ")", " ", desired.spp[q])
+#       mtext(plot.text, side = 3, adj = 1, line = -2, font = my.font)
+#     }
+#     polygon(x = c(xlim, rev(xlim)),
+#             y = c(my.res[[q]]$B_conf_spatial[,1],
+#                   rev(my.res[[q]]$B_conf_spatial[,2])), lty = "solid",
+#             col=rgb(0, 0, 0, 0.2), border = NA)
+#     lines(x = xlim, y = my.res[[q]]$B_mean_spatial, lwd = 3)
+
+#   Dji <- my.res[[q]]$opt$summary[rownames(opt$summary) == "Dji", ]
+#   stockset <- my.res[[q]]$stock$where
+#   Dji <- cbind(rep(xlim, each = length(stockset)), Dji)
+#   colnames(Dji)[1] <- "year"
+
+#   stock.1 <- Dji[my.res[[q]]$stock$where == unique(stockset)[1], ]
+#   stock.1[, "Estimate"] <- exp(stock.1[, "Estimate"])
+#   stock.1.u <- tapply(stock.1[, "Estimate"], stock.1[, "year"], mean)
+#   stock.lines <- list(stock.1.u)
+#   if(length(stockset) > 1){
+#     stock.2 <- Dji[my.res[[q]]$stock$where == unique(stockset)[2], ]
+#     stock.2[, "Estimate"] <- exp(stock.2[, "Estimate"])
+#     stock.2.u <- tapply(stock.2[, "Estimate"], stock.2[, "year"], mean)
+#     stock.lines[[2]] <- stock.2.u
+#     lines(x = xlim,
+#           y = tapply(stock.1[, "Estimate"], stock.1[, "year"], mean),
+#           lty = 2)
+#     lines(x = xlim,
+#           y = tapply(stock.2[, "Estimate"], stock.2[, "year"], mean),
+#           lty = 3)
+#   }
+#  }
+#  axis(1)
+#  mtext(side = 1, "years", outer = TRUE, line = 2)
+#  mtext(side = 2, expression(bar(lnBiomass)), outer = TRUE, line = 1.5)
+#  legend("bottomright", c(paste("longitude >=",
+#                                round(my.res[[q]]$stock$splits[1, "index"], 2)),
+#                          paste("longitude <",
+#                                round(my.res[[q]]$stock$splits[1, "index"], 2))),
+#         lty = c(2, 3), bty = "n")
+# dev.off()
 
 
 
@@ -172,13 +178,12 @@ axis(2)
 NPFMCstrata.afsc <- spTransform(readOGR(file.path(dir.data, "stratum"),
   "strata_geographic"), akCRS)
 
-
 ###############################################################################
 ## population trend for each STRATUM
 ###############################################################################
-make_file(my.filetype, file.path(dir.results, "trend.png"),
-          width = my.width[2], height = my.height.map * length(desired.spp),
-          res = my.resolution)
+png(filename = file.path(dir.results, "trend.png"),
+  width = my.width[2], height = my.height.map * length(desired.spp),
+  res = my.resolution, units = "in")
 par(mfrow = c(length(desired.spp), 1), oma = c(0,5,0,0), mar = c(4,5.5,0,0),
     xpd = TRUE)
   for(q in seq(desired.spp)) {
@@ -217,7 +222,7 @@ par(mfrow = c(length(desired.spp), 1), oma = c(0,5,0,0), mar = c(4,5.5,0,0),
                pch = c(0, 1), bty = "n")
       }
 }
-make_file_off()
+dev.off()
 
 ###############################################################################
 #### table_data

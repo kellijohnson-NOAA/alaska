@@ -23,12 +23,13 @@ png(file.path(dir.results, "AlaskaData.png"), units = "in",
   r4kfj::llgridlines(maps.eez, recenter = TRUE, lty = 1, col = col.gridlines)
   label_major(font = my.font, colour = my.textcolour, size = my.fontsize[2])
   par(new = TRUE)
-  plot.data <- subset(data.all, !is.na(inside))
-  points(spTransform(plot.data, efhCRS),
+  data.plot <- subset(data.all, !is.na(inside))
+  points(spTransform(data.plot, efhCRS),
          # pch = 1,
     col = rgb(0,0,0, alpha = 0.35),
-    cex = (plot.data$WTCPUE / (max(plot.data$WTCPUE))) * 20,
-    pch = ifelse(plot.data$survey == "goa", 0, 1))
+    cex = (data.plot$WTCPUE / (max(data.plot$WTCPUE))) * 20,
+    pch = ifelse(data.plot$survey == "goa", 0, 1))
   legend("topleft", bty = "n", legend = c("Aleutian Islands", "Gulf of Alaska"),
     pch = 1:0)
 dev.off()
+rm(data.plot)

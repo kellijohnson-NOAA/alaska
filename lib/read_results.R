@@ -46,12 +46,12 @@ read_results <- function(data = NULL, report = NULL,
 ## Subset the data based on the interior of the mesh
 ###############################################################################
   # Get the points inside the blue oval within the mesh
-  localboundaries <- findlocal(object = data$mesh, projection = projection)
+  localboundaries <- findlocal(object = results$mesh, projection = projection)
 
   # Get all information for each mesh location
   info <- data.frame(
-    "x" = data$mesh$loc[, 1],
-    "y" = data$mesh$loc[, 2],
+    "x" = results$mesh$loc[, 1],
+    "y" = results$mesh$loc[, 2],
     "omega" = report[["Omega_x"]],
     "clustering" = NA)
   # Subset by those inside the blue line

@@ -99,6 +99,44 @@ newtonOption(obj, smartsearch = FALSE)
   report <- try(sdreport(obj))
   unlist(Report[c('Range', 'SigmaO', 'SigmaE', 'rho', 'theta_z')])
 
+###############################################################################
+#### Clustering
+###############################################################################
+# Get the points of the nodes from the mesh
+plotgroups <- data.frame(
+  "x" = mesh$loc[, 1], "y" = mesh$loc[, 2],
+  "latitude" = round(mesh$loc[, 1], 1),
+  "omega" = Report[["Omega_x"]],
+  "clustering" = NA)
+coordinates(plotgroups) <- ~ x + y
+proj4string(plotgroups) <- akCRS
+
+# Find points in the main frame of the mesh
+localboundaries <- findlocal(mesh)
+plotall <- plotgroups
+plotgroups <- plotgroups[localboundaries, ]
+
+# Calculate the clusters
+est <- list()
+est$kdist <- dist(Report[["Omega_x"]][localboundaries],
+  method = "euclidean")
+
+# Find the optimum number of groups
+est$cluster.ksearch <- cluster_validity(dist.file = est$kdist,
+  tot_k = ceiling(sqrt(attr(est$kdist, "Size") - 1)),
+  plot_sils = TRUE, file = file.path(dir.results, "est_ksearch.png"))
+est$clustermax <- sapply(est$cluster.ksearch[-1], which.max)
+est$clustermin <- sapply(est$cluster.ksearch[-1], which.min)
+est$cluster.use <- cluster::pam(x = est$kdist,
+  k = which.max(est$cluster.ksearch$Hubert.gamma) + 1)
+# Assign the clusters to the spatial points data frame
+plotgroups$clustering <- est$cluster.use$clustering
+
+# Estimate the 2D groupings from the clustering
+est$spatial <- SPODT::spodt(omega ~ 1,
+  data = plotgroups, level.max = 3)
+est$lines <- SPODT::spodtSpatialLines(est$spatial,
+  data = plotgroups)
 
 ###############################################################################
 #### Create summaries

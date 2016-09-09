@@ -15,10 +15,11 @@ calc_meshbound <- function(mesh, projection = NULL) {
 
   # Find points in the main part of the mesh
   if (NROW(mesh$segm$int$idx) <= 0) {
-    stop("No interior band is available for the provided mesh")
+    locators <- unique(c(mesh$segm$bnd$idx))
+  } else {
+    locators <- unique(unlist(mesh$segm$int$idx))
   }
 
-  locators <- unique(unlist(mesh$segm$int$idx))
   points <- mesh$loc[locators, ]
   points <- as.data.frame(points)
 
@@ -48,7 +49,7 @@ calc_meshbound <- function(mesh, projection = NULL) {
     poly <- SpatialPolygons(
       tapply(1:length(points$ID), points$ID,
       function(x, data = points@coords) {
-        data <- data[duplicated(apply(data, 2, paste0)), ]
+        data <- data[!duplicated(apply(data, 2, paste0)), ]
         Polygons(list(Polygon(data)), parent.frame()$i[])
     }))
     projection(poly) <- projection

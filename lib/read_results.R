@@ -28,7 +28,9 @@ read_results <- function(data = NULL, report = NULL,
 ## Determine if the function is loading saved data or using already loaded data
 ###############################################################################
   if (!is.null(file)) {
-    rm(sim_data); rm(Report)
+    if (exists(sim_data)) rm(sim_data)
+    if (exists(Report)) rm(Report)
+
     if (is.null(dir)) { path <- file } else { path <- file.path(dir, file)}
     load(path)
     data <- sim_data

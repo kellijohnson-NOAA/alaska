@@ -5,28 +5,32 @@
 calc_RE <- function(data) {
   # Get matching om and em names
   if (is.vector(data)) {
-    data <- data.frame(t(pars))
+    data <- data.frame(t(data))
   }
   names <- colnames(data)
 
   # Find the matching row for each OM
   match <- data.frame(do.call("rbind", strsplit(names, "_")))
-  match$match <- rep(NA, NROW(match))
+  match$match <- row.names(match)
   for (ii in 1:NROW(match)) {
     if (match[ii, 1] == "om") {
       temp <- which(match[, 2] == match[ii, 2])
       match$match[ii] <- ifelse(length(temp) > 1, tail(temp, 1), NA)
-    } else { next }
+    } else { if (match[ii, 1] == "em") {
+      match$match[ii] <- which(match[, 2] == match[ii, 2])[1]
+      } else { next }}
   }
+  match <- droplevels(match[match[, 1] %in% c("om", "em"), ])
 
   # Calculate the relative error (RE)
-  re <- tapply(match[,3], match[,2], function(x) {
-    (pars[, x[1]] - pars[, x[2]]) / pars[, x[1]]
-  })
-  if (!is.list(re) == 1) {
+  re <- tapply(match$match, match[, 2], function(x) {
+    x <- as.numeric(x)
+    (data[, x[2]] - data[, x[1]]) / data[, x[2]]
+   })
+  if (!is.list(re)) {
     re <- data.frame(t(re))
   } else {
-    re <- do.call("rbind", re)
+    re <- t(do.call("rbind", re))
   }
   colnames(re) <- paste0("re_", colnames(re))
 

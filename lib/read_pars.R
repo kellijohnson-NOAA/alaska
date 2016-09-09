@@ -11,7 +11,7 @@ read_pars <- function(results) {
     "em_Range" = results$Range,
     "em_rho" = results$rho,
     "em_SigmaO" = results$SigmaO,
-    "em_SigmaE" = results$SigmaE,
+    "em_SigmaE" = results$SigmaE
   )
 
   return(pars)

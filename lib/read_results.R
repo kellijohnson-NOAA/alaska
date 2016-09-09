@@ -5,7 +5,8 @@
 #' @param report Specify the results of running the spatial model,
 #' more than likely named \code{Report}.
 #' @param dir A directory where the \code{.RData} file specified in
-#' \code{file} is stored.
+#' \code{file} is stored. If the full path is provided in \code{file}
+#' then set \code{dir = NULL}.
 #' @param file The file name of the \code{.RData} object that houses
 #' \code{data} and \code{report} for a given simulation replicate.
 #' @param size A numeric value specifying the cell size of the spatial
@@ -28,7 +29,8 @@ read_results <- function(data = NULL, report = NULL,
 ###############################################################################
   if (!is.null(file)) {
     rm(sim_data); rm(Report)
-    load(file.path(dir, file))
+    if (is.null(dir)) { path <- file } else { path <- file.path(dir, file)}
+    load(path)
     data <- sim_data
     report <- Report
   }

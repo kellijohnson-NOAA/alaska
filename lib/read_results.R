@@ -80,6 +80,7 @@ read_results <- function(data = NULL, report = NULL,
   results$info <- info
   results$localboundaries <- localboundaries
   names(results)[which(names(results) == "Loc")] <- "loc_true"
+  results$file <- file
 
   return(results)
 }

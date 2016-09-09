@@ -4,6 +4,11 @@ calc_mesh <- function(locations, boundary = prdomain,
   type <- match.arg(type, choices = c("basic", "advanced"),
     several.ok = FALSE)
 
+  if (is.null(boundary)) {
+    boundary <- INLA::inla.nonconvex.hull(locations,
+      convex = -0.05)
+  }
+
   # Create the mesh based on the type specified, where the
   # default is to use the basic mesh.
   if (type == "basic") {

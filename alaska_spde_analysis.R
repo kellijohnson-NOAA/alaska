@@ -42,14 +42,12 @@ dyn.load(dynlib(file.path(dir.data, my.tmb)))
 #### TMB
 ###############################################################################
 # Build inputs
-  X_xp <- matrix(1, ncol = 1, nrow = spde$n.spde)
-
   data <- list(
     Options_vec = 1,
     n_i = NROW(data.all@data),
     n_x = spde$n.spde,
     n_t = length(desired.years),
-    n_p = NCOL(X_xp),
+    n_p = 1,
 
     x_s = mesh$idx$loc - 1,
 
@@ -58,7 +56,7 @@ dyn.load(dynlib(file.path(dir.data, my.tmb)))
     t_i = factor(data.all@data$YEAR, levels = desired.years,
       labels = 1:length(desired.years) - 1),
 
-    X_xp = X_xp,
+    X_xp = matrix(1, ncol = 1, nrow = spde$n.spde),
 
     G0 = spde$param.inla$M0,
     G1 = spde$param.inla$M1,

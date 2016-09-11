@@ -63,18 +63,7 @@ dyn.load(dynlib(file.path(dir.data, my.tmb)))
     G2 = spde$param.inla$M2
     )
 
-  parameters = list(
-    alpha = c(0.0),
-    phi = 0.0,
-    log_tau_E = 1.0,
-    log_tau_O = 1.0,
-    log_kappa = 0.0,
-    rho = 0.5,
-    theta_z = c(0, 0),
-    Epsilon_input = matrix(rnorm(spde$n.spde * data$n_t),
-      nrow = spde$n.spde, ncol = data$n_t),
-    Omega_input = rnorm(spde$n.spde)
-    )
+  parameters <- calc_priors(data)
 
   obj <- MakeADFun(data = data,
     parameters = parameters,

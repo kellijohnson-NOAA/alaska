@@ -68,7 +68,7 @@ dyn.load(dynlib(file.path(dir.data, my.tmb)))
   obj <- MakeADFun(data = data,
     parameters = parameters,
     random = c("Epsilon_input", "Omega_input"),
-    map = NULL,
+    map = NULL, # map is always NULL b/c using rates instead of count
     hessian = FALSE,
     DLL = my.tmb)
 

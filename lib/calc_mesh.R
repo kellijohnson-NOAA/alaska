@@ -9,10 +9,25 @@ calc_mesh <- function(locations, boundary = prdomain,
       convex = -0.05)
   }
 
+  # Find the area of the bounding box and take
+  # 5% of the square root of the area
+  # as the cutoff for the created mesh
+  cutoff <- t(sp::bbox(locations))
+  cutoff <- rbind(
+    c(cutoff[1, 1], cutoff[2, 2]),
+    cutoff[1, ],
+    c(cutoff[2, 1], cutoff[1, 2]),
+    cutoff[2, ])
+  rownames(cutoff) <- NULL
+  cutoff <- SpatialPolygons(list(Polygons(list(Polygon(list(cutoff))), ID = 1)))
+  cutoff <- cutoff@polygons[[1]]@area
+  cutoff <- sqrt(ceiling(cutoff)) * 0.05
+
   # Create the mesh based on the type specified, where the
   # default is to use the basic mesh.
   if (type == "basic") {
-    mesh <- inla.mesh.create(locations, boundary = boundary)
+    mesh <- inla.mesh.create(locations, boundary = boundary,
+      cutoff = cutoff)
   }
   if (type == "advanced") {
     mesh <- inla.mesh.2d(loc = locations,
@@ -23,5 +38,7 @@ calc_mesh <- function(locations, boundary = prdomain,
   }
   spde <- inla.spde2.matern(mesh)
 
-  return(list("mesh" = mesh, "spde" = spde))
+  ID <- data.frame(locations, "ID" = mesh$idx$loc)
+
+  return(list("mesh" = mesh, "spde" = spde, "ID" = ID, "cutoff" = cutoff))
 }

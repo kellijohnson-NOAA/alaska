@@ -60,7 +60,7 @@ Type objective_function<Type>::operator() ()
   PARAMETER(log_tau_O);      // log-inverse SD of Omega
   PARAMETER(log_kappa);      // Controls range of spatial variation
   PARAMETER(rho);            // Autocorrelation (i.e. density dependence)
-  PARAMETER_VECTOR( theta_z ); // Parameters governing measurement error
+  PARAMETER_VECTOR(theta_z); // Parameters governing measurement error
 
   // Random effects
   PARAMETER_ARRAY(Epsilon_input);  // Spatial process variation
@@ -83,7 +83,7 @@ Type objective_function<Type>::operator() ()
 
   // Objects for derived values
   vector<Type> eta_x(n_x);
-  array<Type> log_Dpred_xt(n_x, n_t);
+  array<Type> log_Dpred_xt(n_x, n_t); //todo: determine what this should be for
   vector<Type> Omega_x(n_x);
   vector<Type> Equil_x(n_x);
   matrix<Type> Epsilon_xt(n_x, n_t);
@@ -140,6 +140,19 @@ Type objective_function<Type>::operator() ()
   REPORT( log_chat_i );
   REPORT( jnll_i );
   REPORT( theta_z );
+  REPORT(x_s);
+  REPORT(c_i);
+  REPORT(s_i);
+  REPORT(t_i);
+  REPORT(alpha);
+  REPORT(phi);
+  REPORT(log_tau_E);
+  REPORT(log_tau_O);
+  REPORT(log_kappa);
+  REPORT(eta_x);
+  REPORT(log_Dpred_xt);
+  REPORT(log_notencounterprob_i);
+  REPORT(encounterprob_i);
 
   return jnll;
 }

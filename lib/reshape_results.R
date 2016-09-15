@@ -21,5 +21,7 @@ reshape_results <- function(data,
     by = c("replicate", "n.groups", "par", "id", "percentinc"))
   data$par <- factor(data$par, labels = parlabels)
 
+  data <- droplevels(data)
+
   return(data)
 }

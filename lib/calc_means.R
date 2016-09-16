@@ -21,8 +21,17 @@ calc_means <- function(data, digits = 2, ggplot = NULL) {
   if (!is.null(ggplot)) {
     info <- do.call(rbind, lapply(ggplot_build(ggplot)[["panel"]]$ranges,
       function(range) c(range$x.range, range$y.range)))
-    means$x <- apply(info[, 1:2], 1, mean)
-    means$y <- info[, 4] * 0.80
+    info <- data.frame(info)
+    info$par <- rep(levels(means$par),
+      ifelse(length(unique(means$percentinc)) > 1,
+        NROW(info) / length(levels(means$par)), 1))
+    info$percentinc <- rep(unique(means$percentinc),
+      each = NROW(info) / length(unique(means$percentinc)))
+    info$x <- apply(info[, 1:2], 1, mean)
+    info$y <- info[, 4] * 0.80
+    means <- merge(means, info[, c("par", "percentinc", "x", "y")],
+      by = c("par", "percentinc"))
   }
+
   return(means)
 }

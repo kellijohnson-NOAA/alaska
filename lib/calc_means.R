@@ -11,10 +11,10 @@ calc_means <- function(data, digits = 2, ggplot = NULL) {
   MARE <- function(x) {
     median(abs(x))
   }
-  means <- data.frame(
-    "par" = unique(data$par),
-    "mean" = tapply(data$om, data$par, mean),
-    "MARE" = tapply(data$re, data$par, MARE))
+  means <- aggregate(om ~ par + percentinc, data = data, mean)
+  colnames(means)[which(colnames(means) == "om")] <- "mean"
+  means <- merge(means, aggregate(re ~ par + percentinc, data = data, MARE))
+  colnames(means)[which(colnames(means) == "re")] <- "MARE"
 
   means$MARE <- format(round(means$MARE, digits), nsmall = digits)
 

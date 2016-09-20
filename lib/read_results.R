@@ -69,11 +69,6 @@ read_results <- function(data = NULL, report = NULL,
     cellcentre.offset = bbox(info)[, "min"],
     cellsize = c(size, size), cells.dim = dimension))
 
-  # Calculate the mesh points that are in each true group
-  if (is.null(results$pol_grouptrue)) {
-    info@data$true <- 1
-  } else {info@data$true <- over(info, results$pol_grouptrue)}
-
 ###############################################################################
 ## Save information to the results list
 ###############################################################################

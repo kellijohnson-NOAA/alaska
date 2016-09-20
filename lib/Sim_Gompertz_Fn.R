@@ -159,7 +159,6 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   Sim_List <- list("DF" = DF, "phi" = phi, "Loc" = Loc,
     "Omega" = Omega, "Epsilon" = Epsilon, "Theta" = Theta,
     "alpha" = alpha, "cuts" = cuts, "group" = group,
-    "pol_studyarea" = pol_studyarea,
     "input" = input, "lines_grouptrue" = lines_grouptrue,
     "date" = Sys.Date(), "n_grouptrue" = length(alpha),
     "percentinc" = percentinc)

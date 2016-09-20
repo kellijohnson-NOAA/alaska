@@ -126,10 +126,8 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
     proj4string(dpi) <- projection
     # Determine which polygon each point is in
     group <- over(points, sp::disaggregate(dpi))
-    pol_grouptrue <- sp::disaggregate(dpi)
   } else {
       group <- rep(1, length.out = NROW(Loc))
-      pol_grouptrue <- pol_studyarea
       lines_grouptrue <- NULL
   }
 
@@ -170,7 +168,7 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   Sim_List <- list("DF" = DF, "phi" = phi, "Loc" = Loc,
     "Omega" = Omega, "Epsilon" = Epsilon, "Theta" = Theta,
     "alpha" = alpha, "cuts" = cuts, "group" = group,
-    "pol_studyarea" = pol_studyarea, "pol_grouptrue" = pol_grouptrue,
+    "pol_studyarea" = pol_studyarea,
     "input" = input, "lines_grouptrue" = lines_grouptrue,
     "date" = Sys.Date(), "n_grouptrue" = length(alpha),
     "percentinc" = percentinc)

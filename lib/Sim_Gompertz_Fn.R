@@ -115,17 +115,8 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
         ID = parent.frame()$i[])
       }))
     proj4string(lines_grouptrue) <- projection
-    # create a very thin polygon for each intersected line
-    blpi <- rgeos::gBuffer(
-      rgeos::gIntersection(pol_studyarea, lines_grouptrue, byid = TRUE),
-      byid = TRUE, width = 0.000001)
-    proj4string(blpi) <- projection
-    # split pol_studyarea with each thin polygon
-    dpi <- rgeos::gDifference(pol_studyarea, blpi,
-      byid = FALSE, drop_lower_td = TRUE)
-    proj4string(dpi) <- projection
     # Determine which polygon each point is in
-    group <- over(points, sp::disaggregate(dpi))
+    group <- over(points, calc_polys(pol_studyarea, lines_grouptrue))
   } else {
       group <- rep(1, length.out = NROW(Loc))
       lines_grouptrue <- NULL

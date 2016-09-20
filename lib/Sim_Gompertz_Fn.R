@@ -85,7 +85,7 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   #       such that Omega is not correlated across boundaries
   RandomFields::RFoptions(spConform = FALSE)
   Omega <- RandomFields::RFsimulate(model = model_O,
-    x = Loc[, "x"], y = Loc[, "y"])
+    x = Loc[, "x"], y = Loc[, "y"]) - SD_O^2/2
 
   # Simulate Epsilon
   Epsilon <- array(NA, dim = c(n_stations, n_years))

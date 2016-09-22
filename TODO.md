@@ -10,7 +10,6 @@ using a inverse linear distance kriging algorithm.
 4. Plot the mean log abundance for each stock behind the plot for the overall mean log abundance,
 I am going to have to change what is placed in the report to get at the predicted
 abundance for each station in a given year.
-5. Check the pruning algorithm.
 6. Read: Lindgren F, Rue H, Lindström J. 2011.
 An explicit link between Gaussian fields and Gaussian Markov random fields:
 the stochastic partial differential equation approach [with discussion]. J. R. Stat. Soc. B. 73(4):423–98.
@@ -26,8 +25,10 @@ which uses nearest neighbors and a dependent variable to determine clusters.
 The following code will run the analysis, but it is dependent on how far
 you assume a neighbor can be from another point, and was thus not investigated any further.
 # library(AMOEBA)
-# res <- AMOEBA(output$info@data$omega, dnearneigh(coordinates(output$info), 0, 0.10), 1, 1)
+# res <- AMOEBA(omega, dnearneigh(coordinates(info), 0, 0.10), 1, 1)
 12. export more information out of the .cpp file
+13. Determine if the zero values in the data used to fit the model should
+be exported as zeros or NAs.
 
 # Notes
 

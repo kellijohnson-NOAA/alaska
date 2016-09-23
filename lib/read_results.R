@@ -19,7 +19,7 @@
 #' information <- read_results(data = sim_data, report = Report)
 #'
 read_results <- function(data = NULL, report = NULL,
-  dir = getwd(), file = NULL, size = 0.01, dimension = c(130, 50),
+  dir = getwd(), file = NULL, dimension = c(130, 50),
   projection = akCRS) {
 
   results <- list()
@@ -65,10 +65,10 @@ read_results <- function(data = NULL, report = NULL,
   projection(info) <- projection
 
   # Create a grid for plotting later
-  results$info.grid  <- SpatialGrid(GridTopology(
-    cellcentre.offset = bbox(info)[, "min"],
-    cellsize = c(size, size), cells.dim = dimension))
-  projection(results$info.grid) <- projection
+  # cells.dim == vector with number of cells in each dimension
+  results$info.grid  <- sp::SpatialGrid(points2grid(sp::spsample(
+    info, prod(dimension), type = "regular")),
+    proj4string = projection)
 
 ###############################################################################
 ## Save information to the results list

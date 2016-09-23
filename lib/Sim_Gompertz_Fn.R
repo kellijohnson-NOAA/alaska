@@ -1,4 +1,12 @@
-#' Simulate data from a Gompertz population dynamics model
+#' Simulate data from a Gompertz population dynamics model.
+#'
+#' @description Simulate data for \code{n_years} and \code{n_stations}
+#' using the \code{\pkg{RandomFields}} package and a Gompertz population
+#' dynamics model.
+#'
+#' @details The code for this function originally came from James Thorson
+#' and his github repository
+#' \url{2016_Spatio-temporal_models/Week 7 -- spatiotemporal models/Lab/Sim_Gompertz_Fn.R}
 #'
 #' @param n_years The number of years you want data for
 #' @param n_stations The number of stations you want samples for

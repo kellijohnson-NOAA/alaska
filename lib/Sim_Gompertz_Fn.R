@@ -18,7 +18,7 @@
 #' @param weightvals
 #'
 Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
-  SpatialScale = 0.1, SD_O = 0.5, SD_E = 1.0, SD_extra = 1.0,
+  SpatialScale = 0.1, SD_O = 0.5, SD_E = 1.0, SD_extra = 1.0, SD_obs = 1.0,
   rho = 0.5, logMeanDens = 1, Loc = NULL, projection = akCRS,
   slope = 0.5, weightvals = c(10, 2)) {
 
@@ -27,7 +27,8 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
 ###############################################################################
   # Save the input list to access later
   input <- list("phi" = phi, "SpatialScale" = SpatialScale,
-    "SD_O" = SD_O, "SD_E" = SD_E, "SD_extra" = SD_extra, "rho" = rho,
+    "SD_O" = SD_O, "SD_E" = SD_E, "SD_extra" = SD_extra, "SD_obs" = SD_obs,
+    "rho" = rho,
     "logMeanDens" = logMeanDens, "projection" = projection,
     "slope" = slope, "weightvals" = weightvals)
 
@@ -138,15 +139,23 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
 
   # Simulate data
   DF <- array(NA, dim = c(n_stations * n_years, 3),
-    dimnames = list(NULL, c("Site", "Year", "Simulated_example")))
+    dimnames = list(NULL, c("Site", "Year", "lambda")))
   for(s in 1:n_stations) {
   for(t in 1:n_years) {
     counter <- ifelse(s == 1 & t == 1, 1, counter + 1)
-    DF[counter, ] <- c(s, t,
-      rpois(1, lambda = exp(Theta[s, t] + SD_extra*rnorm(1))))
+    DF[counter, "Site"] <- s
+    DF[counter, "Year"] <- t
+    DF[counter, "lambda"] <- exp(Theta[s, t] + SD_extra*rnorm(1))
   }}
 
   DF <- as.data.frame(DF)
+
+  DF$Simulated_example <- rpois(NROW(DF), lambda = DF$lambda)
+  DF$encounterprob <- 1 - exp(-DF$lambda)
+  DF$zeroinflatedlnorm <- ifelse(DF$Simulated_example > 0, 1, 0) *
+    rlnorm(NROW(DF),
+      meanlog = log(DF$lambda / DF$encounterprob),
+      sdlog = SD_obs)
   DF$Longitude <- Loc[DF[, "Site"], 1]
   DF$Latitude <- Loc[DF[, "Site"], 2]
 

@@ -147,11 +147,6 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   }}
 
   DF <- as.data.frame(DF)
-  DF$Simulated_weight <- sapply(DF[, "Simulated_example"], function(x) {
-    temp <- rlnorm(x, mean = weightvals[1], sd = weightvals[2])
-    temp <- log(temp * exp(weightvals[2]^2 / 2))
-    return(sum(temp))
-  })
   DF$Longitude <- Loc[DF[, "Site"], 1]
   DF$Latitude <- Loc[DF[, "Site"], 2]
 

@@ -70,7 +70,8 @@ dyn.load(dynlib(file.path(dir.data, my.tmb)))
     random = c("Epsilon_input", "Omega_input"),
     map = NULL, # map is always NULL b/c using rates instead of count
     hessian = FALSE,
-    DLL = my.tmb)
+    DLL = my.tmb,
+    silent = TRUE)
 
 newtonOption(obj, smartsearch = FALSE)
 

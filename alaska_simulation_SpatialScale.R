@@ -109,7 +109,8 @@ obj <- MakeADFun(
   random = Random,
   map = Map,
   hessian = FALSE,
-  DLL = my.tmb)
+  DLL = my.tmb,
+  silent = TRUE)
 
 # Run optimizer
 optimizer <- nlminb(obj$par, objective = obj$fn,

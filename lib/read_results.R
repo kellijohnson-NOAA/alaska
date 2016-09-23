@@ -68,6 +68,7 @@ read_results <- function(data = NULL, report = NULL,
   results$info.grid  <- SpatialGrid(GridTopology(
     cellcentre.offset = bbox(info)[, "min"],
     cellsize = c(size, size), cells.dim = dimension))
+  projection(results$info.grid) <- projection
 
 ###############################################################################
 ## Save information to the results list

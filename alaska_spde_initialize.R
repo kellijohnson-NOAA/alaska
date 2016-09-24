@@ -37,7 +37,8 @@ col.gridlines <- "dark gray"
 
 lty.eez <- 2
 lty.currents <- c(1, 3, 4)
-plot.colours <- c("light gray", "dark gray")
+plot.colours <- c("grey90", "grey30")
+grayscale <- colorRampPalette(plot.colours)
 
 ###############################################################################
 #### Load packages

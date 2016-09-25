@@ -11,7 +11,6 @@
 #' manunit <- calc_manunit(information = information)
 #'
 calc_manunit <- function(information, file = NULL) {
-
   # Pull out relevant portions of information
   info <- information$info
   # Find the full polygon
@@ -110,12 +109,12 @@ calc_manunit <- function(information, file = NULL) {
   areas <- matrix(NA, nrow = length(pol.true), ncol = length(pol.choose),
     dimnames = list(paste0("true.", seq_along(pol.true)),
     paste0("choose.", seq_along(pol.choose))))
-  for (x in seq_along(pol.true)) {
-    for (y in seq_along(pol.choose)) {
-      temp <- rgeos::gIntersection(pol.choose[y], pol.true[x])
+  for (ix in seq_along(pol.true)) {
+    for (iy in seq_along(pol.choose)) {
+      temp <- rgeos::gIntersection(pol.choose[iy], pol.true[ix])
       if (is.null(temp)) {
-        areas[x, y] <- 0
-      } else {areas[x, y] <- rgeos::gArea(temp) / rgeos::gArea(pol.true[x])}
+        areas[ix, iy] <- 0
+      } else {areas[ix, iy] <- rgeos::gArea(temp) / rgeos::gArea(pol.true[ix])}
       rm(temp)
     }
   }

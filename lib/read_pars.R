@@ -4,7 +4,7 @@
 #'
 read_pars <- function(results) {
   pars <- c(
-    "om_Range" = results$input$SpatialScale * 2,
+    "om_Range" = results$input$SpatialScale,
     "om_rho" = results$input$rho,
     "om_SigmaO" = results$input$SD_O,
     "om_SigmaE" = results$input$SD_O,

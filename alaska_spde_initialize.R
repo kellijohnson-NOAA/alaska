@@ -66,7 +66,7 @@ if (file.exists(file.path("c:", "adcomp"))) {
     system("git rebase origin/master")
   }
   remove.packages("TMB")
-  source("install_windows.R")
+  source("install_windows.R", verbose = FALSE, echo = FALSE, print.eval = FALSE)
   setwd(old_wd)
   rm(old_wd)
 } else {
@@ -75,8 +75,8 @@ if (file.exists(file.path("c:", "adcomp"))) {
 
 # Load .R files specific for the alaska analysis, located in "lib" folder
 ignore <- sapply(dir(file.path(my.base, "lib"), full.names = TRUE), source)
-library("r4kfj")
-library(INLA)
+library("r4kfj", quietly = TRUE, verbose = FALSE, warn.conflicts = FALSE)
+library(INLA, quietly = TRUE, verbose = FALSE, warn.conflicts = FALSE)
 load_packages(c("fields", "fpc", "ggplot2", "gstat", "igraph",
   "maps", "maptools", "mapproj", "Matrix",
   "plyr", "RandomFields",

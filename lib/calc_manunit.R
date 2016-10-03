@@ -39,7 +39,7 @@ calc_manunit <- function(information, file = NULL) {
     lines.choose <- SPODT::spodtSpatialLines(cluster.choose, data = info)
     # split the full polygon by the estimated polygons
     if (length(unique(cluster.choose@partition)) == 1) {
-      pol.choose <- pol.true
+      pol.choose <- bounds$poly
     } else {pol.choose <- calc_polys(bounds$poly, lines.choose)}
 
   if (!is.null(file)) {
@@ -59,48 +59,40 @@ calc_manunit <- function(information, file = NULL) {
 ###############################################################################
 # Calculate statistics based on the identified clustering
 ###############################################################################
-  # Create a data frame that has the true groups and the estimated groups
-  diffs <- data.frame(info@coords,
-    "true" = info@data$true,
-    "est" = cluster.choose@partition)
-
   match.table <- tapply(cluster.choose@partition, info@data$true, table)
   if (is.list(match.table)) {
-    match.table <- do.call("rbind", match.table)
+    # Find the number of matches to each estimated partition
+    match.table <- Reduce(function(...) merge(..., by = "Var1", all = TRUE),
+      lapply(match.table, function(x) data.frame(x)))
 
-  # Make match.table a data frame and correctly set the names, which
-  # are lost when using a matrix
-  match.table <- data.frame(match.table)
-  colnames(match.table) <- gsub("X", "", colnames(match.table))
+    # Create a blank vector, with a single entry per each cluster.choose
+    correctlabel <- rep(NA, NROW(cluster.choose@adj))
+    names(correctlabel) <- match.table[, 1]
+    rownames(match.table) <- match.table[, 1]
 
-  correctlabel <- rep(NA, NROW(cluster.choose@adj))
-  # 1. Assign that number w/ most matches to pol.choose
-  # 2. Remove that pol.true and pol.choose from the options
-  # 3. Repeat the process until there are no more rows options
-  # 4. Find which numbers were not assigned b/c they do not correspond to
-  # 5. a true group and give them a number
-  if (NROW(match.table) == 1) {
-    best <- which(match.table == max(match.table), arr.ind = TRUE)
-    correctlabel[best[1]] <- rownames(match.table)[best[1]]
-  }
-  while (NROW(match.table) > 1) {
-    best <- which(match.table == max(match.table), arr.ind = TRUE)
-    correctlabel[best[1]] <- rownames(match.table)[best[1]]
-    if (NROW(match.table) == 2 & NCOL(match.table) == 2) {
-      best <- which(match.table == match.table[-best[1], -best[2]],
-        arr.ind = TRUE)
-      correctlabel[best[1]] <- rownames(match.table)[best[1]]
+   # Remove the names and rename the columns
+    match.table[, 1] <- 0
+    colnames(match.table) <- 0:(NCOL(match.table) -1)
+
+    while (NCOL(match.table) > 1) {
+      col <- which.max(sapply(apply(match.table, 2, which.max),
+        function(x) match.table[x, parent.frame()$i[]]))
+      row <- which.max(as.numeric(as.character(match.table[, names(col)])))
+
+      correctlabel[row] <- as.numeric(names(col))
+      match.table[row, ] <- 0
+      match.table <- match.table[, -col]
     }
-    match.table <- match.table[-best[1], -best[2]]
-    rm(best)
-  }
-  while (any(is.na(correctlabel))) {
-    correctlabel[which(is.na(correctlabel))[1]] <-
-      seq_along(correctlabel)[!seq_along(correctlabel) %in% correctlabel][1]
-  }
+
+    # Fill in missing values
+    temp <- 1:length(correctlabel)
+    correctlabel[which(is.na(correctlabel))] <- temp[!temp %in% correctlabel]
+    rm(temp)
+
   info@data$est <- factor(cluster.choose@partition, labels = correctlabel)
   } else {
     info@data$est <- 1
+    correctlabel <- c("1" = 1)
   } # End if (is.list(match.table))
 
 ###############################################################################

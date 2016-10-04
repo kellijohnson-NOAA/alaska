@@ -23,12 +23,11 @@
 #' @param Loc
 #' @param projection
 #' @param slope
-#' @param weightvals
 #'
 Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   SpatialScale = 0.1, SD_O = 0.5, SD_E = 1.0, SD_extra = 1.0, SD_obs = 1.0,
   rho = 0.5, logMeanDens = 1, Loc = NULL, projection = akCRS,
-  slope = 0.5, weightvals = c(10, 2)) {
+  slope = 0.5) {
 
 ###############################################################################
 ## Parameters
@@ -38,7 +37,7 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
     "SD_O" = SD_O, "SD_E" = SD_E, "SD_extra" = SD_extra, "SD_obs" = SD_obs,
     "rho" = rho,
     "logMeanDens" = logMeanDens, "projection" = projection,
-    "slope" = slope, "weightvals" = weightvals)
+    "slope" = slope)
 
   # Determine the starting position from equilibrium
   if (is.null(phi)) phi <- rnorm(1, mean = 0, sd = 1)

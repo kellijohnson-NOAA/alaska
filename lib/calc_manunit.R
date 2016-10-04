@@ -30,11 +30,12 @@ calc_manunit <- function(information, file = NULL) {
     # Let the algorithm choose the clusters without providing a maximum
     # rtwo.min can be between 0 and 1, default is 0.001
     cluster.choose <- SPODT::spodt(omega ~ 1, data = info,
-      level.max = NROW(information$mesh$loc), graft = 0,
+      level.max = NROW(information$mesh$loc),
+      graft = information$SigmaO,
       min.parent = 4, min.child = 2,
       # base the minimum variance of the partition on the estimated
       # marginal variance of Omega
-      rtwo.min = information$SigmaO)
+      rtwo.min = 0.001)
     # Create the lines for each management unit based on the chosen clusters
     lines.choose <- SPODT::spodtSpatialLines(cluster.choose, data = info)
     # split the full polygon by the estimated polygons

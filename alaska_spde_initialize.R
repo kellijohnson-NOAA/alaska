@@ -77,10 +77,14 @@ if (file.exists(file.path("c:", "adcomp"))) {
 ignore <- sapply(dir(file.path(my.base, "lib"), full.names = TRUE), source)
 library("r4kfj", quietly = TRUE, verbose = FALSE, warn.conflicts = FALSE)
 library(INLA, quietly = TRUE, verbose = FALSE, warn.conflicts = FALSE)
-load_packages(c("fields", "fpc", "ggplot2", "gstat", "igraph",
+load_packages(c(
+  "doParallel",
+  "fields",
+  "foreach",
+  "fpc", "ggplot2", "gstat", "igraph",
   "maps", "maptools", "mapproj", "Matrix",
   "plyr", "RandomFields",
-  "RANN", "raster", "reshape", "reshape2", "rgdal",
+  "raster", "reshape", "reshape2", "rgdal",
   "rgeos", "sp", "SPODT", "splancs",
   "spdep", "stats4", "TMB", "xtable"))
 

@@ -3,7 +3,7 @@
 #' @param data
 #'
 reshape_results <- function(data,
-  parlabels = c("range", "rho", "sigma[Epsilon]", "sigma[Omega]")) {
+  parlabels = c("range", "rho", "sigma[epsilon]", "sigma[omega]")) {
 
   data <- merge(
     reshape(data, direction = "long", timevar = "par",

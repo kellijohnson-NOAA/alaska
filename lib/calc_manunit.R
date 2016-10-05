@@ -112,6 +112,11 @@ calc_manunit <- function(information, file = NULL) {
     }
   }
 
-  return(list("cluster.choose" = cluster.choose, "areas" = areas,
-    "info" = info))
+  return(list(
+    "areas" = areas,
+    "cluster.choose" = cluster.choose,
+    "lines.choose" = lines.choose,
+    "pol.choose" = pol.choose,
+    "info" = info
+  ))
 }

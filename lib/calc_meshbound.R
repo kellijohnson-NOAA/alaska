@@ -14,25 +14,15 @@ calc_meshbound <- function(mesh, projection = NULL) {
   }
 
   # Find points in the main part of the mesh
-  if (NROW(mesh$segm$int$idx) <= 0) {
-    locators <- unique(c(mesh$segm$bnd$idx))
-  } else {
-    locators <- unique(unlist(mesh$segm$int$idx))
-  }
+  locators <- mesh$idx$loc
 
-  points <- mesh$loc[locators, ]
-  points <- as.data.frame(points)
-
+  points <- as.data.frame(mesh$loc[locators, ])
   colnames(points) <- c("x", "y", "ID")
 
   if (!is.null(projection)) {
     points$num <- 1:NROW(points)
     coordinates(points) <- ~ x + y
-    proj4string(points) <- projection
-
-    polygons <- SpatialPolygons(list(
-    Polygons(list(Polygon(list(points@coords))),
-    "bound")))
+    projection(points) <- projection
 
     # Create a convex hull polygon that does not follow the
     # points exactly
@@ -46,18 +36,21 @@ calc_meshbound <- function(mesh, projection = NULL) {
     }))
     projection(hull) <- projection
     # Create a polygon that follows the points exactly
-    poly <- SpatialPolygons(
-      tapply(1:length(points$ID), points$ID,
-      function(x, data = points@coords) {
-        data <- data[!duplicated(apply(data, 2, paste0)), ]
-        Polygons(list(Polygon(data)), parent.frame()$i[])
-    }))
-    projection(poly) <- projection
+    # if the interior boundary is present.
+    if (NROW(mesh$segm$bnd$idx) > 0) {
+      temp <- data.frame(mesh$loc[unique(c(mesh$segm$bnd$idx)), ])
+      colnames(temp) <- c("x", "y", "ID")
+      coordinates(temp) <- ~ x + y
+      projection(temp) <- projection
+      poly <- SpatialPolygons(list(Polygons(list(Polygon(temp)), 1)))
+      poly <- rgeos::gBuffer(poly, width = -100)
+      projection(poly) <- projection
+    } else {poly <- NULL}
   } else {
     hull <- NULL
     poly <- NULL
   }
 
-  return(list("points" = points, "hull" = hull, "poly" = poly))
-
+  return(list("points" = points, "hull" = hull, "poly" = poly,
+    "locators" = locators))
 }

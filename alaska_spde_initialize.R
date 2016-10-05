@@ -88,6 +88,9 @@ load_packages(c(
   "rgeos", "sp", "SPODT", "splancs",
   "spdep", "stats4", "TMB", "xtable"))
 
+###############################################################################
+#### Define custom inputs, such as projections and plotting
+###############################################################################
 define_projections()
 
 # Save custom ggplot theme

@@ -14,6 +14,7 @@
 ###############################################################################
 # Must set my.base or have loaded in R
 my.tmb       <- "spatial_gompertz"
+my.SaTScan <- "c:\\SaTScan\\SaTScanBatch.exe"
 
 my.filetype <- "png"
 my.width <- c(3.34646, 6.69291) # 85 mm, 170mm

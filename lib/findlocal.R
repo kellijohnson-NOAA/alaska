@@ -10,7 +10,7 @@ findlocal <- function(object, projection = akCRS) {
   points <- data.frame("x" = object$loc[, 1],
     "y" = object$loc[, 2])
   coordinates(points) <- ~ x + y
-  proj4string(points) <- projection
+  projection(points) <- projection
 
   # Create a polygon of the main points
   poly <- calc_meshbound(mesh = object, projection = projection)$poly

@@ -1,10 +1,13 @@
 #' Calculate management units from a \code{readin} read in using
 #' \code{read_results}.
 #'
-#' @param readin
+#' @param readin A list of information read in from the disk using
+#' \code\link{read_results} that summarizes the data used to simulate the
+#' population and the model results.
 #' @param file A character value giving the filename to save the resulting
 #' plot of the groups within the population. The default is \code{NULL},
-#' which leads to no plot being saved.
+#' which leads to no plot being saved. A full path can be specified, or else
+#' the file will be saved in the current directory.
 #'
 #' @examples
 #' readin <- read_results(data = sim_data, report = Report)

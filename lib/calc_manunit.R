@@ -10,8 +10,9 @@
 #' the file will be saved in the current directory.
 #'
 #' @examples
-#' readin <- read_results(data = sim_data, report = Report)
-#' manunit <- calc_manunit(readin = readin)
+#' temp <- read_results(data = sim_data, report = Report)
+#' manunit <- calc_manunit(readin = temp)
+#' rm(temp, manunit)
 #'
 calc_manunit <- function(readin, file = NULL) {
   # Pull out relevant portions of readin

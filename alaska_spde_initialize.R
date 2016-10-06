@@ -92,6 +92,8 @@ load_packages(c(
 ###############################################################################
 #### Define custom inputs, such as projections and plotting
 ###############################################################################
+my.prm <- file.path(dir.data, "normal.prm")
+
 define_projections()
 
 # Save custom ggplot theme

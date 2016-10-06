@@ -1,26 +1,26 @@
-#' Calculate management units from a \code{information} read in using
+#' Calculate management units from a \code{readin} read in using
 #' \code{read_results}.
 #'
-#' @param information
+#' @param readin
 #' @param file A character value giving the filename to save the resulting
 #' plot of the groups within the population. The default is \code{NULL},
 #' which leads to no plot being saved.
 #'
 #' @examples
-#' information <- read_results(data = sim_data, report = Report)
-#' manunit <- calc_manunit(information = information)
+#' readin <- read_results(data = sim_data, report = Report)
+#' manunit <- calc_manunit(readin = readin)
 #'
-calc_manunit <- function(information, file = NULL) {
-  # Pull out relevant portions of information
-  info <- information$info
+calc_manunit <- function(readin, file = NULL) {
+  # Pull out relevant portions of readin
+  info <- readin$info
   # Find the full polygon
-  projection <- proj4string(information$info)
-  bounds <- calc_meshbound(information$mesh, projection = projection)
+  projection <- proj4string(readin$info)
+  bounds <- calc_meshbound(readin$mesh, projection = projection)
 
-  if (is.null(information$lines_grouptrue)) {
+  if (is.null(readin$lines_grouptrue)) {
     pol.true <- bounds$poly
   } else {
-    pol.true <- calc_polys(bounds$poly, information$lines_grouptrue)
+    pol.true <- calc_polys(bounds$poly, readin$lines_grouptrue)
   }
   # Add a small amount of space to the polygon and then determine which
   # true group each point is in.
@@ -30,8 +30,8 @@ calc_manunit <- function(information, file = NULL) {
     # Let the algorithm choose the clusters without providing a maximum
     # rtwo.min can be between 0 and 1, default is 0.001
     cluster.choose <- SPODT::spodt(omega ~ 1, data = info,
-      level.max = NROW(information$mesh$loc),
-      graft = information$SigmaO,
+      level.max = NROW(readin$mesh$loc),
+      graft = readin$SigmaO,
       min.parent = 4, min.child = 2,
       # base the minimum variance of the partition on the estimated
       # marginal variance of Omega
@@ -120,3 +120,13 @@ calc_manunit <- function(information, file = NULL) {
     "info" = info
   ))
 }
+
+export_prm("d:/alaska/data/normal.prm", getwd(), "test")
+export_geo(best[[51]]$info, getwd(), "test")
+system(paste(my.SaTScan, "test.prm"))
+temp <- readShapePoly(file.path(getwd(), "test.col"))
+projection(temp) <- llCRS
+
+plot(best[[int]]$info)
+lines(best[[int]]$lines_grouptrue)
+plot(spTransform(temp, akCRS), add = TRUE)

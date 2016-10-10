@@ -57,8 +57,7 @@ read_results <- function(data = NULL, report = NULL,
   info <- data.frame(
     "x" = results$mesh$loc[, 1],
     "y" = results$mesh$loc[, 2],
-    "omega" = results[["Omega_x"]],
-    "clustering" = NA)
+    "omega" = results[["Omega_x"]])
   # Subset by those inside the blue line
   info <- info[localboundaries, ]
   coordinates(info) <- ~ x + y

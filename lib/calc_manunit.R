@@ -15,6 +15,13 @@
 #' \code{system} will work. For example: \code{"c:\\SaTScan\\SatScanBatch.exe"}.
 #' @param prmtemplate A full file path specifying the location of the prm template
 #' file to alter for this analysis.
+#' @param projection The spatial projection of the results. The default is
+#' \code{sp::CRS("+proj=longlat +ellps=WGS84")}, but any projection can
+#' be used. If latitude and longitude is used the function will create a
+#' shapefile for the results. If cartesian coordinates are used, then the
+#' results will be read in and a hull is created around the points that
+#' are selected for each group because SaTScan does not create a shapefile
+#' for cartesian coordinates.
 #'
 #' @examples
 #' # Only works on local machine
@@ -27,7 +34,7 @@
 #'
 calc_manunit <- function(readin, dir = getwd(), file = NULL,
   exe = NULL, prmtemplate = NULL,
-  longlatproj = sp::CRS("+proj=longlat +ellps=WGS84")) {
+  projection = sp::CRS("+proj=longlat +ellps=WGS84"), ...) {
   type <- "satscan"
   if (is.null(exe)) type <- "spodt"
 
@@ -37,10 +44,10 @@ calc_manunit <- function(readin, dir = getwd(), file = NULL,
   # that lie within the inner boundary of the mesh.
   # These were determined using \code\link{{calc_meshbound}}
   info <- readin$info
-  projection <- sp::CRS(raster::projection(readin$info))
 
   #2. Calculate the true polygons
-  bounds <- calc_meshbound(readin$mesh, projection = projection)
+  bounds <- calc_meshbound(readin$mesh,
+    projection = sp::CRS(raster::projection(readin$info)))
   if (is.null(readin$lines_grouptrue)) {
     # lines_grouptrue will be null if there is only one true subpopulation
     pol.true <- bounds$poly
@@ -67,18 +74,32 @@ calc_manunit <- function(readin, dir = getwd(), file = NULL,
   }
 
   if (type == "satscan") {
-    export_prm(file_in = prmtemplate, dir = dir, file = file)
-    export_geo(points = info, dir = dir, file = file)
+    export_prm(file_in = prmtemplate, dir = dir, file = file, ...)
+    export_geo(points = info, dir = dir, file = file,
+      projection = projection)
     # Double check the direction of slashes and call system
     system(paste(
       gsub("/", "\\\\", exe),
       file.path(gsub("/", "\\\\", dir), paste0(file, ".prm"), fsep = "\\")
     ), show.output.on.console = FALSE)
-
-    pol.choose <- readShapePoly(file.path(dir, paste0(file, ".col")))
-    projection(pol.choose) <- longlatproj
-    pol.choose <- sp::spTransform(pol.choose,
-      raster::projection(info, asText = FALSE))
+    # Read in the results
+    textfile <- read_txt(dir = dir, file = file)
+    # If the shapefile exists, read it in.
+    shapefile <- file.path(dir, paste0(file, ".col"))
+    if (file.exists(shapefile)) {
+      pol.choose <- readShapePoly(shapefile)
+    } else {
+      # Create a convex hull of each polygon
+      pol.choose <- SpatialPolygons(
+        lapply(textfile$cluster,
+        function(x, data = info@coords) {
+          X <- data[x, ]
+          X.chull <- chull(X)
+          X.chull <- c(X.chull, X.chull[1])
+          Polygons(list(Polygon(X[X.chull, ])), parent.frame()$i[])
+      }))
+    }
+    projection(pol.choose) <- raster::projection(info, asText = FALSE)
   }
 
   #4. Calculate the number of points from each true group encompassed
@@ -88,7 +109,11 @@ calc_manunit <- function(readin, dir = getwd(), file = NULL,
     correctlabel <- rep(NA, NROW(cluster.choose@adj))
   }
   if (type == "satscan") {
-    info@data$estorignum <- sp::over(info, pol.choose)$LOC_ID
+    temp <- sp::over(info, pol.choose)
+    if (is.data.frame(temp) | "LOC_ID" %in% colnames(temp)) {
+      info@data$estorignum <- temp$LOC_ID
+    } else {info@data$estorignum <- temp}
+    rm(temp)
     correctlabel <- rep(NA, length(pol.choose))
   }
 
@@ -142,16 +167,24 @@ calc_manunit <- function(readin, dir = getwd(), file = NULL,
   #5. Calculate the amount of area each estimated polygon covers of
   # each true polygon.
   if (type == "satscan"){
-    areas <- matrix(NA, nrow = length(pol.true), ncol = length(pol.choose),
-      dimnames = list(paste0("true.", seq_along(pol.true)),
+    # Use the hull polygon rather than the outer bounds
+    truth <- bounds$hull
+    if (length(pol.true) == 1) {
+       truth <- bounds$hull
+    } else {truth <- calc_polys(bounds$hull, readin$lines_grouptrue)}
+
+    areas <- matrix(NA, nrow = length(truth), ncol = length(pol.choose),
+      dimnames = list(paste0("true.", seq_along(truth)),
       paste0("choose.", seq_along(pol.choose))))
-    for (ix in seq_along(pol.true)) {
+    for (ix in seq_along(truth)) {
       for (iy in seq_along(pol.choose)) {
-        temp <- subset(pol.choose, CLUSTER == iy)
-        temp <- rgeos::gIntersection(temp, pol.true[ix])
+        if (class(pol.choose) == "SpatialPolygons") {
+          temp <- pol.choose[iy]
+        } else {temp <- subset(pol.choose, CLUSTER == iy)}
+        temp <- rgeos::gIntersection(temp, truth[ix])
         if (is.null(temp)) {
           areas[ix, iy] <- 0
-        } else {areas[ix, iy] <- rgeos::gArea(temp) / rgeos::gArea(pol.true[ix])}
+        } else {areas[ix, iy] <- rgeos::gArea(temp) / rgeos::gArea(truth[ix])}
         rm(temp)
       }
     }

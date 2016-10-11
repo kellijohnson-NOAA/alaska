@@ -22,12 +22,10 @@
 #' @param logMeanDens
 #' @param Loc
 #' @param projection
-#' @param slope
 #'
 Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   SpatialScale = 0.1, SD_O = 0.5, SD_E = 1.0, SD_extra = 1.0, SD_obs = 1.0,
-  rho = 0.5, logMeanDens = 1, Loc = NULL, projection = akCRS,
-  slope = 0.5) {
+  rho = 0.5, logMeanDens = 1, Loc = NULL, projection = akCRS) {
 
 ###############################################################################
 ## Parameters
@@ -36,8 +34,7 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   input <- list("phi" = phi, "SpatialScale" = SpatialScale,
     "SD_O" = SD_O, "SD_E" = SD_E, "SD_extra" = SD_extra, "SD_obs" = SD_obs,
     "rho" = rho,
-    "logMeanDens" = logMeanDens, "projection" = projection,
-    "slope" = slope)
+    "logMeanDens" = logMeanDens, "projection" = projection)
 
   # Determine the starting position from equilibrium
   if (is.null(phi)) phi <- rnorm(1, mean = 0, sd = 1)
@@ -118,8 +115,7 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
     # Remove the last value because it represents the higher Longitude limit
     cuts <- cuts[-length(cuts)]
     lines_grouptrue <- sp::SpatialLines(lapply(cuts, function(x) {
-      angle <- sample(c(1, runif(1, min = 1 - slope, max = 1 + slope)), 2)
-      Lines(Line(cbind(x * angle, latlimits)),
+      Lines(Line(cbind(x, latlimits)),
         ID = parent.frame()$i[])
       }))
     proj4string(lines_grouptrue) <- projection

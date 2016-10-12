@@ -78,33 +78,11 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   coordinates(points) <- ~ x + y
   proj4string(points) <- projection
 
-  # scale determines the distance at which correlation declines to ~10% of
-  # the maximum observed correlation
-  # Estimates of "Range" should scale linearly with scale because
-  # Range = sqrt(8)/exp(logkappa)
-  model_O <- RandomFields::RMgauss(var = SD_O^2, scale = SpatialScale)
-  model_E <- RandomFields::RMgauss(var = SD_E^2, scale = SpatialScale)
-
-  # Simulate Omega to obtain an estimate of spatial variation for each location
-  # todo: May need to only supply locations that are in a single alpha region
-  #       such that Omega is not correlated across boundaries
-  RandomFields::RFoptions(spConform = FALSE)
-  Omega <- RandomFields::RFsimulate(model = model_O,
-    x = Loc[, "x"], y = Loc[, "y"]) - SD_O^2/2
-
-  # Simulate Epsilon
-  Epsilon <- array(NA, dim = c(n_stations, n_years))
-  for(t in 1:n_years) {
-    Epsilon[, t] <- RandomFields::RFsimulate(
-      model = model_E,
-      x = Loc[, "x"], y = Loc[, "y"])
-  }
-  RandomFields::RFoptions(spConform = TRUE)
-
   # Determine which subpopulation each location belongs to
   # Find the outer boundaries
   cuts <- unlist(attributes(extent(pol_studyarea))[c("xmin", "xmax")])
-  latlimits <- unlist(attributes(extent(pol_studyarea))[c("ymin", "ymax")]) * c(0.0, 1.8)
+  latlimits <- unlist(attributes(extent(
+    calc_areabuffer(pol_studyarea, ratio = 3.5)))[c("ymin", "ymax")])
   # Use quantile to cut into one region per alpha value
   cuts <- floor(quantile(cuts, seq(0, 1, length.out = length(alpha) + 1)))
   # Remove the first value because it represents the lower Longitude limit
@@ -118,7 +96,7 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
       Lines(Line(cbind(x, latlimits)),
         ID = parent.frame()$i[])
       }))
-    proj4string(lines_grouptrue) <- projection
+    projection(lines_grouptrue) <- projection
     # Determine which polygon each point is in
     group <- over(points, calc_polys(pol_studyarea, lines_grouptrue))
   } else {
@@ -126,25 +104,43 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
       lines_grouptrue <- NULL
   }
 
+  # scale determines the distance at which correlation declines to ~10% of
+  # the maximum observed correlation
+  # Estimates of "Range" should scale linearly with scale because
+  # Range = sqrt(8)/exp(logkappa)
+  model_O <- RandomFields::RMgauss(var = SD_O^2, scale = SpatialScale)
+  model_E <- RandomFields::RMgauss(var = SD_E^2, scale = SpatialScale)
+
+  RandomFields::RFoptions(spConform = FALSE)
+  Omega <- unlist(split(unlist(tapply(1:NROW(Loc), group,
+    function(x, data = Loc, model = model_O, sd = SD_O) {
+    RandomFields::RFsimulate(model = model,
+      x = data[x, "x"], y = data[x, "y"]) - sd^2/2
+  })), group))
+
+  # Simulate Epsilon
+  Epsilon <- array(NA, dim = c(n_stations, n_years))
+  for(t in 1:n_years) {
+    Epsilon[, t] <- RandomFields::RFsimulate(
+      model = model_E,
+      x = Loc[, "x"], y = Loc[, "y"])
+  }
+  RandomFields::RFoptions(spConform = TRUE)
+
 ###############################################################################
 ## Calculate Psi
 ###############################################################################
   Theta <- array(NA, dim = c(n_stations, n_years))
+  DF <- array(NA, dim = c(n_stations * n_years, 3),
+    dimnames = list(NULL, c("Site", "Year", "lambda")))
   for (s in 1:n_stations) {
-  for(t in 1:n_years) {
+  for (t in 1:n_years) {
     if(t == 1) Theta[s, t] <- as.numeric(
       phi + Epsilon[s, t] + (alpha[group[s]] + Omega[s])/(1 - rho)
       )
     if(t >= 2) Theta[s, t] <- as.numeric(
       rho * Theta[s, t - 1] + alpha[group[s]] + Omega[s] + Epsilon[s, t]
       )
-  }}
-
-  # Simulate data
-  DF <- array(NA, dim = c(n_stations * n_years, 3),
-    dimnames = list(NULL, c("Site", "Year", "lambda")))
-  for(s in 1:n_stations) {
-  for(t in 1:n_years) {
     counter <- ifelse(s == 1 & t == 1, 1, counter + 1)
     DF[counter, "Site"] <- s
     DF[counter, "Year"] <- t
@@ -167,7 +163,7 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
     "Omega" = Omega, "Epsilon" = Epsilon, "Theta" = Theta,
     "alpha" = alpha, "cuts" = cuts, "group" = group,
     "input" = input, "lines_grouptrue" = lines_grouptrue,
-    "date" = Sys.Date(), "n_grouptrue" = length(alpha),
+    "n_grouptrue" = length(alpha),
     "percentinc" = percentinc)
 
   return(Sim_List)

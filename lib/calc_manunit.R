@@ -22,6 +22,9 @@
 #' results will be read in and a hull is created around the points that
 #' are selected for each group because SaTScan does not create a shapefile
 #' for cartesian coordinates.
+#' @param criticalvalue A numeric value indicating the threshold limit for the
+#' pvalue, where above the threshold the estimated polygons will be eliminated
+#' from the results. The default value is 0.05.
 #'
 #' @examples
 #' # Only works on local machine
@@ -34,7 +37,8 @@
 #'
 calc_manunit <- function(readin, dir = getwd(), file = NULL,
   exe = NULL, prmtemplate = NULL,
-  projection = sp::CRS("+proj=longlat +ellps=WGS84"), ...) {
+  projection = sp::CRS("+proj=longlat +ellps=WGS84"),
+  criticalvalue = 0.05, ...) {
   type <- "satscan"
   if (is.null(exe)) type <- "spodt"
 
@@ -67,12 +71,7 @@ calc_manunit <- function(readin, dir = getwd(), file = NULL,
       graft = readin$SigmaO, rtwo.min = 0.001)
     # Create the lines for each management unit based on the chosen clusters
     lines.choose <- SPODT::spodtSpatialLines(cluster.choose, data = info)
-    # split the full polygon by the estimated polygons
-    if (length(unique(cluster.choose@partition)) == 1) {
-      pol.choose <- bounds$poly
-    } else {pol.choose <- calc_polys(bounds$poly, lines.choose)}
   }
-
   if (type == "satscan") {
     export_prm(file_in = prmtemplate, dir = dir, file = file, ...)
     export_geo(points = info, dir = dir, file = file,
@@ -84,12 +83,29 @@ calc_manunit <- function(readin, dir = getwd(), file = NULL,
     ), show.output.on.console = FALSE)
     # Read in the results
     textfile <- read_txt(dir = dir, file = file)
+    # Get p values
+    if (is.data.frame(textfile$coordinates) | is.matrix(textfile$coordinates)) {
+      pvalues <- as.numeric(sapply(strsplit(
+        textfile$coordinates[grep("P-", textfile$coordinates[, 1]), ],
+        ":"), "[[", 2))
+    }
     # If the shapefile exists, read it in.
     shapefile <- file.path(dir, paste0(file, ".col"))
+  }
+
+  # split the full polygon by the estimated polygons
+  if (exists("lines.choose")) {
+    if (length(unique(cluster.choose@partition)) == 1) {
+      pol.choose <- bounds$hull
+    } else {
+      pol.choose <- calc_polys(rgeos::gBuffer(bounds$hull, width = 1),
+        lines.choose)
+    }
+  } else {
     if (file.exists(shapefile)) {
       pol.choose <- readShapePoly(shapefile)
+      pol.choose <- SpatialPolygons(pol.choose@polygons)
     } else {
-      # Create a convex hull of each polygon
       pol.choose <- SpatialPolygons(
         lapply(textfile$cluster,
         function(x, data = info@coords) {
@@ -99,23 +115,21 @@ calc_manunit <- function(readin, dir = getwd(), file = NULL,
           Polygons(list(Polygon(X[X.chull, ])), parent.frame()$i[])
       }))
     }
+    if (exists("pvalues")) {
+      pol.choose <- pol.choose[pvalues <= criticalvalue]
+      if (length(pol.choose) == 0) pol.choose <- bounds$hull
+    }
     projection(pol.choose) <- raster::projection(info, asText = FALSE)
   }
 
   #4. Calculate the number of points from each true group encompassed
   # in each calculated management unit
-  if (type == "spodt") {
-    info@data$estorignum <- cluster.choose@partition
-    correctlabel <- rep(NA, NROW(cluster.choose@adj))
-  }
-  if (type == "satscan") {
-    temp <- sp::over(info, pol.choose)
-    if (is.data.frame(temp) | "LOC_ID" %in% colnames(temp)) {
+  temp <- sp::over(info, pol.choose)
+  correctlabel <- rep(NA, length(pol.choose))
+  if ("LOC_ID" %in% colnames(temp)) {
       info@data$estorignum <- temp$LOC_ID
-    } else {info@data$estorignum <- temp}
-    rm(temp)
-    correctlabel <- rep(NA, length(pol.choose))
-  }
+  } else {info@data$estorignum <- temp}
+  rm(temp)
 
   match.table <- tapply(info@data$estorignum, info@data$true,
     table, exclude = NULL)
@@ -124,7 +138,7 @@ calc_manunit <- function(readin, dir = getwd(), file = NULL,
     match.table <- Reduce(function(...) merge(..., by = "Var1", all = TRUE),
       lapply(match.table, function(x) data.frame(x)))
     # Store the NA row for later
-    remove <- which(is.na(match.table[, 1]))
+    remove <- which(is.na(match.table[, "Var1"]))
     matches <- match.table
     navalues <- match.table[remove, ]
     match.table <- match.table[-remove, ]
@@ -134,10 +148,11 @@ calc_manunit <- function(readin, dir = getwd(), file = NULL,
     rownames(match.table) <- match.table[, 1]
 
    # Remove the names and rename the columns
-    match.table[, 1] <- 0
-    colnames(match.table) <- 0:(NCOL(match.table) -1)
+    match.table[, "Var1"] <- 0
+    colnames(match.table) <- 0:(NCOL(match.table) - 1)
 
     while (NCOL(match.table) > 1) {
+      if (max(match.table, na.rm = TRUE) == 0) {break}
       col <- which.max(sapply(apply(match.table, 2, which.max),
         function(x) match.table[x, parent.frame()$i[]]))
       row <- which.max(as.numeric(as.character(match.table[, names(col)])))
@@ -181,7 +196,12 @@ calc_manunit <- function(readin, dir = getwd(), file = NULL,
         if (class(pol.choose) == "SpatialPolygons") {
           temp <- pol.choose[iy]
         } else {temp <- subset(pol.choose, CLUSTER == iy)}
-        temp <- rgeos::gIntersection(temp, truth[ix])
+        if (.hasSlot(temp@polygons[[1]]@Polygons[[1]], "area")) {
+          if (temp@polygons[[1]]@Polygons[[1]]@area == 0) {
+          temp <- NULL
+          }} else {
+            temp <- rgeos::gIntersection(temp, truth[ix])
+          } #End if area == 0
         if (is.null(temp)) {
           areas[ix, iy] <- 0
         } else {areas[ix, iy] <- rgeos::gArea(temp) / rgeos::gArea(truth[ix])}

@@ -131,6 +131,7 @@ calc_manunit <- function(readin, dir = getwd(), file = NULL,
   } else {info@data$estorignum <- temp}
   rm(temp)
 
+
   match.table <- tapply(info@data$estorignum, info@data$true,
     table, exclude = NULL)
   if (is.list(match.table)) {
@@ -138,10 +139,8 @@ calc_manunit <- function(readin, dir = getwd(), file = NULL,
     match.table <- Reduce(function(...) merge(..., by = "Var1", all = TRUE),
       lapply(match.table, function(x) data.frame(x)))
     # Store the NA row for later
-    remove <- which(is.na(match.table[, "Var1"]))
     matches <- match.table
-    navalues <- match.table[remove, ]
-    match.table <- match.table[-remove, ]
+    match.table <- match.table[-which(is.na(match.table[, "Var1"])), ]
 
     # Create a blank vector, with a single entry per each cluster.choose
     names(correctlabel) <- match.table[, 1]
@@ -170,8 +169,33 @@ calc_manunit <- function(readin, dir = getwd(), file = NULL,
     info@data$est <- factor(info@data$estorignum, labels = correctlabel)
 
     # Correctly label the matches table
-    colnames(matches) <- c("manunit", 1:(NCOL(matches) - 1))
-    rownames(matches)[1:length(correctlabel)] <- correctlabel
+    if (NCOL(matches) > 2) {
+      matches <- reshape(matches, direction = "long",
+        idvar = "Var1",
+        varying = grep("Freq", colnames(matches), value = TRUE))
+    } else {
+      matches <- data.frame("Var1" = matches$Var1, "time" = "x",
+        "Freq" = matches$Freq)
+    }
+    if (!all(matches$time %in% c("x", "y"))) {
+      stop("There is an additional variable name in", matches$time)
+    } else {
+      matches$time <- as.numeric(factor(matches$time))
+    }
+    matches$replicate <- readin$replicate
+    matches$scenario <- gsub("sim_|\\.RData", "", basename(readin$file))
+    matches$subpopulations <- strsplit(matches$scenario, "-")[[1]][1]
+    matches$alpha <- strsplit(matches$scenario, "-")[[1]][3]
+    matches <- merge(x = matches, y = data.frame(table(info@data$true)),
+      by.x = "time", by.y = "Var1", all = TRUE)
+    colnames(matches)[which(colnames(matches) == "Freq.y")] <- "true"
+    colnames(matches) <- gsub("\\.x", "", colnames(matches))
+    matches$Var1 <- factor(matches$Var1, labels = correctlabel)
+    matches$Freq[is.na(matches$Freq)] <- 0
+    matches$decimal <- matches$Freq / matches$true
+    matches$decimal <- ifelse(matches$Var1 == matches$time |
+      is.na(matches$Var1), 1, -1) * matches$decimal
+    matches$decimal <- ifelse(is.na(matches$Var1), -1, 1) * matches$decimal
   } else {
     info@data$est <- 1
     correctlabel <- c("1" = 1)

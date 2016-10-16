@@ -33,7 +33,6 @@ my.textcolour <- "black"
 my.font <- 2
 my.fontsize <- c(0.4, 0.7)
 
-my.spp.line <- -5
 col.gridlines <- "dark gray"
 
 lty.eez <- 2

@@ -213,10 +213,6 @@ par(mfrow = c(length(desired.spp), 1), oma = c(0,5,0,0), mar = c(4,5.5,0,0),
     points(do.call("rbind", my.coords),
            pch = points.shape, cex = abs(growth*15))
       plot.text <- paste0("(", letters[q], ")", " ", desired.spp[q])
-      if(length(desired.spp) > 1){
-            mtext(plot.text, side = 3, adj = 1, line = my.spp.line, font = my.font,
-                  col = my.textcolour, cex = 1.5)
-          }
       if(q == 1){
         legend("topleft", legend = c("positive", "negative"),
                pch = c(0, 1), bty = "n")

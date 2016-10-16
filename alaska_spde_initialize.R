@@ -24,7 +24,7 @@ my.resolution <- 500
 
 desired.areas <- c("ai", "goa")
 desired.spp <- "Pacific cod"
-desired.years <- 1990:2015 #2015 = last year of data in the AI
+desired.years <- 1990:2016 #2015 = last year of data in the AI
 
 ###############################################################################
 #### Initial inputs for plots

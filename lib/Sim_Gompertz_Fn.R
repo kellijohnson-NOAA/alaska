@@ -80,28 +80,26 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
 
   # Determine which subpopulation each location belongs to
   # Find the outer boundaries
-  cuts <- unlist(attributes(extent(pol_studyarea))[c("xmin", "xmax")])
+  lonlimits <- unlist(attributes(extent(pol_studyarea))[c("xmin", "xmax")])
   latlimits <- unlist(attributes(extent(
     calc_areabuffer(pol_studyarea, ratio = 3.5)))[c("ymin", "ymax")])
-  # Use quantile to cut into one region per alpha value
-  cuts <- floor(quantile(cuts, seq(0, 1, length.out = length(alpha) + 1)))
-  # Remove the first value because it represents the lower Longitude limit
-  # independent of the number of alpha values
-  cuts <- cuts[-1]
-  # Create spatial lines for each cut
-  if (length(cuts) > 1) {
-    # Remove the last value because it represents the higher Longitude limit
-    cuts <- cuts[-length(cuts)]
-    lines_grouptrue <- sp::SpatialLines(lapply(cuts, function(x) {
-      Lines(Line(cbind(x, latlimits)),
-        ID = parent.frame()$i[])
-      }))
-    projection(lines_grouptrue) <- projection
-    # Determine which polygon each point is in
-    group <- over(points, calc_polys(pol_studyarea, lines_grouptrue))
+  if (length(alpha) > 1) {
+    table <- 0
+    while (any(table < 0.25)) {
+      cuts <- runif(length(alpha) - 1, min = lonlimits[1], max = lonlimits[2])
+      lines_grouptrue <- sp::SpatialLines(lapply(cuts, function(x) {
+        Lines(Line(cbind(x, latlimits)),
+          ID = parent.frame()$i[])
+        }))
+      projection(lines_grouptrue) <- projection
+      # Determine which polygon each point is in
+      group <- over(points, calc_polys(pol_studyarea, lines_grouptrue))
+      table <- table(group) / length(group)
+    }
   } else {
       group <- rep(1, length.out = NROW(Loc))
       lines_grouptrue <- NULL
+      cuts <- NA
   }
 
   # scale determines the distance at which correlation declines to ~10% of

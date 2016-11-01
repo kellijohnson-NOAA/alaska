@@ -38,6 +38,7 @@ legend(x = -2800000, y = 2800000,
   cex = my.fontsize[1], pt.cex = 1.2)
 label_major(font = my.font, colour = my.textcolour, size = my.fontsize[2])
 text(x = 1300000, y = 500000, "Dixon \nEntrance", font = my.font, col = my.textcolour, cex = my.fontsize[1])
+text(x = 860000, y = 700000, "South\nEast Alaska\nOutside Trawl\nClosure", font = my.font, col = my.textcolour, cex = my.fontsize[1], adj = c(0, 0))
 ## TODO:
 ## 2. Add lines for the currents, where the current is specified w/ a line type
 text(x = -600000, y = 490000, "Unimak Pass", font = my.font, col = my.textcolour, cex = my.fontsize[1])

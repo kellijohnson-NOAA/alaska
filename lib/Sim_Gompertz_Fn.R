@@ -130,16 +130,16 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   Theta <- array(NA, dim = c(n_stations, n_years))
   DF <- array(NA, dim = c(n_stations * n_years, 3),
     dimnames = list(NULL, c("Site", "Year", "lambda")))
-  for (s in 1:n_stations) {
+  for (it_s in 1:n_stations) {
   for (t in 1:n_years) {
-    if(t == 1) Theta[s, t] <- as.numeric(
-      phi + Epsilon[s, t] + (alpha[group[s]] + Omega[s])/(1 - rho)
+    if(t == 1) Theta[it_s, t] <- as.numeric(
+      phi + Epsilon[it_s, t] + (alpha[group[it_s]] + Omega[it_s])/(1 - rho)
       )
-    if(t >= 2) Theta[s, t] <- as.numeric(
-      rho * Theta[s, t - 1] + alpha[group[s]] + Omega[s] + Epsilon[s, t]
+    if(t >= 2) Theta[it_s, t] <- as.numeric(
+      rho * Theta[it_s, t - 1] + alpha[group[it_s]] + Omega[it_s] + Epsilon[it_s, t]
       )
-    counter <- ifelse(s == 1 & t == 1, 1, counter + 1)
-    DF[counter, "Site"] <- s
+    counter <- ifelse(it_s == 1 & t == 1, 1, counter + 1)
+    DF[counter, "Site"] <- it_s
     DF[counter, "Year"] <- t
   }}
 

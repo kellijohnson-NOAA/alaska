@@ -1,19 +1,18 @@
 # TODO
 
-1. Find the true mean weight and standard deviation of cod because
-the data is given in in CPUE, which makes the weight not a true weight.
-2. Simplify the simulation. JTT does not think that I need to do as many simulations as what are currently included.
-2. Make sure equations are the same as JTT equations.
-   - I believe I am using his code, but I should double check.
-3. gstat: a spatial r package that will facilitate mapping of spatial predictions
+1. gstat: a spatial r package that will facilitate mapping of spatial predictions
 using a inverse linear distance kriging algorithm.
-4. Plot the mean log abundance for each stock behind the plot for the overall mean log abundance,
+2. Plot the mean log abundance for each stock behind the plot for the overall mean log abundance,
 I am going to have to change what is placed in the report to get at the predicted
 abundance for each station in a given year.
+3. Make the bounds investigated in the estimation routine more realistic,
+rather than investigating out to the ranges of -200 and 200.
+4.
+5.
 6. Read: Lindgren F, Rue H, Lindström J. 2011.
 An explicit link between Gaussian fields and Gaussian Markov random fields:
 the stochastic partial differential equation approach [with discussion]. J. R. Stat. Soc. B. 73(4):423–98.
-7. Get NOAA JISAO contribution number.
+7.
 8. @Mueter2005 also states why years prior to 1993 should be removed
 because of a lack of standardized gear, and they suggest that
 only trawls with a performance of satisfactory should be included, but I am
@@ -29,6 +28,9 @@ you assume a neighbor can be from another point, and was thus not investigated a
 12. export more information out of the .cpp file
 13. Determine if the zero values in the data used to fit the model should
 be exported as zeros or NAs.
+14. Table order
+15. Figure order
+16. NOAA JISAO contribution number.
 
 # Notes
 

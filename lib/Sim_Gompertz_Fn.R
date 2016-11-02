@@ -17,14 +17,13 @@
 #' in the same units as the locations
 #' @param SD_O The marginal variance of Omega.
 #' @param SD_E The marginal variance of temporal and spatial process error.
-#' @param SD_extra
 #' @param rho Density-dependence
 #' @param logMeanDens
 #' @param Loc
 #' @param projection
 #'
 Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
-  SpatialScale = 0.1, SD_O = 0.5, SD_E = 1.0, SD_extra = 1.0, SD_obs = 1.0,
+  SpatialScale = 0.1, SD_O = 0.5, SD_E = 1.0, SD_obs = 1.0,
   rho = 0.5, logMeanDens = 1, Loc = NULL, projection = akCRS) {
 
 ###############################################################################
@@ -142,7 +141,6 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
     counter <- ifelse(s == 1 & t == 1, 1, counter + 1)
     DF[counter, "Site"] <- s
     DF[counter, "Year"] <- t
-    DF[counter, "lambda"] <- exp(Theta[s, t] + SD_extra*rnorm(1))
   }}
 
   DF <- as.data.frame(DF)

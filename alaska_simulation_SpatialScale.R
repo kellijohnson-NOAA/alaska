@@ -37,7 +37,6 @@ sim_data <- Sim_Gompertz_Fn(
   SpatialScale = i_scale,
   SD_O = error,
   SD_E = error,
-  SD_extra = 0.0,
   rho = 0.5,
   logMeanDens = c(2.0),
   phi = 0.0,

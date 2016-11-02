@@ -109,12 +109,6 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   model_E <- RandomFields::RMgauss(var = SD_E^2, scale = SpatialScale)
 
   RandomFields::RFoptions(spConform = FALSE)
-  Omega <- unlist(split(unlist(tapply(1:NROW(Loc), group,
-    function(x, data = Loc, model = model_O, sd = SD_O) {
-    RandomFields::RFsimulate(model = model,
-      x = data[x, "x"], y = data[x, "y"]) - sd^2/2
-  })), group))
-
   # Simulate Epsilon
   Epsilon <- array(NA, dim = c(n_stations, n_years))
   for(t in 1:n_years) {
@@ -122,6 +116,11 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
       model = model_E,
       x = Loc[, "x"], y = Loc[, "y"])
   }
+  Omega <- unlist(split(unlist(tapply(1:NROW(Loc), group,
+    function(x, data = Loc, model = model_O, sd = SD_O) {
+    RandomFields::RFsimulate(model = model,
+      x = data[x, "x"], y = data[x, "y"]) - sd^2/2
+  })), group))
   RandomFields::RFoptions(spConform = TRUE)
 
 ###############################################################################

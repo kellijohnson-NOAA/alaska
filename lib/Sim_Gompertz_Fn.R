@@ -84,7 +84,7 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
     calc_areabuffer(pol_studyarea, ratio = 3.5)))[c("ymin", "ymax")])
   if (length(alpha) > 1) {
     table <- 0
-    while (any(table < 0.25)) {
+    while (any(table < 0.25) | all(table == 1)) {
       cuts <- runif(length(alpha) - 1, min = lonlimits[1], max = lonlimits[2])
       lines_grouptrue <- sp::SpatialLines(lapply(cuts, function(x) {
         Lines(Line(cbind(x, latlimits)),

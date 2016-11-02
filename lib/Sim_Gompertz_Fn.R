@@ -31,12 +31,6 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
 ## Parameters
 ###############################################################################
   set.seed(seed)
-  # Save the input list to access later
-  input <- list("phi" = phi, "SpatialScale" = SpatialScale,
-    "SD_O" = SD_O, "SD_E" = SD_E, "SD_extra" = SD_extra, "SD_obs" = SD_obs,
-    "rho" = rho,
-    "logMeanDens" = logMeanDens, "projection" = projection)
-
   # Determine the starting position from equilibrium
   if (is.null(phi)) phi <- rnorm(1, mean = 0, sd = 1)
 
@@ -135,8 +129,15 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
 ## Calculate Psi
 ###############################################################################
   Theta <- array(NA, dim = c(n_stations, n_years))
-  DF <- array(NA, dim = c(n_stations * n_years, 3),
-    dimnames = list(NULL, c("Site", "Year", "lambda")))
+  DF <- array(NA, dim = c(n_stations * n_years, 7),
+    dimnames = list(NULL, c(
+      "Site",
+      "Year",
+      "lambda",
+      "group",
+      "Epsilon",
+      "Omega",
+      "alpha")))
   for (it_s in 1:n_stations) {
   for (t in 1:n_years) {
     if(t == 1) Theta[it_s, t] <- as.numeric(
@@ -148,10 +149,15 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
     counter <- ifelse(it_s == 1 & t == 1, 1, counter + 1)
     DF[counter, "Site"] <- it_s
     DF[counter, "Year"] <- t
+    DF[counter, "lambda"] <- exp(Theta[it_s, t])
+    DF[counter, "group"] <- as.numeric(group[it_s])
+    DF[counter, "Epsilon"] <- Epsilon[it_s, t]
+    DF[counter, "Omega"] <- Omega[it_s]
+    DF[counter, "alpha"] <- as.numeric(alpha[group[it_s]])
   }}
 
   DF <- as.data.frame(DF)
-
+  DF <- DF[order(DF$group, DF$Site, DF$Year), ]
   DF$Simulated_example <- rpois(NROW(DF), lambda = DF$lambda)
   DF$encounterprob <- 1 - exp(-DF$lambda)
   DF$zeroinflatedlnorm <- ifelse(DF$Simulated_example > 0, 1, 0) *
@@ -160,14 +166,16 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
       sdlog = SD_obs)
   DF$Longitude <- Loc[DF[, "Site"], 1]
   DF$Latitude <- Loc[DF[, "Site"], 2]
+  DF$phi <- phi
+  DF$cuts <- cuts
+  DF$sd_O <- SD_O
+  DF$sd_E <- SD_E
+  DF$sd_obs <- SD_obs
+  DF$SpatialScale <- SpatialScale
+  DF$seed <- seed
 
   # Return stuff
-  Sim_List <- list("DF" = DF, "phi" = phi, "Loc" = Loc,
-    "Omega" = Omega, "Epsilon" = Epsilon, "Theta" = Theta,
-    "alpha" = alpha, "cuts" = cuts, "group" = group,
-    "input" = input, "lines_grouptrue" = lines_grouptrue,
-    "n_grouptrue" = length(alpha),
-    "percentinc" = percentinc)
+  Sim_List <- list("DF" = DF, "lines_grouptrue" = lines_grouptrue)
 
-  return(Sim_List)
+  return(DF)
 }

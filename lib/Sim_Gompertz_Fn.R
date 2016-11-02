@@ -24,11 +24,13 @@
 #'
 Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   SpatialScale = 0.1, SD_O = 0.5, SD_E = 1.0, SD_obs = 1.0,
-  rho = 0.5, logMeanDens = 1, Loc = NULL, projection = akCRS) {
+  rho = 0.5, logMeanDens = 1, Loc = NULL, projection = akCRS,
+  seed = 1) {
 
 ###############################################################################
 ## Parameters
 ###############################################################################
+  set.seed(seed)
   # Save the input list to access later
   input <- list("phi" = phi, "SpatialScale" = SpatialScale,
     "SD_O" = SD_O, "SD_E" = SD_E, "SD_extra" = SD_extra, "SD_obs" = SD_obs,

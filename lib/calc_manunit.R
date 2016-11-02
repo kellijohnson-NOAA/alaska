@@ -102,10 +102,6 @@ calc_manunit <- function(readin, dir = getwd(), file = NULL,
         lines.choose)
     }
   } else {
-    if (file.exists(shapefile)) {
-      pol.choose <- readShapePoly(shapefile)
-      pol.choose <- SpatialPolygons(pol.choose@polygons)
-    } else {
       pol.choose <- SpatialPolygons(
         lapply(textfile$cluster,
         function(x, data = info@coords) {
@@ -114,23 +110,31 @@ calc_manunit <- function(readin, dir = getwd(), file = NULL,
           X.chull <- c(X.chull, X.chull[1])
           Polygons(list(Polygon(X[X.chull, ])), parent.frame()$i[])
       }))
+    projection(pol.choose) <- raster::projection(info, asText = FALSE)
+    if (file.exists(paste0(shapefile, ".shp"))) {
+      pol.hull <- readShapePoly(shapefile)
+      pol.hull <- SpatialPolygons(pol.hull@polygons)
+      projection(pol.hull) <- raster::projection("+proj=longlat +ellps=WGS84")
+      if (!exists("pol.choose")) pol.choose <- pol.hull
     }
     if (exists("pvalues")) {
       pol.choose <- pol.choose[pvalues <= criticalvalue]
-      if (length(pol.choose) == 0) pol.choose <- bounds$hull
     }
-    projection(pol.choose) <- raster::projection(info, asText = FALSE)
   }
 
   #4. Calculate the number of points from each true group encompassed
   # in each calculated management unit
-  temp <- sp::over(info, pol.choose)
-  correctlabel <- rep(NA, length(pol.choose))
-  if ("LOC_ID" %in% colnames(temp)) {
-      info@data$estorignum <- temp$LOC_ID
-  } else {info@data$estorignum <- temp}
-  rm(temp)
-
+  if (length(pol.choose) > 0) {
+    temp <- sp::over(info, pol.choose)
+    correctlabel <- rep(NA, length(pol.choose))
+    if ("LOC_ID" %in% colnames(temp)) {
+        info@data$estorignum <- temp$LOC_ID
+    } else {info@data$estorignum <- temp}
+    rm(temp)
+  } else {
+    info@data$estorignum <- NA
+    info@data$est <- NA
+  }
 
   match.table <- tapply(info@data$estorignum, info@data$true,
     table, exclude = NULL)
@@ -182,30 +186,29 @@ calc_manunit <- function(readin, dir = getwd(), file = NULL,
     } else {
       matches$time <- as.numeric(factor(matches$time))
     }
-    matches$replicate <- readin$replicate
-    matches$scenario <- gsub("sim_|\\.RData", "", basename(readin$file))
-    matches$subpopulations <- strsplit(matches$scenario, "-")[[1]][1]
-    matches$alpha <- strsplit(matches$scenario, "-")[[1]][3]
     matches <- merge(x = matches, y = data.frame(table(info@data$true)),
       by.x = "time", by.y = "Var1", all = TRUE)
     colnames(matches)[which(colnames(matches) == "Freq.y")] <- "true"
     colnames(matches) <- gsub("\\.x", "", colnames(matches))
     matches$Var1 <- factor(matches$Var1, labels = correctlabel)
-    matches$Freq[is.na(matches$Freq)] <- 0
-    matches$decimal <- matches$Freq / matches$true
-    matches$decimal <- ifelse(matches$Var1 == matches$time |
-      is.na(matches$Var1), 1, -1) * matches$decimal
-    matches$decimal <- ifelse(is.na(matches$Var1), -1, 1) * matches$decimal
   } else {
-    info@data$est <- 1
-    correctlabel <- c("1" = 1)
-    # todo: determine if this should be changed if NULL ever comes up
-    matches <- NULL
+    matches <- data.frame(
+      "time" = as.numeric(as.character(names(match.table))),
+      "Var1" = NA, "Freq" = match.table, "true" = sum(match.table))
   } # End if (is.list(match.table))
+  matches$replicate <- readin$replicate
+  matches$scenario <- gsub("sim_|\\.RData", "", basename(readin$file))
+  matches$subpopulations <- strsplit(matches$scenario, "-")[[1]][1]
+  matches$alpha <- strsplit(matches$scenario, "-")[[1]][3]
+  matches$Freq[is.na(matches$Freq)] <- 0
+  matches$decimal <- matches$Freq / matches$true
+  matches$decimal <- ifelse(matches$Var1 == matches$time |
+    is.na(matches$Var1), 1, -1) * matches$decimal
+  matches$decimal <- ifelse(is.na(matches$Var1), -1, 1) * matches$decimal
 
   #5. Calculate the amount of area each estimated polygon covers of
   # each true polygon.
-  if (type == "satscan"){
+  if (type == "satscan" & length(pol.choose) > 0){
     # Use the hull polygon rather than the outer bounds
     truth <- bounds$hull
     if (length(pol.true) == 1) {
@@ -237,6 +240,7 @@ calc_manunit <- function(readin, dir = getwd(), file = NULL,
   #6. Plot the results if a file is specified.
     png(file.path(dir, paste0(file, ".png")),
       units = "in", res = 300, width = 8, height = 5)
+    par(xpd = TRUE)
     plot(info, cex = abs(min(info$omega)) + info$omega,
       pch = ifelse(info$omega >= 0, 2, 6),
       ylab = "northing",
@@ -251,7 +255,7 @@ calc_manunit <- function(readin, dir = getwd(), file = NULL,
     }
     lines(readin$lines_grouptrue, lty = 1, lwd = 0.5)
     axis(1, pos = 0)
-    text(x = mean(par("usr")[1:2]), y = -400, label = "easting")
+    text(x = mean(par("usr")[1:2]), y = -350, label = "easting")
     axis(2, at = round(seq(0, extent(info)@ymax, length.out = 4) / 5, -2) * 5)
     dev.off()
 

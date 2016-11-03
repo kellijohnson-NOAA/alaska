@@ -264,7 +264,8 @@ calc_manunit <- function(readin, dir = getwd(), file = NULL,
     "areas" = areas,
     "matches" = matches,
     "pol.choose" = pol.choose,
-    "info" = info
+    "info" = info,
+    "n_years" = readin$n_years
   ))
 
   #8. End the function

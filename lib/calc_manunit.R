@@ -206,37 +206,6 @@ calc_manunit <- function(readin, dir = getwd(), file = NULL,
     is.na(matches$Var1), 1, -1) * matches$decimal
   matches$decimal <- ifelse(is.na(matches$Var1), -1, 1) * matches$decimal
 
-  #5. Calculate the amount of area each estimated polygon covers of
-  # each true polygon.
-  if (type == "satscan" & length(pol.choose) > 0){
-    # Use the hull polygon rather than the outer bounds
-    truth <- bounds$hull
-    if (length(pol.true) == 1) {
-       truth <- bounds$hull
-    } else {truth <- calc_polys(bounds$hull, readin$lines_grouptrue)}
-
-    areas <- matrix(NA, nrow = length(truth), ncol = length(pol.choose),
-      dimnames = list(paste0("true.", seq_along(truth)),
-      paste0("choose.", seq_along(pol.choose))))
-    for (ix in seq_along(truth)) {
-      for (iy in seq_along(pol.choose)) {
-        if (class(pol.choose) == "SpatialPolygons") {
-          temp <- pol.choose[iy]
-        } else {temp <- subset(pol.choose, CLUSTER == iy)}
-        if (.hasSlot(temp@polygons[[1]]@Polygons[[1]], "area")) {
-          if (temp@polygons[[1]]@Polygons[[1]]@area == 0) {
-          temp <- NULL
-          }} else {
-            temp <- rgeos::gIntersection(temp, truth[ix])
-          } #End if area == 0
-        if (is.null(temp)) {
-          areas[ix, iy] <- 0
-        } else {areas[ix, iy] <- rgeos::gArea(temp) / rgeos::gArea(truth[ix])}
-        rm(temp)
-      }
-    }
-  } else {areas <- NULL}
-
   #6. Plot the results if a file is specified.
     png(file.path(dir, paste0(file, ".png")),
       units = "in", res = 300, width = 8, height = 5)
@@ -261,7 +230,6 @@ calc_manunit <- function(readin, dir = getwd(), file = NULL,
 
   #7. Export the results.
   return(list(
-    "areas" = areas,
     "matches" = matches,
     "pol.choose" = pol.choose,
     "info" = info,

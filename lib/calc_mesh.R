@@ -1,7 +1,7 @@
 calc_mesh <- function(locations, boundary = prdomain,
-  type = c("basic", "advanced", "default")) {
+  type = c("basic", "default")) {
 
-  type <- match.arg(type, choices = c("basic", "advanced", "default"),
+  type <- match.arg(type, choices = c("basic", "default"),
     several.ok = FALSE)
 
   if (is.null(boundary)) {
@@ -34,13 +34,6 @@ calc_mesh <- function(locations, boundary = prdomain,
   if (type == "basic") {
     mesh <- inla.mesh.create(locations, boundary = boundary,
       cutoff = cutoff)
-  }
-  if (type == "advanced") {
-    mesh <- inla.mesh.2d(loc = locations,
-      offset = c(-0.06, -0.03),
-      cutoff = 100,
-      max.edge = c(100, 2000),
-      boundary = boundary)
   }
   if (type == "default") {
     mesh <- inla.mesh.create(locations)

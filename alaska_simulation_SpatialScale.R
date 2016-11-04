@@ -14,102 +14,54 @@ setwd(dir.test)
 ###############################################################################
 # Provide simulation inputs
 ###############################################################################
-error <- 0.01
+error <- 0.1
 Reports <- list()
-true <- c(seq(200, 2000, by = 50))
-
-###############################################################################
-#### Unload and load cpp
-###############################################################################
-calc_cpp(cpp = my.tmb, loc = dir.data)
+true <- c(seq(200, 2000, by = 100))
+set.seed(11)
+locations <- coordinates(data.all[sample(NROW(data.all), 500), ])
 
 ###############################################################################
 #### Start simulation loop
 ###############################################################################
 for (i_scale in true) {
-  set.seed(10)
 
 ###############################################################################
 # Simulate data
 ###############################################################################
-sim_data <- Sim_Gompertz_Fn(
-  n_years = length(unique(data.all@data$YEAR)),
+data_i <- Sim_Gompertz_Fn(
+  n_years = diff(range(unique(data.all@data$YEAR))),
+  phi = 0.0,
   SpatialScale = i_scale,
   SD_O = error,
   SD_E = error,
+  SD_obs, error,
   rho = 0.5,
-  logMeanDens = c(2.0),
-  phi = 0.0,
-  Loc = coordinates(data.all[sample(NROW(data.all), 1000), ]),
+  logMeanDens = 1.0,
+  Loc = locations,
   projection = akCRS,
-  weightvals = c(
-    mean(data.all$WTCPUE / data.all$NUMCPUE, na.rm = TRUE),
-    sd(data.all$WTCPUE / data.all$NUMCPUE, na.rm = TRUE)))
+  seed = 10)
 
-meshlist <- calc_mesh(sim_data$DF[, c("Longitude", "Latitude")])
+meshlist <- calc_mesh(data_i[, c("Longitude", "Latitude")], NULL,
+  type = "basic")
 
-# ggplot(data = cbind(sim_data$DF, "group" = factor(rep(sim_data$group, each = 22))),
-#   aes(x = Year, y = Simulated_example)) +
-#   geom_point(aes(col = group)) +
-#   ylab("Count")
-
-if (i_scale == 1000){
+# Plot one of the true correlations from the OM
+if (i_scale == true[which(true > median(true))[1]]){
   png(file.path(dir.results, paste0("SpatialScale_True_", i_scale, ".png")))
-  correlations <- ncf::correlog(sim_data[["Loc"]][,1],
-    sim_data[["Loc"]][,2], sim_data[["Omega"]],
-    increment = 10, resamp = 1000, quiet = TRUE)
-  par(las = 1)
+  correlations <- with(data_i[data_i$Year < 2, ],
+    ncf::correlog(Longitude, Latitude, Omega,
+    increment = 10, resamp = 1000, quiet = TRUE))
   plot(correlations$mean.of.class, correlations$correlation,
-    ylab = "correlation", xlab = "distance (km)")
+    ylab = "correlation", xlab = "distance (km)", las = 1)
   abline(v = i_scale, h = 0, col = "red", lty = 2)
   dev.off()
+  rm(correlations)
 }
 
 ###############################################################################
 #### Build inputs
 ###############################################################################
-Data <- list(
-  Options_vec = ifelse(all(round(
-    sim_data$DF[, "Simulated_example"]) == sim_data$DF[, "Simulated_example"]),
-    0, 1),
-  n_i = NROW(sim_data$DF),
-  n_x = meshlist$mesh$n,
-  n_t = max(sim_data$DF$Year),
-  n_p = 1,
-  x_s = meshlist$mesh$idx$loc - 1,
-  c_i = sim_data$DF[, "Simulated_example"],
-  s_i = sim_data$DF[, "Site"] - 1,
-  t_i = sim_data$DF[, "Year"] - 1,
-  X_xp = matrix(1, ncol = 1, nrow = meshlist$mesh$n),
-  G0 = meshlist$spde$param.inla$M0,
-  G1 = meshlist$spde$param.inla$M1,
-  G2 = meshlist$spde$param.inla$M2)
-Parameters <- list(
-  alpha = c(0.0),
-  phi = 0.0,
-  log_tau_E = 1.0,
-  log_tau_O = 1.0,
-  log_kappa = 0.0,
-  rho = 0.5,
-  theta_z = c(0.0, 0.0),
-  Epsilon_input = matrix(rnorm(meshlist$mesh$n * Data$n_t),
-    nrow = meshlist$mesh$n, ncol = Data$n_t),
-  Omega_input = rnorm(meshlist$mesh$n))
-Random <- c("Epsilon_input", "Omega_input")
-Map <- NULL
-if (Data$Options_vec == 0) {
-  Map[["theta_z"]] <- factor(c(NA, NA))
-}
-
-# Make object
-obj <- MakeADFun(
-  data = Data,
-  parameters = Parameters,
-  random = Random,
-  map = Map,
-  hessian = FALSE,
-  DLL = my.tmb,
-  silent = TRUE)
+obj <- calc_adfun(data = data_i, mesh = meshlist$mesh, tmb = my.tmb,
+  variable = "zeroinflatedlnorm")
 
 # Run optimizer
 optimizer <- nlminb(obj$par, objective = obj$fn,
@@ -120,28 +72,33 @@ optimizer <- nlminb(obj$par, objective = obj$fn,
 Reports[[length(Reports) + 1]] <- Report <- obj$report()
 
 # Save the report
-save(Report, sim_data, Data, Parameters, file = file.path(dir.test,
+save(Report, file = file.path(dir.test,
   paste0("sim_SpatialScale_report_", i_scale, ".RData")))
 
-rm(obj)
+rm(obj, optimizer)
 
 } # End of i_scale loop
 
-png(file.path(dir.results, "SpatialScale_Range.png"), units = "in",
+png(file.path(dir.results, "simulation_range.png"), units = "in",
   width = my.width[2], height = my.width[2], res = my.resolution)
 temp <- data.frame("scale" = true, "range" = sapply(Reports, "[[", "Range"))
-# Select only those models with a rho having < 40% RE
-temp <- temp[which(sapply(Reports, "[[", "rho") < (0.3 * 0.5 + 0.5)), ]
 with(temp, plot(scale, range, las = 1,
-  xlab = "spatial scale supplied to \"RMgauss()\" (km)", ylab = ""))
+  xlab = paste0("spatial scale (km) supplied to \"RMgauss(var = ", error, ")\""), ylab = ""))
 temp <- lm(range ~ scale, data = temp)
 abline(temp)
-mtext(side = 2, line = 2.2, expression(range == ~ hat(sqrt(8)/kappa)))
-legend("bottomright", bty = "n",
+abline(1, 1, lty = 2)
+legend("topleft", legend = "1:1", lty = 2, bty = "n")
+mtext(side = 2, line = 2.5, expression(range == ~ hat(sqrt(8)/kappa)))
+legend("top", bty = "n",
   legend = paste("slope =", paste(round(summary(temp)$coefficients[2, 1:2], 5),
-  collapse = ", se = ")))
-rm(temp)
+  collapse = "\nse = ")))
 dev.off()
+
+###############################################################################
+#### End the file
+###############################################################################
+
+rm(data_i, error, optimizer, locations, meshlist, Report, Reports, temp, true)
 
 setwd(my.base)
 # End of file

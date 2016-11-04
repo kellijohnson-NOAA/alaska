@@ -64,11 +64,11 @@ if (file.exists(file.path("c:", "adcomp"))) {
   if (getweb) {
     system("git fetch")
     system("git rebase origin/master")
-  }
   remove.packages("TMB")
   source("install_windows.R", verbose = FALSE, echo = FALSE, print.eval = FALSE)
   setwd(old_wd)
   rm(old_wd)
+  }
 } else {
   stop("TMB is not installed on this computer.")
 }

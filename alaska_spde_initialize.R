@@ -59,9 +59,9 @@ if (getweb) {
 
 # Install TMB
 if (file.exists(file.path("c:", "adcomp"))) {
+  if (getweb) {
   old_wd <- getwd()
   setwd(file.path("c:", "adcomp"))
-  if (getweb) {
     system("git fetch")
     system("git rebase origin/master")
   remove.packages("TMB")
@@ -88,6 +88,8 @@ load_packages(c(
   "raster", "reshape", "reshape2", "rgdal",
   "rgeos", "sp", "SPODT", "splancs",
   "spdep", "stats4", "TMB", "xtable"))
+
+calc_cpp(cpp = my.tmb, loc = dir.data)
 
 ###############################################################################
 #### Define custom inputs, such as projections and plotting

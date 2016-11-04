@@ -46,3 +46,5 @@ source("alaska_simulation_SpatialScale.R")
 source("alaska_spde_analysis.R")
 source("alaska_spde_results.R")
 
+# Final clean up
+source("alaska_cleanup02.R")

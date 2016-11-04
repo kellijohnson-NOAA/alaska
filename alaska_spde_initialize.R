@@ -72,6 +72,7 @@ if (file.exists(file.path("c:", "adcomp"))) {
 } else {
   stop("TMB is not installed on this computer.")
 }
+if (!"TMB" %in% installed.packages()[, "Package"]) stop("TMB is not installed")
 
 # Load .R files specific for the alaska analysis, located in "lib" folder
 ignore <- sapply(dir(file.path(my.base, "lib"), full.names = TRUE), source)

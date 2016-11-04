@@ -18,7 +18,6 @@ errors <- c("level" = c(0.01, 0.50))
 pdata <- NULL
 for (omega in seq_along(errors)) {
 for (process in seq_along(errors)) {
-  set.seed(10)
   pdata <- rbind(pdata, data.frame(Sim_Gompertz_Fn(
     n_years = diff(range(unique(data.all@data$YEAR))),
     SpatialScale = 0.25,
@@ -30,7 +29,8 @@ for (process in seq_along(errors)) {
     phi = 0.0,
     n_stations = 200,
     Loc = NULL,
-    projection = akCRS)$DF,
+    projection = akCRS,
+    seed = 10),
     "process" = paste("sigma[epsilon] ==", errors[process]),
     "omega" = paste("sigma[omega] ==", errors[omega])))
   if (is.null(pdata)) pdata <- pdata$DF
@@ -60,4 +60,4 @@ theme(
   strip.text.x = element_text(size = 15))
 
 dev.off()
-rm(pdata)
+rm(errors, pdata)

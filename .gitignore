@@ -1,4 +1,5 @@
 .SyncArchive/**
+analysis.***.**
 data/**
 ignore/**
 ms/alaska_ms_20*

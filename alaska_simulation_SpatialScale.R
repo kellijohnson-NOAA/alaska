@@ -84,13 +84,13 @@ png(file.path(dir.results, "simulation_range.png"), units = "in",
 temp <- data.frame("scale" = true, "range" = sapply(Reports, "[[", "Range"))
 with(temp, plot(scale, range, las = 1,
   xlab = paste0("spatial scale (km) supplied to \"RMgauss(var = ", error, ")\""), ylab = ""))
-temp <- lm(range ~ scale, data = temp)
+temp <- lm(range ~ scale - 1, data = temp)
 abline(temp)
 abline(1, 1, lty = 2)
 legend("topleft", legend = "1:1", lty = 2, bty = "n")
 mtext(side = 2, line = 2.5, expression(range == ~ hat(sqrt(8)/kappa)))
 legend("top", bty = "n",
-  legend = paste("slope =", paste(round(summary(temp)$coefficients[2, 1:2], 5),
+  legend = paste("slope =", paste(round(summary(temp)$coefficients[1, 1:2], 5),
   collapse = "\nse = ")))
 dev.off()
 
@@ -98,7 +98,7 @@ dev.off()
 #### End the file
 ###############################################################################
 
-rm(data_i, error, optimizer, locations, meshlist, Report, Reports, temp, true)
+rm(data_i, error, locations, meshlist, Report, Reports, temp, true)
 
 setwd(my.base)
 # End of file

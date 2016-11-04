@@ -5,8 +5,10 @@ calc_mesh <- function(locations, boundary = prdomain,
     several.ok = FALSE)
 
   if (is.null(boundary)) {
-    boundary <- INLA::inla.nonconvex.hull(locations,
-      convex = -0.05)
+    if (!is.matrix(locations)) {
+      boundary <- INLA::inla.nonconvex.hull(as.matrix(locations), -0.05)
+    } else { boundary <- INLA::inla.nonconvex.hull(locations, -0.05)
+    }
   }
 
   # Find the area of the bounding box and take

@@ -32,8 +32,7 @@
 #   higher accuracy, with the required resolution stated.
 # eps = The polygonal curve simplification tolerance used for simplifying
 #   the resulting boundary curve.
-prdomain <- inla.nonconvex.hull(coordinates(data.all),
-  convex = -0.05, resolution = c(40, 15))
+prdomain <- inla.nonconvex.hull(coordinates(data.all), convex = -0.05)
 
 # inla.mesh.2d(loc = NULL, loc.domain = NULL, offset = NULL,
 #   n = NULL, boundary = NULL, interior = NULL, max.edge,

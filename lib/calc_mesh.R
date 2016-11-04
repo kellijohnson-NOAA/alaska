@@ -1,7 +1,7 @@
 calc_mesh <- function(locations, boundary = prdomain,
-  type = c("basic", "advanced")) {
+  type = c("basic", "advanced", "default")) {
 
-  type <- match.arg(type, choices = c("basic", "advanced"),
+  type <- match.arg(type, choices = c("basic", "advanced", "default"),
     several.ok = FALSE)
 
   if (is.null(boundary)) {
@@ -12,7 +12,11 @@ calc_mesh <- function(locations, boundary = prdomain,
   # Find the area of the bounding box and take
   # 5% of the square root of the area
   # as the cutoff for the created mesh
-  cutoff <- t(sp::bbox(locations))
+  if (is.data.frame(locations)) {
+    cutoff <- t(sp::bbox(array(locations)))
+  } else {
+    cutoff <- t(sp::bbox(locations))
+  }
   cutoff <- rbind(
     c(cutoff[1, 1], cutoff[2, 2]),
     cutoff[1, ],
@@ -36,9 +40,9 @@ calc_mesh <- function(locations, boundary = prdomain,
       max.edge = c(100, 2000),
       boundary = boundary)
   }
-  spde <- inla.spde2.matern(mesh)
+  if (type == "default") {
+    mesh <- inla.mesh.create(locations)
+  }
 
-  ID <- data.frame(locations, "ID" = mesh$idx$loc)
-
-  return(list("mesh" = mesh, "spde" = spde, "ID" = ID, "cutoff" = cutoff))
+  return(list("mesh" = mesh, "cutoff" = cutoff))
 }

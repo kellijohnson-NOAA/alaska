@@ -82,7 +82,6 @@ Type objective_function<Type>::operator() ()
 
   // Objects for derived values
   vector<Type> eta_x(n_x);
-  array<Type> log_Dpred_xt(n_x, n_t); //todo: determine what this should be for
   vector<Type> Omega_x(n_x);
   vector<Type> Equil_x(n_x);
   matrix<Type> Epsilon_xt(n_x, n_t);
@@ -92,6 +91,14 @@ Type objective_function<Type>::operator() ()
   jnll_comp(1) = SEPARABLE(AR1(rho),GMRF(Q))(Epsilon_input);
 
   // Transform GMRFs
+  // alpha parameter input is a single value, which is then repeated the same length as the
+  // design matrix. Theoretically, alpha is the mean of the productivity field and should be
+  // a single value. In the future one may want to look at how using a covariate design matrix
+  // based on estimated management units could improve the ability of the model to estimate
+  // other parameters.
+  // The OM uses the log input mean density and calculates alpha
+  // \alpha = ln(\bar{density}) * (1 - \rho).
+  // Here, we do the opposite to calculate the equilibrium for each location on the mesh.
   eta_x = X_xp * alpha.matrix();
   for(int x=0; x<n_x; x++){
     Omega_x(x) = Omega_input(x) / exp(log_tau_O);
@@ -105,8 +112,6 @@ Type objective_function<Type>::operator() ()
   vector<Type> log_chat_i(n_i);
   vector<Type> jnll_i(n_i);
   jnll_i.setZero();
-  vector<Type> log_notencounterprob_i(n_i);
-  vector<Type> encounterprob_i(n_i);
   vector<Type> tmp_i(n_i);
   for (int i=0; i<n_i; i++){
     // t_i(i) is actually the timestep - 1 b/c indexing starts at zero
@@ -148,9 +153,6 @@ Type objective_function<Type>::operator() ()
   REPORT(log_tau_O);
   REPORT(log_kappa);
   REPORT(eta_x);
-  REPORT(log_Dpred_xt);
-  REPORT(log_notencounterprob_i);
-  REPORT(encounterprob_i);
 
   return jnll;
 }

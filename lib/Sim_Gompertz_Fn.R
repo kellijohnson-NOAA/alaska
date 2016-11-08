@@ -129,7 +129,7 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
 ## Calculate Psi
 ###############################################################################
   Theta <- array(NA, dim = c(n_stations, n_years))
-  DF <- array(NA, dim = c(n_stations * n_years, 7),
+  DF <- array(NA, dim = c(n_stations * n_years, 9),
     dimnames = list(NULL, c(
       "Site",
       "Year",
@@ -137,7 +137,9 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
       "group",
       "Epsilon",
       "Omega",
-      "alpha")))
+      "alpha",
+      "Longitude",
+      "Latitude")))
   for (it_s in 1:n_stations) {
   for (t in 1:n_years) {
     if(t == 1) Theta[it_s, t] <- as.numeric(
@@ -154,6 +156,8 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
     DF[counter, "Epsilon"] <- Epsilon[it_s, t]
     DF[counter, "Omega"] <- Omega[it_s]
     DF[counter, "alpha"] <- as.numeric(alpha[group[it_s]])
+    DF[counter, "Longitude"] <- Loc[it_s, 1]
+    DF[counter, "Latitude"] <- Loc[it_s, 2]
   }}
 
   DF <- as.data.frame(DF)
@@ -164,8 +168,6 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
     rlnorm(NROW(DF),
       meanlog = log(DF$lambda / DF$encounterprob),
       sdlog = SD_obs)
-  DF$Longitude <- Loc[DF[, "Site"], 1]
-  DF$Latitude <- Loc[DF[, "Site"], 2]
   DF$phi <- phi
   DF$cuts <- cuts
   DF$sd_O <- SD_O

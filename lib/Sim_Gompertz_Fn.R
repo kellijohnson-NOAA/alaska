@@ -38,11 +38,6 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   # If all values are the same, then condense alpha to the first value
   alpha <- logMeanDens * (1 - rho)
   if (length(unique(alpha)) == 1) alpha <- alpha[1]
-  if (length(alpha) > 1) {
-    percentinc <- (alpha[2] - alpha[1]) / alpha[1] * 100
-  } else {
-    percentinc <- 0
-  }
 
 ###############################################################################
 ## Spatial model

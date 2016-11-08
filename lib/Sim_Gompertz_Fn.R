@@ -79,6 +79,7 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
     lonlimits[2] * 0.95, lonlimits[2] * 1.05)
   latlimits <- unlist(attributes(extent(
     calc_areabuffer(pol_studyarea, ratio = 3.5)))[c("ymin", "ymax")])
+  cuts <- NULL
   if (length(alpha) > 1) {
     table <- 0
     while (any(table < 0.25) | all(table == 1)) {
@@ -95,9 +96,8 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   } else {
       group <- rep(1, length.out = NROW(Loc))
       lines_grouptrue <- NULL
-      cuts <- NA
   }
-
+  cuts <- c(latlimits[1], cuts)
   # scale determines the distance at which correlation declines to ~10% of
   # the maximum observed correlation
   # Estimates of "Range" should scale linearly with scale because
@@ -164,7 +164,7 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
       meanlog = log(DF$lambda / DF$encounterprob),
       sdlog = SD_obs)
   DF$phi <- phi
-  DF$cuts <- cuts
+  DF$cuts <- cuts[DF$group]
   DF$sd_O <- SD_O
   DF$sd_E <- SD_E
   DF$sd_obs <- SD_obs

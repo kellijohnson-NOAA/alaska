@@ -20,11 +20,11 @@
 #' @param rho Density-dependence
 #' @param logMeanDens
 #' @param Loc
-#' @param projection
+#' @param projection The projection for your \code{Loc}.
 #'
 Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   SpatialScale = 0.1, SD_O = 0.5, SD_E = 1.0, SD_obs = 1.0,
-  rho = 0.5, logMeanDens = 1, Loc = NULL, projection = akCRS,
+  rho = 0.5, logMeanDens = 1, Loc = NULL, projection = NULL,
   seed = 1) {
 
 ###############################################################################
@@ -58,7 +58,7 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   }
   # Create a polygon with a buffer around the locations
   pol_studyarea <- as(raster::extent(Loc), "SpatialPolygons")
-  proj4string(pol_studyarea) <- projection
+  if (!is.null(projection)) sp::proj4string(pol_studyarea) <- projection
   # Find a new polygon that is 10% bigger
   pol_studyarea <- calc_areabuffer(pol_studyarea, ratio = 1.1,
     precision = 0.001)
@@ -66,7 +66,7 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   # Create SpatialPoints from Loc data
   points <- as.data.frame(Loc)
   coordinates(points) <- ~ x + y
-  proj4string(points) <- projection
+  if (!is.null(projection)) sp::proj4string(points) <- projection
 
   # Determine which subpopulation each location belongs to
   # Find the outer boundaries
@@ -88,9 +88,9 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
         Lines(Line(cbind(x, latlimits)),
           ID = parent.frame()$i[])
         }))
-      projection(lines_grouptrue) <- projection
+      if (!is.null(projection)) sp::proj4string(lines_grouptrue) <- projection
       # Determine which polygon each point is in
-      group <- over(points, calc_polys(pol_studyarea, lines_grouptrue))
+      group <- sp::over(points, calc_polys(pol_studyarea, lines_grouptrue))
       table <- table(group) / length(group)
     }
   } else {

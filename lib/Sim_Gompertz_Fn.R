@@ -2,7 +2,10 @@
 #'
 #' @description Simulate data for \code{n_years} and \code{n_stations}
 #' using the \code{\pkg{RandomFields}} package and a Gompertz population
-#' dynamics model.
+#' dynamics model. The model uses a recursive equation to simulate population
+#' dynamics rather than an autoregressive model. Please ensure that your
+#' estimation model uses the same code, otherwise you will estimate biased
+#' variance parameters.
 #'
 #' @details The code for this function originally came from James Thorson
 #' and his github repository
@@ -18,8 +21,10 @@
 #' @param SD_O The marginal variance of Omega.
 #' @param SD_E The marginal variance of temporal and spatial process error.
 #' @param rho Density-dependence
-#' @param logMeanDens
-#' @param Loc
+#' @param logMeanDens A scalar or vector of log mean density that will be
+#' converted into a scalar or vector value for \code{alpha} or mean
+#' productivity. \code{alpha} = \code{logMeanDens} * (1 - \code{rho}).
+#' @param Loc A two-column matrix of locations.
 #' @param projection The projection for your \code{Loc}.
 #'
 Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,

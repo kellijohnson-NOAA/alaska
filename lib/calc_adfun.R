@@ -21,7 +21,6 @@ calc_adfun <- function(data, mesh, tmb, variable) {
     n_p = 1,
     x_s = mesh$idx$loc - 1,
     c_i = data[, variable],
-    s_i = mesh$idx$loc - 1,
     t_i = data[, "Year"] - 1,
     X_xp = matrix(1, ncol = 1, nrow = mesh$n),
     G0 = spde$param.inla$M0,

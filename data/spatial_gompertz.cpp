@@ -44,7 +44,6 @@ Type objective_function<Type>::operator() ()
   // Data
   DATA_IVECTOR( x_s );	      // Association of each station with a given vertex in SPDE mesh
   DATA_VECTOR( c_i );       	// Count data
-  DATA_IVECTOR( s_i );        // Station for each sample 0:(# of used unique stations - 1)
   DATA_IVECTOR( t_i );        // Time for each sample
   DATA_MATRIX( X_xp );		    // Covariate design matrix
 
@@ -112,7 +111,7 @@ Type objective_function<Type>::operator() ()
   for (int i=0; i<n_i; i++){
     // t_i(i) is actually the timestep - 1 b/c indexing starts at zero
     // rho^0 == 1, and thus the population starts at phi
-    log_chat_i(i) = phi*pow(rho,t_i(i)) + Epsilon_xt(x_s(s_i(i)),t_i(i)) + (eta_x(x_s(s_i(i))) + Omega_x(x_s(s_i(i))) ) / (1-rho);
+    log_chat_i(i) = phi*pow(rho,t_i(i)) + Epsilon_xt(x_s(i),t_i(i)) + (eta_x(x_s(i)) + Omega_x(x_s(i)) ) / (1-rho);
     if( !isNA(c_i(i)) ){
       if(Options_vec(0)==0) jnll_i(i) -= dpois( c_i(i), exp(log_chat_i(i)), true );
       if(Options_vec(0)==1) jnll_i(i) -= d_poisson_lognormal( c_i(i), log_chat_i(i), theta_z(0), theta_z(1), true );
@@ -142,7 +141,6 @@ Type objective_function<Type>::operator() ()
   REPORT( theta_z );
   REPORT(x_s);
   REPORT(c_i);
-  REPORT(s_i);
   REPORT(t_i);
   REPORT(alpha);
   REPORT(phi);

@@ -121,7 +121,7 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   Omega <- unlist(split(unlist(tapply(1:NROW(Loc), group,
     function(x) {
     RandomFields::RFsimulate(model = model_O,
-      x = Loc[x, "x"], y = Loc[x, "y"]) - SD_O^2/2
+      x = Loc[x, "x"], y = Loc[x, "y"])
   })), group))
   RandomFields::RFoptions(spConform = TRUE)
 

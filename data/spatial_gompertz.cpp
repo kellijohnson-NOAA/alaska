@@ -99,7 +99,17 @@ Type objective_function<Type>::operator() ()
 
   // Probability of Gaussian-Markov random fields (GMRFs)
   jnll_comp(0) += GMRF(Q)(Omega_input);
-  jnll_comp(1) = SEPARABLE(AR1(rho),GMRF(Q))(Epsilon_input);
+  // If you do not scale below using Omega_x then you can scale here.
+  // jnll_comp(0) += GMRF(Q)(Omega_input);
+  // Spatial-temporal process error
+  // If using autoregressive model.
+  // jnll_comp(1) = SEPARABLE(AR1(rho),GMRF(Q))(Epsilon_input);
+  // If using a recursive model
+  for(int t=0; t<n_t; t++){
+    // code from spatial_index_model_V1
+    // jnll_comp(1) += SCALE(GMRF(Q), 1/exp(log_tau_E))( Epsilon_input.col(t)-Epsilon_input.col(t-1));
+    jnll_comp(1) += GMRF(Q)(Epsilon_input.col(t));
+  }
 
   // Transform GMRFs
   // alpha parameter input is a single value, which is then repeated the same length as the
@@ -125,7 +135,8 @@ Type objective_function<Type>::operator() ()
   for (int i=0; i<n_i; i++){
     // t_i(i) is actually the timestep - 1 b/c indexing starts at zero
     // rho^0 == 1, and thus the population starts at phi
-    log_chat_i(i) = phi*pow(rho,t_i(i)) + Epsilon_xt(x_s(i),t_i(i)) + (eta_x(x_s(i)) + Omega_x(x_s(i)) ) / (1-rho);
+    if (t_i(i) == 0) log_chat_i(i) = phi + Equil_x(x_s(i)) + Epsilon_xt(x_s(i),t_i(i));
+    if (t_i(i) > 0)  log_chat_i(i) = rho * log_chat_i(i - 1) + (eta_x(x_s(i)) + Omega_x(x_s(i))) + Epsilon_xt(x_s(i),t_i(i));
     if( !isNA(c_i(i)) ){
       if(Options_vec(0)==0) jnll_i(i) -= dpois( c_i(i), exp(log_chat_i(i)), true );
       if(Options_vec(0)==1) jnll_i(i) -= d_poisson_lognormal( c_i(i), log_chat_i(i), theta_z(0), theta_z(1), true );

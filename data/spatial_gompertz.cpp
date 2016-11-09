@@ -15,6 +15,16 @@ Type dlognorm(Type x, Type log_mean, Type log_sd, int give_log=false){
   return Return;
 }
 
+// The Poisson lognormal distribution.
+// Bulmer, M. G. 1974. On fitting the Poisson lognormal distribution to species-
+//   abundance data. Biometrics, 30: 101-110.
+// \mu = mean; \sigma^2 = lognormal variance = \mu + \mu^2 * (exp(\sigma^2) - 1)
+// where the variance of a negative binomial distribution is
+// \sigma^2 = \mu + (\mu^2 / k)
+// The Poisson distribution = \frac{\lambda^x * exp(-\lambda)}{x!}
+// The Normal distribution = \frac{1}{sqrt{2*\sigma^2*\pie}} * exp(\frac{-(x-\mu)^2}{2*\sigma^2})
+// p(x) = \frac{1}{sqrt{2*\sigma^2*\pie}*x!}
+//   \integral{exp(-\lambda) * lambda^{x-1} * exp(-\frac{(ln(\lambda) - x)^2}{2 * \sigma^2})}dx
 template<class Type>
 Type d_poisson_lognormal(Type x, Type log_mean, Type log_sd, Type log_clustersize, int give_log=false){
   Type Return;

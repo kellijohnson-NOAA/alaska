@@ -94,6 +94,7 @@ Type objective_function<Type>::operator() ()
   vector<Type> eta_x(n_x);
   vector<Type> Omega_x(n_x);
   vector<Type> Equil_x(n_x);
+  vector<Type> log_chat_i(n_i);
   matrix<Type> Epsilon_xt(n_x, n_t);
 
   // Probability of Gaussian-Markov random fields (GMRFs)
@@ -119,10 +120,8 @@ Type objective_function<Type>::operator() ()
   }
 
   // Likelihood contribution from observations
-  vector<Type> log_chat_i(n_i);
   vector<Type> jnll_i(n_i);
   jnll_i.setZero();
-  vector<Type> tmp_i(n_i);
   for (int i=0; i<n_i; i++){
     // t_i(i) is actually the timestep - 1 b/c indexing starts at zero
     // rho^0 == 1, and thus the population starts at phi

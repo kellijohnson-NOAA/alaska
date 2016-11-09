@@ -75,14 +75,14 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
 
   # Determine which subpopulation each location belongs to
   # Find the outer boundaries
-  lonlimits <- unlist(attributes(extent(pol_studyarea))[c("xmin", "xmax")])
+  lonlimits <- unlist(attributes(raster::extent(pol_studyarea))[c("xmin", "xmax")])
   # Make them a little smaller to decrease the likelihood that it will be
   # split bad
   lonlimits[1] <- ifelse(lonlimits[1] < 0 ,
     lonlimits[1] * 0.95, lonlimits[1] * 1.05)
   lonlimits[2] <- ifelse(lonlimits[2] >= 0 ,
     lonlimits[2] * 0.95, lonlimits[2] * 1.05)
-  latlimits <- unlist(attributes(extent(
+  latlimits <- unlist(attributes(raster::extent(
     calc_areabuffer(pol_studyarea, ratio = 3.5)))[c("ymin", "ymax")])
   cuts <- NULL
   if (length(alpha) > 1) {

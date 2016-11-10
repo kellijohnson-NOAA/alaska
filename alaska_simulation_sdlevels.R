@@ -60,4 +60,4 @@ theme(
   strip.text.x = element_text(size = 15))
 
 dev.off()
-rm(errors, pdata)
+rm(errors, pdata, omega, process)

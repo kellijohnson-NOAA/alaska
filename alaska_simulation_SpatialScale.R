@@ -7,6 +7,7 @@
 ## Comments:
 ###############################################################################
 ###############################################################################
+
 dir.test <- file.path(my.base, "simulation_SpatialScale")
 dir.create(dir.test, showWarnings = FALSE)
 setwd(dir.test)
@@ -18,7 +19,7 @@ error <- 0.1
 Reports <- list()
 true <- c(seq(200, 2000, by = 100))
 set.seed(11)
-locations <- coordinates(data.all[sample(NROW(data.all), 500), ])
+locations <- coordinates(data.all[sample(NROW(data.all), 200), ])
 
 ###############################################################################
 #### Start simulation loop
@@ -34,7 +35,7 @@ data_i <- Sim_Gompertz_Fn(
   SpatialScale = i_scale,
   SD_O = error,
   SD_E = error,
-  SD_obs, error,
+  SD_obs = 0.01,
   rho = 0.5,
   logMeanDens = 1.0,
   Loc = locations,
@@ -42,7 +43,7 @@ data_i <- Sim_Gompertz_Fn(
   seed = 10)
 
 meshlist <- calc_mesh(data_i[, c("Longitude", "Latitude")], NULL,
-  type = "basic")
+  type = "default")
 
 # Plot one of the true correlations from the OM
 if (i_scale == true[which(true > median(true))[1]]){
@@ -69,6 +70,7 @@ optimizer <- nlminb(obj$par, objective = obj$fn,
   lower = c(rep(-200, 5), -0.999, rep(-200, 2)),
   upper = c(rep( 200, 5), 0.999, rep(200, 2)),
   control = list(eval.max = 1e4, iter.max = 1e4, trace = 1))
+
 Reports[[length(Reports) + 1]] <- Report <- obj$report()
 
 # Save the report
@@ -83,14 +85,15 @@ png(file.path(dir.results, "simulation_range.png"), units = "in",
   width = my.width[2], height = my.width[2], res = my.resolution)
 temp <- data.frame("scale" = true, "range" = sapply(Reports, "[[", "Range"))
 with(temp, plot(scale, range, las = 1,
-  xlab = paste0("spatial scale (km) supplied to \"RMgauss(var = ", error, ")\""), ylab = ""))
+  xlab = paste0("spatial scale (km) supplied to \"RMgauss(scale = x, var = ", error, ")\""),
+  ylab = ""))
 temp <- lm(range ~ scale - 1, data = temp)
 abline(temp)
-abline(1, 1, lty = 2)
-legend("topleft", legend = "1:1", lty = 2, bty = "n")
-mtext(side = 2, line = 2.5, expression(range == ~ hat(sqrt(8)/kappa)))
+abline(0, 2, lty = 2)
+legend("topleft", legend = "1:2", lty = 2, bty = "n")
+mtext(side = 2, line = 2.75, expression(hat(range) == ~ sqrt(8)/kappa))
 legend("top", bty = "n",
-  legend = paste("slope =", paste(round(summary(temp)$coefficients[1, 1:2], 5),
+  legend = paste("slope =", paste(round(summary(temp)$coefficients[1, 1:2], 2),
   collapse = "\nse = ")))
 dev.off()
 

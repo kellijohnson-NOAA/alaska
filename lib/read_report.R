@@ -34,18 +34,14 @@ read_report <- function(report) {
     # Manipulate two matrices into long data frames
     "Year" = rep(1:cols, times = rows),
     "Site" = rep(1:rows, each = cols),
-    "Epsilon_est" = c(report$Epsilon_xt),
-    "log_Dpred_xt" = c(report$log_Dpred_xt)
+    "Epsilon_est" = c(report$Epsilon_xt)
   )
 
   some <- data.frame(
     "x_s" = rep(report$x_s + 1, each = cols),
     "t_i" = report$t_i + 1,
-    "s_i" = report$s_i + 1,
     "c_i" = report$c_i,
     "jnll_i" = report$jnll_i,
-    "lnprob" = report$log_notencounterprob_i,
-    "prob" = report$encounterprob_i,
     "log_chat_i" = report$log_chat_i
   )
 

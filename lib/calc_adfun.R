@@ -1,17 +1,31 @@
 #' Make a tmb object to fit using optim or some other algorithm in R.
 #'
-#' @param data
-#' @param mesh
-#' @param tmb
+#' @param data A data set generated from \code{\link{Sim_Gompertz_Fn}}.
+#' @param mesh A triangulation network generated from \code{\pkg{INLA}}.
+#' @param tmb The library name that was loaded using
+#' \code{\link[TMB]{dynlib}}.
 #' @param variable A character value of the dependent variable that you
-#' want to model. For example, \code{"Simulated_example"}.
+#' want to model. For example, \code{"Simulated_example"}. The character
+#' value must be a column name of \code{data}.
 #'
 calc_adfun <- function(data, mesh, tmb, variable) {
   # Start with data
+  ## Make sure that the variable name is in \code{data}
+  if(!variable %in% colnames(data)) {
+    stop(variable, "is not a column of data")
+  }
+  ## Make sure that Year is a column name of \code{data}
+  if(!"Year" %in% colnames(data)) {
+    stop("Year is not a column of data")
+  }
+  ## Make sure that the mesh is of class inla.mesh
+  if(class(mesh) != "inla.mesh") {
+    stop("mesh is not of class inla.mesh")
+  }
   ## Determine if using counts or weights
   what <- ifelse(all(is.integer(data[, variable])), 0, 1)
   ## Create the spde object from the mesh
-  spde <- inla.spde2.matern(mesh)
+  spde <- INLA::inla.spde2.matern(mesh)
 
   Data <- list(
     Options_vec = what,

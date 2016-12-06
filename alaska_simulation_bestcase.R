@@ -15,6 +15,9 @@ dir.results <- file.path(getwd(), "results")
 dir.create(dir.results)
 sapply(dir("lib", full.names = TRUE), source)
 tmb <- gsub("\\.cpp", "", dir("data", pattern = "cpp"))[1]
+if(!file.exists(file.path("data", paste0(tmb, ".o")))) {
+  TMB::compile(file.path("data", paste0(tmb, ".cpp")))
+}
 dyn.load(dynlib(file.path("data", tmb)))
 
 ###############################################################################
@@ -49,7 +52,7 @@ optimizer <- nlminb(obj$par, objective = obj$fn,
   upper = c(rep( 200, 5), 0.999, rep(200, 2)),
   control = list(eval.max = 1e4, iter.max = 1e4, trace = 1))
 
-save(data_i, obj, file = file.path("results", "bestcase.RData"))
+save(data_i, obj, file = file.path("results", "simulation_bestcase.RData"))
 sink(file.path("results", "simulation_bestcase.txt"))
 cat("Results from the best case simulation\n")
 cat("exp(theta_z)\n")

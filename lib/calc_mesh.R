@@ -1,5 +1,5 @@
 calc_mesh <- function(locations, boundary = prdomain,
-  type = c("basic", "default")) {
+  type = c("basic", "default"), cutoff) {
 
   type <- match.arg(type, choices = c("basic", "default"),
     several.ok = FALSE)
@@ -13,21 +13,23 @@ calc_mesh <- function(locations, boundary = prdomain,
 
   # Find the area of the bounding box and take
   # 5% of the square root of the area
-  # as the cutoff for the created mesh
-  if (is.data.frame(locations)) {
-    cutoff <- t(sp::bbox(array(locations)))
-  } else {
-    cutoff <- t(sp::bbox(locations))
+  # as the cutoff for the created mesh if cutoff is not supplied
+  if (missing(cutoff)) {
+    if (is.data.frame(locations)) {
+      cutoff <- t(sp::bbox(array(locations)))
+    } else {
+      cutoff <- t(sp::bbox(locations))
+    }
+    cutoff <- rbind(
+      c(cutoff[1, 1], cutoff[2, 2]),
+      cutoff[1, ],
+      c(cutoff[2, 1], cutoff[1, 2]),
+      cutoff[2, ])
+    rownames(cutoff) <- NULL
+    cutoff <- SpatialPolygons(list(Polygons(list(Polygon(list(cutoff))), ID = 1)))
+    cutoff <- cutoff@polygons[[1]]@area
+    cutoff <- sqrt(ceiling(cutoff)) * 0.05
   }
-  cutoff <- rbind(
-    c(cutoff[1, 1], cutoff[2, 2]),
-    cutoff[1, ],
-    c(cutoff[2, 1], cutoff[1, 2]),
-    cutoff[2, ])
-  rownames(cutoff) <- NULL
-  cutoff <- SpatialPolygons(list(Polygons(list(Polygon(list(cutoff))), ID = 1)))
-  cutoff <- cutoff@polygons[[1]]@area
-  cutoff <- sqrt(ceiling(cutoff)) * 0.05
 
   # Create the mesh based on the type specified, where the
   # default is to use the basic mesh.

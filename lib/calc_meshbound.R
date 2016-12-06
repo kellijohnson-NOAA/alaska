@@ -21,30 +21,30 @@ calc_meshbound <- function(mesh, projection = NULL) {
 
   if (!is.null(projection)) {
     points$num <- 1:NROW(points)
-    coordinates(points) <- ~ x + y
-    projection(points) <- projection
+    sp::coordinates(points) <- ~ x + y
+    raster::projection(points) <- projection
 
     # Create a convex hull polygon that does not follow the
     # points exactly
-    hull <- SpatialPolygons(
+    hull <- sp::SpatialPolygons(
       tapply(1:length(points$ID), points$ID,
       function(x, data = points@coords) {
         X <- data[x, ]
         X.chull <- chull(X)
         X.chull <- c(X.chull, X.chull[1])
-        Polygons(list(Polygon(X[X.chull, ])), parent.frame()$i[])
+        sp::Polygons(list(sp::Polygon(X[X.chull, ])), parent.frame()$i[])
     }))
-    projection(hull) <- projection
+    raster::projection(hull) <- projection
     # Create a polygon that follows the points exactly
     # if the interior boundary is present.
     if (NROW(mesh$segm$bnd$idx) > 0) {
       temp <- data.frame(mesh$loc[unique(c(mesh$segm$bnd$idx)), ])
       colnames(temp) <- c("x", "y", "ID")
-      coordinates(temp) <- ~ x + y
-      projection(temp) <- projection
-      poly <- SpatialPolygons(list(Polygons(list(Polygon(temp)), 1)))
+      sp::coordinates(temp) <- ~ x + y
+      raster::projection(temp) <- projection
+      poly <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(temp)), 1)))
       poly <- rgeos::gBuffer(poly, width = -100)
-      projection(poly) <- projection
+      raster::projection(poly) <- projection
     } else {poly <- NULL}
   } else {
     hull <- NULL

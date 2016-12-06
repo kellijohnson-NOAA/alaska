@@ -10,33 +10,15 @@
 ###############################################################################
 
 ###############################################################################
-#### Compile tmb file
-###############################################################################
-file.remove(paste0(file.path(dir.data, my.tmb), c(".o", ".dll")))
-compile(file.path(dir.data, paste0(my.tmb, ".cpp")))
-dyn.load(dynlib(file.path(dir.data, my.tmb)))
-
-###############################################################################
 #### Set up the data
 ###############################################################################
   #Initial values are calculated in the model and placed in t_i[0]
   #t_i[1] is the first year of the data
 
-  #A.locator is the location of each data point on the mesh
-  #Only some of the mesh nodes are actually filled
-  #Filled nodes == A.locator.unique
-  #station is used to map 1:numberofnodes to 0:numberofnodes-1
-  #station_map creates a vector to map the 0:numberofusednodes-1
-  #to 0:numberofnodes-1 because the cpp code only predicts for used nodes
-  A.locator <- mesh$idx$loc
-    A.locator.unique <- unique(A.locator)[order(unique(A.locator))]
-    station <- A.locator - 1
-    station_unique  <- A.locator.unique - 1
-    mapval <- data.frame(s.unique = station_unique,
-                         map = seq(0, (length(A.locator.unique) - 1)))
+
   #Obtain the lat / lon (in UTM) coordinates for the used stations
-    x_stations <- mesh$loc[A.locator.unique, 1]
-    y_stations <- mesh$loc[A.locator.unique, 2]
+    x_stations <- mesh$loc[unique(mesh$idx$loc)[order(unique(mesh$idx$loc))], 1]
+    y_stations <- mesh$loc[unique(mesh$idx$loc)[order(unique(mesh$idx$loc))], 2]
 
 ###############################################################################
 #### TMB
@@ -52,7 +34,7 @@ dyn.load(dynlib(file.path(dir.data, my.tmb)))
     x_s = mesh$idx$loc - 1,
 
     c_i = as.vector(data.all@data$WTCPUE),
-    s_i = mapval[match(station, mapval$s.unique), "map"],
+    s_i = calc_meshmap(mesh),
     t_i = factor(data.all@data$YEAR, levels = desired.years,
       labels = 1:length(desired.years) - 1),
 
@@ -83,9 +65,9 @@ newtonOption(obj, smartsearch = FALSE)
 
   # Obtain standard errors
   Report <- obj$report()
-  rm(report)
   report <- try(sdreport(obj))
   unlist(Report[c('Range', 'SigmaO', 'SigmaE', 'rho', 'theta_z')])
+  save(Report, report, file = file.path(dir.results, "analysis.RData"))
 
 ###############################################################################
 #### Clustering
@@ -93,38 +75,53 @@ newtonOption(obj, smartsearch = FALSE)
 # Get the points of the nodes from the mesh
 plotgroups <- data.frame(
   "x" = mesh$loc[, 1], "y" = mesh$loc[, 2],
-  "latitude" = round(mesh$loc[, 1], 1),
   "omega" = Report[["Omega_x"]],
-  "clustering" = NA)
+  "est" = NA)
 coordinates(plotgroups) <- ~ x + y
 proj4string(plotgroups) <- akCRS
+plotall <- plotgroups
 
 # Find points in the main frame of the mesh
-localboundaries <- findlocal(mesh)
-plotall <- plotgroups
-plotgroups <- plotgroups[localboundaries, ]
+plotgroups <- plotgroups[findlocal(mesh), ]
 
 # Calculate the clusters
-est <- list()
-est$kdist <- dist(Report[["Omega_x"]][localboundaries],
-  method = "euclidean")
+    export_prm(file_in = my.prm, dir = getwd(), file = "analysis",
+      shape = "circle", size = 100)
+    export_geo(points = spTransform(plotgroups, llCRS),
+      dir = getwd(), file = "analysis", projection = llCRS)
+    # Double check the direction of slashes and call system
+    system(paste(
+      gsub("/", "\\\\", my.SaTScan),
+      file.path(gsub("/", "\\\\", getwd()), paste0("analysis", ".prm"), fsep = "\\")
+    ), show.output.on.console = FALSE)
+    # Read in the results
+    textfile <- read_txt(dir = getwd(), file = "analysis")
+    shape <- readShapePoly(file.path(getwd(), "analysis.col"))
+    projection(shape) <- llCRS
 
-# Find the optimum number of groups
-est$cluster.ksearch <- cluster_validity(dist.file = est$kdist,
-  tot_k = ceiling(sqrt(attr(est$kdist, "Size") - 1)),
-  plot_sils = TRUE, file = file.path(dir.results, "est_ksearch.png"))
-est$clustermax <- sapply(est$cluster.ksearch[-1], which.max)
-est$clustermin <- sapply(est$cluster.ksearch[-1], which.min)
-est$cluster.use <- cluster::pam(x = est$kdist,
-  k = which.max(est$cluster.ksearch$Hubert.gamma) + 1)
-# Assign the clusters to the spatial points data frame
-plotgroups$clustering <- est$cluster.use$clustering
+# Get p values
+if (is.data.frame(textfile$coordinates) | is.matrix(textfile$coordinates)) {
+  pvalues <- as.numeric(sapply(strsplit(
+    textfile$coordinates[grep("P-", textfile$coordinates[, 1]), ],
+    ":"), "[[", 2))
+}
 
-# Estimate the 2D groupings from the clustering
-est$spatial <- SPODT::spodt(omega ~ 1,
-  data = plotgroups, level.max = 3)
-est$lines <- SPODT::spodtSpatialLines(est$spatial,
-  data = plotgroups)
+load(file.path(dir.data, "maps.eez.RData"))
+
+png(file.path(dir.results, "analysis_clusters.png"),
+  width = my.width[2], height = my.height.map, res = my.resolution, units = "in")
+plot(maps.eez)
+r4kfj::llgridlines(maps.eez, recenter = TRUE, lty = 1, col = col.gridlines)
+plot(spTransform(plotgroups, efhCRS), cex = 5 * (abs(plotgroups$omega)),
+  pch = ifelse(plotgroups$omega >= 0, 15, 0), add = TRUE,
+  col = rgb(0, 0, 0, 0.4))
+for (it_ in seq_along(shape)) {
+  if (pvalues[it_] > 0.05) next
+  plot(spTransform(subset(shape, CLUSTER == it_), efhCRS), add = TRUE)
+}
+dev.off()
+
+
 
 ###############################################################################
 #### Create summaries

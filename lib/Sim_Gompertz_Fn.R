@@ -3,13 +3,16 @@
 #' @description Simulate data for \code{n_years} and \code{n_stations}
 #' using the \code{\pkg{RandomFields}} package and a Gompertz population
 #' dynamics model. The model uses a recursive equation to simulate population
-#' dynamics rather than an autoregressive model. Please ensure that your
-#' estimation model uses the same code, otherwise you will estimate biased
-#' variance parameters.
+#' dynamics rather than an autoregressive equation.
+#' If you plan on using the results of \code{Sim_Gompertz_Fn} in a simulation,
+#' your parameter estimates will be less biased if you use a recursive equation
+#' in your estimation routine as well, rather than an autoregressive estimation
+#' method. The majority of the bias will be in the variance parameters if you
+#' choose to not do the self test.
 #'
 #' @details The code for this function originally came from James Thorson
 #' and his github repository
-#' \url{2016_Spatio-temporal_models/Week 7 -- spatiotemporal models/Lab/Sim_Gompertz_Fn.R}
+#' \url{https://github.com/James-Thorson/2016_Spatio-temporal_models/Week 7 -- spatiotemporal models/Lab/Sim_Gompertz_Fn.R}
 #'
 #' @param n_years The number of years you want data for
 #' @param n_stations The number of stations you want samples for
@@ -17,18 +20,28 @@
 #' The default is to start at a random \code{rnorm(1, mean = 0, sd = 1)}
 #' start value.
 #' @param SpatialScale The scale of the spatial random effects, must be
-#' in the same units as the locations
-#' @param SD_O The marginal variance of Omega.
-#' @param SD_E The marginal variance of temporal and spatial process error.
+#' in the same units as the locations.
+#' @param SD_O The marginal standard deviation of Omega.
+#' @param SD_E The marginal standard deviation of
+#' temporal and spatial process error.
+#' @param SD_E The standard deviation of observation error.
+#' @param SD_extra Extra variance in the poisson distribution.
 #' @param rho Density-dependence
 #' @param logMeanDens A scalar or vector of log mean density that will be
-#' converted into a scalar or vector value for \code{alpha} or mean
-#' productivity. \code{alpha} = \code{logMeanDens} * (1 - \code{rho}).
+#' converted into \code{alpha} or mean productivity.
+#' \code{alpha} = \code{logMeanDens} * (1 - \code{rho}).
 #' @param Loc A two-column matrix of locations.
 #' @param projection The projection for your \code{Loc}.
+#' @param seed A numeric value providing the random seed for the simulation.
+#'
+#' @examples
+#' test <- Sim_Gompertz_Fn(10, 50, phi = NULL,
+#'   SpatialScale = 0.1, SD_O = 0.5, SD_E = 1.0, SD_obs = 1.0,
+#'   rho = 0.5, logMeanDens = c(1), Loc = NULL, projection = NULL,
+#'   seed = 1)
 #'
 Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
-  SpatialScale = 0.1, SD_O = 0.5, SD_E = 1.0, SD_obs = 1.0,
+  SpatialScale = 0.1, SD_O = 0.5, SD_E = 1.0, SD_obs = 1.0, SD_extra = 0,
   rho = 0.5, logMeanDens = 1, Loc = NULL, projection = NULL,
   seed = 1) {
 
@@ -53,7 +66,7 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   if (is.null(Loc)) {
     Loc <- cbind(
       "x" = runif(n_stations, min = 0, max = 1),
-      "y" = runif(n_stations, min = 0, max = 1 / length(alpha)))
+      "y" = runif(n_stations, min = 0, max = 1))
   } else {
     # If locations are given, determine how many stations and
     # set column names
@@ -111,6 +124,16 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   model_E <- RandomFields::RMgauss(var = SD_E^2, scale = SpatialScale)
 
   RandomFields::RFoptions(spConform = FALSE)
+  # Simulate Omega
+  Omega <- rep(NA, length(group))
+  for (it_ in seq_along(alpha)) {
+    temp <- which(group == it_)
+    Omega[temp] <- RandomFields::RFsimulate(model = model_O,
+      x = Loc[temp, "x"], y = Loc[temp, "y"])
+  }
+  if (any(is.na(Omega))) stop("Not all Omega values were created",
+    "more than likely the cuts were placed outside of the boundaries.")
+  rm(temp)
   # Simulate Epsilon
   Epsilon <- array(NA, dim = c(n_stations, n_years))
   for(t in 1:n_years) {
@@ -118,22 +141,19 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
       model = model_E,
       x = Loc[, "x"], y = Loc[, "y"])
   }
-  Omega <- unlist(split(unlist(tapply(1:NROW(Loc), group,
-    function(x) {
-    RandomFields::RFsimulate(model = model_O,
-      x = Loc[x, "x"], y = Loc[x, "y"])
-  })), group))
+
   RandomFields::RFoptions(spConform = TRUE)
 
 ###############################################################################
 ## Calculate Psi
 ###############################################################################
   Theta <- array(NA, dim = c(n_stations, n_years))
-  DF <- array(NA, dim = c(n_stations * n_years, 9),
+  DF <- array(NA, dim = c(n_stations * n_years, 10),
     dimnames = list(NULL, c(
       "Site",
       "Year",
       "lambda",
+      "Simulated_example",
       "group",
       "Epsilon",
       "Omega",
@@ -143,15 +163,20 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   for (it_s in 1:n_stations) {
   for (t in 1:n_years) {
     if(t == 1) Theta[it_s, t] <- as.numeric(
-      phi + Epsilon[it_s, t] + (alpha[group[it_s]] + Omega[it_s])/(1 - rho)
+      phi +
+      (alpha[group[it_s]] + Omega[it_s])/(1 - rho) +
+      Epsilon[it_s, t]
       )
     if(t >= 2) Theta[it_s, t] <- as.numeric(
-      rho * Theta[it_s, t - 1] + alpha[group[it_s]] + Omega[it_s] + Epsilon[it_s, t]
+      rho * Theta[it_s, t - 1] +
+      (alpha[group[it_s]] + Omega[it_s]) +
+      Epsilon[it_s, t]
       )
     counter <- ifelse(it_s == 1 & t == 1, 1, counter + 1)
     DF[counter, "Site"] <- it_s
     DF[counter, "Year"] <- t
     DF[counter, "lambda"] <- exp(Theta[it_s, t])
+    DF[counter, "Simulated_example"] <- rpois(1, lambda = DF[counter, "lambda"] * exp(SD_extra * rnorm(1)))
     DF[counter, "group"] <- as.numeric(group[it_s])
     DF[counter, "Epsilon"] <- Epsilon[it_s, t]
     DF[counter, "Omega"] <- Omega[it_s]
@@ -162,7 +187,7 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
 
   DF <- as.data.frame(DF)
   DF <- DF[order(DF$group, DF$Site, DF$Year), ]
-  DF$Simulated_example <- rpois(NROW(DF), lambda = DF$lambda)
+  # DF$Simulated_example <- rpois(NROW(DF), lambda = DF$lambda)
   DF$encounterprob <- 1 - exp(-DF$lambda)
   DF$zeroinflatedlnorm <- ifelse(DF$Simulated_example > 0, 1, 0) *
     rlnorm(NROW(DF),

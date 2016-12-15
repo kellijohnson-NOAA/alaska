@@ -9,12 +9,14 @@
 ###############################################################################
 if(basename(getwd()) != "alaska") stop("set your working directory",
   " to the cloned repo")
+# install.packages("INLA", repos="https://www.math.ntnu.no/inla/R/stable")
 library(INLA)
+# install.packages("TMB")
 library(TMB)
 dir.results <- file.path(getwd(), "results")
 dir.create(dir.results)
-sapply(dir("lib", full.names = TRUE), source)
-tmb <- gsub("\\.cpp", "", dir("data", pattern = "cpp"))[1]
+ignore <- sapply(dir("lib", full.names = TRUE), source)
+tmb <- gsub("\\.cpp", "", dir("data", pattern = "gompertz\\.cpp"))[1]
 if(!file.exists(file.path("data", paste0(tmb, ".o")))) {
   TMB::compile(file.path("data", paste0(tmb, ".cpp")))
 }

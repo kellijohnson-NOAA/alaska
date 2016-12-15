@@ -45,7 +45,7 @@ data_i <- Sim_Gompertz_Fn(
 mesh_i <- INLA::inla.mesh.create(data_i[, c("Longitude", "Latitude")])
 obj <- calc_adfun(data = data_i, mesh = mesh_i, 
   tmb = tmb,
-  variable = "zeroinflatedlnorm")
+  variable = "Simulated_example")
 
 # Run optimizer
 optimizer <- nlminb(obj$par, objective = obj$fn,

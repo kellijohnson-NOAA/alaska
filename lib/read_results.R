@@ -1,14 +1,12 @@
 #' Read in results for alaska simulation
 #'
-#' @param data Specify a simulated data set, more than likely named
-#' \code{sim_data}.
 #' @param report Specify the results of running the spatial model,
 #' more than likely named \code{Report}.
 #' @param dir A directory where the \code{.RData} file specified in
 #' \code{file} is stored. If the full path is provided in \code{file}
 #' then set \code{dir = NULL}.
 #' @param file The file name of the \code{.RData} object that houses
-#' \code{data} and \code{report} for a given simulation replicate.
+#' \code{report} for a given simulation replicate.
 #' @param projection The spatial projection of the data
 #'
 read_results <- function(report = NULL,
@@ -32,6 +30,8 @@ read_results <- function(report = NULL,
   # At a minimum the user must supply a \code{report} object.
   if (!is.list(results)) {stop("report must be a list")}
 
+  # Read in the report file, which stores the model output and combine
+  # it with the data used to fit the model.
   em <- read_report(results)
   combine <- merge(results$DF, em,
     by = c("Year", "Site"),
@@ -50,7 +50,7 @@ read_results <- function(report = NULL,
     "y" = results$mesh$loc[, 2],
     "omega" = results[["Omega_x"]])
   # Subset by those inside the blue line
-  info <- info[localboundaries$local, ]
+  results$info <- info[localboundaries$local, ]
   sp::coordinates(info) <- ~ x + y
   raster::projection(info) <- projection
 
@@ -59,7 +59,6 @@ read_results <- function(report = NULL,
 ###############################################################################
   combine$n_years <- NCOL(results[["Epsilon_xt"]])
 
-  results$info <- info
   results$localboundaries <- localboundaries
   names(results)[which(names(results) == "Loc")] <- "loc_true"
   results$file <- file

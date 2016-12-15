@@ -23,7 +23,9 @@ calc_adfun <- function(data, mesh, tmb, variable) {
     stop("mesh is not of class inla.mesh")
   }
   ## Determine if using counts or weights
-  what <- ifelse(all(is.integer(data[, variable])), 0, 1)
+  # Transform to integers
+  integers <- as.integer(data[, variable])
+  what <- ifelse(all(integers == data[, variable]), 0, 1)
   ## Create the spde object from the mesh
   spde <- INLA::inla.spde2.matern(mesh)
 

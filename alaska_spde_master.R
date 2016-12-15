@@ -22,6 +22,7 @@ my.base <- file.path("c:", "alaska")
 setwd(my.base)
 
 getweb <- FALSE #If TRUE pull r4kfj off of github
+error.use <- 0.25
 
 ###############################################################################
 #### Run analysis
@@ -41,6 +42,8 @@ source("alaska_cleanup.R")
 
 # Simulations
 source("alaska_simulation_SpatialScale.R")
+source("alaska_simulation_sdlevels.R")
+source("alaska_simulation.R", echo = TRUE, verbose = TRUE)
 
 # Analysis
 source("alaska_spde_analysis.R")

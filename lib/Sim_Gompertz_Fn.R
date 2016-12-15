@@ -83,7 +83,7 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
 
   # Create SpatialPoints from Loc data
   points <- as.data.frame(Loc)
-  raster::coordinates(points) <- ~ x + y
+  sp::coordinates(points) <- ~ x + y
   if (!is.null(projection)) sp::proj4string(points) <- projection
 
   # Determine which subpopulation each location belongs to

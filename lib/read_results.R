@@ -20,10 +20,15 @@ read_results <- function(report = NULL,
   if (!is.null(file)) {
     if (exists("Report", inherits = FALSE)) rm(Report)
 
-    if (is.null(dir)) { path <- file } else { path <- file.path(dir, file)}
+    if (is.null(dir)) {
+      path <- file
+    } else {
+      path <- file.path(dir, file)
+    }
     load(path)
     results <- Report
-  } else {results <- report}
+    rm(Report)
+  } else {results <- report; rm(report)}
 
   # Combine data and report into a single list, such that the function
   # can return everything that is imported.

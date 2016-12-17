@@ -50,12 +50,17 @@ read_results <- function(report = NULL,
   localboundaries <- data.frame("Site" = 1:results$mesh$n,
     "local" = findlocal(object = results$mesh, projection = projection))
   combine <- merge(combine, localboundaries, by = "Site", all = TRUE)
+
+  # Subset by those inside the blue line
+  # info was needed for the spherical determination of management
+  # units but is no longer needed, so I am not exporting it.
+  # todo: remove info from calculations to speed up the creation
+  # of results
   info <- data.frame(
     "x" = results$mesh$loc[, 1],
     "y" = results$mesh$loc[, 2],
     "omega" = results[["Omega_x"]])
-  # Subset by those inside the blue line
-  results$info <- info[localboundaries$local, ]
+  info <- info[localboundaries$local, ]
   sp::coordinates(info) <- ~ x + y
   raster::projection(info) <- projection
 
@@ -63,13 +68,8 @@ read_results <- function(report = NULL,
 ## Save information to the results list
 ###############################################################################
   combine$n_years <- NCOL(results[["Epsilon_xt"]])
+  combine$file <- file
 
-  results$localboundaries <- localboundaries
-  names(results)[which(names(results) == "Loc")] <- "loc_true"
-  results$file <- file
-  results$n_years <- NCOL(results[["Epsilon"]])
-  results$all <- combine
-
-return(results)
+return(combine)
 
 }

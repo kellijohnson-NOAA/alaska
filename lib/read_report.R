@@ -29,7 +29,8 @@ read_report <- function(report) {
     "rho" = report$rho,
     "lntau_E" = report$log_tau_E,
     "lntau_O" = report$log_tau_O,
-    "SpatialScale" = report$Range,
+    "range" = report$Range,
+    "SpatialScale" = report$Range / 2,
     "lnkappa" = report$log_kappa,
     # vectors
     "eta_x" = report$eta_x,

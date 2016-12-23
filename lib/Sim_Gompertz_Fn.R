@@ -200,6 +200,7 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   DF$sd_obs <- SD_obs
   DF$SpatialScale <- SpatialScale
   DF$seed <- seed
+  DF$rho <- rho
 
   # Return stuff
   Sim_List <- list("DF" = DF, "lines_grouptrue" = lines_grouptrue)

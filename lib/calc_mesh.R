@@ -1,13 +1,17 @@
-calc_mesh <- function(locations, boundary = prdomain,
+calc_mesh <- function(locations, boundary = NULL,
   type = c("basic", "default"), cutoff) {
 
   type <- match.arg(type, choices = c("basic", "default"),
     several.ok = FALSE)
 
   if (is.null(boundary)) {
+    if (class(locations) == "SpatialPointsDataFrame") {
+      locations <- coordinates(locations)
+    }
     if (!is.matrix(locations)) {
       boundary <- INLA::inla.nonconvex.hull(as.matrix(locations), -0.05)
-    } else { boundary <- INLA::inla.nonconvex.hull(locations, -0.05)
+    } else {
+      boundary <- INLA::inla.nonconvex.hull(locations, -0.05)
     }
   }
 

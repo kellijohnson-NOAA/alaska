@@ -29,15 +29,23 @@ calc_adfun <- function(data, mesh, tmb, variable) {
   ## Create the spde object from the mesh
   spde <- INLA::inla.spde2.matern(mesh)
 
+  # Find the number of years included in the data
+  sequence <- seq(min(data$Year), max(data$Year))
+  n_t_ <- ifelse(min(data$Year) == 1,
+    max(data$Year),
+    max(data$Year) - min(data$Year) + 1)
+  t_i_ <- as.numeric(as.character(factor(data[, "Year"] - 1,
+      labels = (1:(n_t_))[sequence %in% unique(data$Year)]))) - 1
+
   Data <- list(
     Options_vec = what,
     n_i = NROW(data),
     n_x = mesh$n,
-    n_t = max(data$Year),
+    n_t = n_t_,
     n_p = 1,
     x_s = mesh$idx$loc - 1,
     c_i = data[, variable],
-    t_i = data[, "Year"] - 1,
+    t_i = t_i_,
     X_xp = matrix(1, ncol = 1, nrow = mesh$n),
     G0 = spde$param.inla$M0,
     G1 = spde$param.inla$M1,

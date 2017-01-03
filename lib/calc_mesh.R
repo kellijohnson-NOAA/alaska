@@ -1,7 +1,7 @@
 calc_mesh <- function(locations, boundary = NULL,
-  type = c("basic", "default"), cutoff) {
+  type = c("basic", "cutoff", "default"), cutoff) {
 
-  type <- match.arg(type, choices = c("basic", "default"),
+  type <- match.arg(type, choices = c("basic", "cutoff", "default"),
     several.ok = FALSE)
 
   if (is.null(boundary)) {
@@ -40,6 +40,9 @@ calc_mesh <- function(locations, boundary = NULL,
   if (type == "basic") {
     mesh <- inla.mesh.create(locations, boundary = boundary,
       cutoff = cutoff)
+  }
+  if (type == "cutoff") {
+    mesh <- INLA::inla.mesh.create(locations, cutoff = cutoff)
   }
   if (type == "default") {
     mesh <- inla.mesh.create(locations)

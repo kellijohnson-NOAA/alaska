@@ -19,6 +19,10 @@
 #' @param phi The fraction from equilibrium you want to start from
 #' The default is to start at a random \code{rnorm(1, mean = 0, sd = 1)}
 #' start value.
+#' @param rho Density-dependence
+#' @param logMeanDens A scalar or vector of log mean density that will be
+#' converted into \code{alpha} or mean productivity.
+#' \code{alpha} = \code{logMeanDens} * (1 - \code{rho}).
 #' @param SpatialScale The scale of the spatial random effects, must be
 #' in the same units as the locations.
 #' @param SD_O The marginal standard deviation of Omega.
@@ -26,24 +30,33 @@
 #' temporal and spatial process error.
 #' @param SD_E The standard deviation of observation error.
 #' @param SD_extra Extra variance in the poisson distribution.
-#' @param rho Density-dependence
-#' @param logMeanDens A scalar or vector of log mean density that will be
-#' converted into \code{alpha} or mean productivity.
-#' \code{alpha} = \code{logMeanDens} * (1 - \code{rho}).
+#' @param log_clustersize The natural log of the expected cluster size
+#'   for the Poisson lognormal distribution.
 #' @param Loc A two-column matrix of locations.
 #' @param projection The projection for your \code{Loc}.
 #' @param seed A numeric value providing the random seed for the simulation.
 #'
 #' @examples
-#' test <- Sim_Gompertz_Fn(10, 50, phi = NULL,
-#'   SpatialScale = 0.1, SD_O = 0.5, SD_E = 1.0, SD_obs = 1.0,
-#'   rho = 0.5, logMeanDens = c(1), Loc = NULL, projection = NULL,
+#' test <- Sim_Gompertz_Fn(n_years = 10, n_stations = 50, phi = NULL,
+#'   rho = 0.5, logMeanDens = c(1), SpatialScale = 0.1,
+#'   SD_O = 0.5, SD_E = 1.0, SD_obs = 1.0, log_clustersize = log(4),
+#'   Loc = NULL, projection = NULL,
 #'   seed = 1)
 #'
 Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
-  SpatialScale = 0.1, SD_O = 0.5, SD_E = 1.0, SD_obs = 1.0, SD_extra = 0,
-  rho = 0.5, logMeanDens = 1, Loc = NULL, projection = NULL,
+  rho = 0.5, logMeanDens = 1, SpatialScale = 0.1,
+  SD_O = 0.5, SD_E = 1.0, SD_obs = 1.0, SD_extra = 0, log_clustersize = log(4),
+  Loc = NULL, projection = NULL,
   seed = 1) {
+
+  # Define Poisson lognormal from JTT::r_poisson_lognormal
+  rlpois <- function(n, log_mean, sdlog, log_clustersize){
+    encounterprob <- 1 - exp(-1 * exp(log_mean) / exp(log_clustersize));
+    posTF <- rbinom(n = n, size = 1, prob = encounterprob)
+    catch <- posTF *
+      rlnorm(n = n, meanlog = log_mean - log(encounterprob), sdlog = sdlog)
+    return(catch)
+  }
 
 ###############################################################################
 ## Parameters
@@ -176,7 +189,10 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
     DF[counter, "Site"] <- it_s
     DF[counter, "Year"] <- t
     DF[counter, "lambda"] <- exp(Theta[it_s, t])
-    DF[counter, "Simulated_example"] <- rpois(1, lambda = DF[counter, "lambda"] * exp(SD_extra * rnorm(1)))
+    DF[counter, "Simulated_example"] <- rpois(1,
+      lambda = DF[counter, "lambda"] * exp(SD_extra * rnorm(1)))
+    DF[counter, "zeroinflatedlnorm"] <- rlpois(1,
+      log_mean = Theta[it_s, t], sdlog = SD_obs, log_clustersize = log_clustersize)
     DF[counter, "group"] <- as.numeric(group[it_s])
     DF[counter, "Epsilon"] <- Epsilon[it_s, t]
     DF[counter, "Omega"] <- Omega[it_s]
@@ -187,17 +203,12 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
 
   DF <- as.data.frame(DF)
   DF <- DF[order(DF$group, DF$Site, DF$Year), ]
-  # DF$Simulated_example <- rpois(NROW(DF), lambda = DF$lambda)
-  DF$encounterprob <- 1 - exp(-DF$lambda)
-  DF$zeroinflatedlnorm <- ifelse(DF$Simulated_example > 0, 1, 0) *
-    rlnorm(NROW(DF),
-      meanlog = log(DF$lambda / DF$encounterprob),
-      sdlog = SD_obs)
   DF$phi <- phi
   DF$cuts <- cuts[DF$group]
   DF$sd_O <- SD_O
   DF$sd_E <- SD_E
   DF$sd_obs <- SD_obs
+  DF$log_clustersize <- log_clustersize
   DF$SpatialScale <- SpatialScale
   DF$seed <- seed
   DF$rho <- rho

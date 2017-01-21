@@ -117,7 +117,9 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   cuts <- NULL
   if (length(alpha) > 1) {
     table <- 0
-    while (any(table < 0.25) | all(table == 1)) {
+    while (any(table < 1/length(alpha)/2) | all(table == 1)) {
+      # Cut the min and max longitude into areas based on how many
+      # alpha values are supplied.
       cuts <- runif(length(alpha) - 1, min = lonlimits[1], max = lonlimits[2])
       lines_grouptrue <- sp::SpatialLines(lapply(cuts, function(x) {
         Lines(Line(cbind(x, latlimits)),

@@ -128,7 +128,7 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
       if (!is.null(projection)) sp::proj4string(lines_grouptrue) <- projection
       # Determine which polygon each point is in
       group <- sp::over(points, calc_polys(pol_studyarea, lines_grouptrue))
-      table <- table(group) / length(group)
+      table <- prop.table(table(group))
     }
   } else {
       group <- rep(1, length.out = NROW(Loc))

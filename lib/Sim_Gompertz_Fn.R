@@ -34,6 +34,8 @@
 #'   for the Poisson lognormal distribution.
 #' @param Loc A two-column matrix of locations.
 #' @param projection The projection for your \code{Loc}.
+#' @param gridlimits A vector of numeric values specifying the grid limits
+#'   if \code{is.null(Loc)}. The values will be used to create a square grid.
 #' @param seed A numeric value providing the random seed for the simulation.
 #'
 #' @examples
@@ -46,7 +48,7 @@
 Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   rho = 0.5, logMeanDens = 1, SpatialScale = 0.1,
   SD_O = 0.5, SD_E = 1.0, SD_obs = 1.0, SD_extra = 0, log_clustersize = log(4),
-  Loc = NULL, projection = NULL,
+  Loc = NULL, projection = NULL, gridlimits = c(0, 1),
   seed = 1) {
 
   # Define Poisson lognormal from JTT::r_poisson_lognormal
@@ -77,9 +79,13 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   # such that each polygon is approximately square, and if there is
   # only one alpha value then the spatial landscape is 1 x 1
   if (is.null(Loc)) {
+    if (length(gridlimits) != 2) {
+      stop("gridlimits must have a length of two, \nwhereas a vector",
+        " of length = ", length(gridlimits), " was supplied.")
+    }
     Loc <- cbind(
-      "x" = runif(n_stations, min = 0, max = 1),
-      "y" = runif(n_stations, min = 0, max = 1))
+      "x" = runif(n_stations, min = gridlimits[1], max = gridlimits[2]),
+      "y" = runif(n_stations, min = gridlimits[1], max = gridlimits[2]))
   } else {
     # If locations are given, determine how many stations and
     # set column names
@@ -87,6 +93,7 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
     if (NCOL(Loc) != 2) stop("Loc does not have two columns")
     colnames(Loc) <- c("x", "y")
   }
+
   # Create a polygon with a buffer around the locations
   pol_studyarea <- as(raster::extent(Loc), "SpatialPolygons")
   if (!is.null(projection)) sp::proj4string(pol_studyarea) <- projection

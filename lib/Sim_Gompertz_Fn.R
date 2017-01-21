@@ -121,11 +121,8 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
       # Cut the min and max longitude into areas based on how many
       # alpha values are supplied.
       cuts <- runif(length(alpha) - 1, min = lonlimits[1], max = lonlimits[2])
-      lines_grouptrue <- sp::SpatialLines(lapply(cuts, function(x) {
-        Lines(Line(cbind(x, latlimits)),
-          ID = parent.frame()$i[])
-        }))
-      if (!is.null(projection)) sp::proj4string(lines_grouptrue) <- projection
+      lines_grouptrue <- calc_lines(cuts = cuts, limits = latlimits,
+        projection = projection)
       # Determine which polygon each point is in
       group <- sp::over(points, calc_polys(pol_studyarea, lines_grouptrue))
       table <- prop.table(table(group))

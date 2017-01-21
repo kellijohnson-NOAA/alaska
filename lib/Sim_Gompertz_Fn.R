@@ -97,6 +97,13 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   # Create a polygon with a buffer around the locations
   pol_studyarea <- as(raster::extent(Loc), "SpatialPolygons")
   if (!is.null(projection)) sp::proj4string(pol_studyarea) <- projection
+# Find the outer boundaries
+  lonlimits <- unlist(attributes(
+    raster::extent(pol_studyarea))[c("xmin", "xmax")])
+  # Make them a little smaller so they will be not be split bad
+  lonlimits <- ifelse(lonlimits < 0, lonlimits * 0.95, lonlimits * 1.05)
+  latlimits <- unlist(attributes(raster::extent(
+    calc_areabuffer(pol_studyarea, ratio = 3.5)))[c("ymin", "ymax")])
   # Find a new polygon that is 10% bigger
   pol_studyarea <- calc_areabuffer(pol_studyarea, ratio = 1.1,
     precision = 0.001)
@@ -107,16 +114,6 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   if (!is.null(projection)) sp::proj4string(points) <- projection
 
   # Determine which subpopulation each location belongs to
-  # Find the outer boundaries
-  lonlimits <- unlist(attributes(raster::extent(pol_studyarea))[c("xmin", "xmax")])
-  # Make them a little smaller to decrease the likelihood that it will be
-  # split bad
-  lonlimits[1] <- ifelse(lonlimits[1] < 0 ,
-    lonlimits[1] * 0.95, lonlimits[1] * 1.05)
-  lonlimits[2] <- ifelse(lonlimits[2] >= 0 ,
-    lonlimits[2] * 0.95, lonlimits[2] * 1.05)
-  latlimits <- unlist(attributes(raster::extent(
-    calc_areabuffer(pol_studyarea, ratio = 3.5)))[c("ymin", "ymax")])
   cuts <- NULL
   if (length(alpha) > 1) {
     table <- 0

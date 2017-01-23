@@ -117,7 +117,6 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   sp::coordinates(points) <- ~ x + y
   if (!is.null(projection)) sp::proj4string(points) <- projection
 
-browser()
   # Determine which subpopulation each location belongs to
   cuts <- NULL
   if (length(alpha) > 1) {
@@ -135,7 +134,6 @@ browser()
   } else {
       group <- rep(1, length.out = NROW(Loc))
   }
-  # Need to assign the limits to the end data frame
   cuts <- c(latlimits[1], cuts)
 
   # scale determines the distance at which correlation declines to ~10% of
@@ -178,13 +176,15 @@ browser()
 ## Calculate Psi
 ###############################################################################
   Theta <- array(NA, dim = c(n_stations, n_years))
-  DF <- array(NA, dim = c(n_stations * n_years, 10),
+  DF <- array(NA, dim = c(n_stations * n_years, 12),
     dimnames = list(NULL, c(
       "Site",
       "Year",
       "lambda",
       "Simulated_example",
+      "zeroinflatedlnorm",
       "group",
+      "cuts",
       "Epsilon",
       "Omega",
       "alpha",
@@ -211,6 +211,7 @@ browser()
     DF[counter, "zeroinflatedlnorm"] <- rlpois(1,
       log_mean = Theta[it_s, t], sdlog = SD_obs, log_clustersize = log_clustersize)
     DF[counter, "group"] <- as.numeric(group[it_s])
+    DF[counter, "cuts"] <- cuts[DF[counter, "group"]]
     DF[counter, "Epsilon"] <- Epsilon[it_s, t]
     DF[counter, "Omega"] <- Omega[it_s]
     DF[counter, "alpha"] <- as.numeric(alpha[group[it_s]])
@@ -229,9 +230,6 @@ browser()
   DF$SpatialScale <- SpatialScale
   DF$seed <- seed
   DF$rho <- rho
-
-  # Return stuff
-  Sim_List <- list("DF" = DF)
 
   return(DF)
 }

@@ -36,6 +36,10 @@
 #' @param projection The projection for your \code{Loc}.
 #' @param gridlimits A vector of numeric values specifying the grid limits
 #'   if \code{is.null(Loc)}. The values will be used to create a square grid.
+#' @param model A character value specifying the \code{\link{RandomFields}}
+#'   covariance model to use for the simulated spatial field. Currently,
+#'   the options are \code{"RMgauss"}, which is the default, and
+#'   \code{RMgneiting}, which is more stable than the default.
 #' @param seed A numeric value providing the random seed for the simulation.
 #'
 #' @examples
@@ -43,13 +47,13 @@
 #'   rho = 0.5, logMeanDens = c(1), SpatialScale = 0.1,
 #'   SD_O = 0.5, SD_E = 1.0, SD_obs = 1.0, log_clustersize = log(4),
 #'   Loc = NULL, projection = NULL,
-#'   seed = 1)
+#'   model = "RMgauss", seed = 1)
 #'
 Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   rho = 0.5, logMeanDens = 1, SpatialScale = 0.1,
   SD_O = 0.5, SD_E = 1.0, SD_obs = 1.0, SD_extra = 0, log_clustersize = log(4),
   Loc = NULL, projection = NULL, gridlimits = c(0, 1),
-  seed = 1) {
+  model = "RMgauss", seed = 1) {
 
   # Define Poisson lognormal from JTT::r_poisson_lognormal
   rlpois <- function(n, log_mean, sdlog, log_clustersize){
@@ -113,6 +117,7 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   sp::coordinates(points) <- ~ x + y
   if (!is.null(projection)) sp::proj4string(points) <- projection
 
+browser()
   # Determine which subpopulation each location belongs to
   cuts <- NULL
   if (length(alpha) > 1) {
@@ -129,15 +134,24 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
     }
   } else {
       group <- rep(1, length.out = NROW(Loc))
-      lines_grouptrue <- NULL
   }
+  # Need to assign the limits to the end data frame
   cuts <- c(latlimits[1], cuts)
+
   # scale determines the distance at which correlation declines to ~10% of
   # the maximum observed correlation
   # Estimates of "Range" should scale linearly with scale because
   # Range = sqrt(8)/exp(logkappa)
-  model_O <- RandomFields::RMgauss(var = SD_O^2, scale = SpatialScale)
-  model_E <- RandomFields::RMgauss(var = SD_E^2, scale = SpatialScale)
+  if (model == "RMgauss") {
+    model_O <- RandomFields::RMgauss(var = SD_O^2, scale = SpatialScale)
+    model_E <- RandomFields::RMgauss(var = SD_E^2, scale = SpatialScale)
+  }
+  if (model == "RMgneiting") {
+    model_O <- RandomFields::RMgneiting(orig = FALSE,
+      var = SD_O^2, scale = SpatialScale)
+    model_E <- RandomFields::RMgneiting(orig = FALSE,
+      var = SD_E^2, scale = SpatialScale)
+  }
 
   RandomFields::RFoptions(spConform = FALSE)
   # Simulate Omega
@@ -217,7 +231,7 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   DF$rho <- rho
 
   # Return stuff
-  Sim_List <- list("DF" = DF, "lines_grouptrue" = lines_grouptrue)
+  Sim_List <- list("DF" = DF)
 
   return(DF)
 }

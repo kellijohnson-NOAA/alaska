@@ -82,6 +82,7 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   # Randomly generate the locations if a matrix is not given
   # such that each polygon is approximately square, and if there is
   # only one alpha value then the spatial landscape is 1 x 1
+  set.seed(seed + 1)
   if (is.null(Loc)) {
     if (length(gridlimits) != 2) {
       stop("gridlimits must have a length of two, \nwhereas a vector",
@@ -162,7 +163,9 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   if (any(is.na(Omega))) stop("Not all Omega values were created",
     "more than likely the cuts were placed outside of the boundaries.")
   rm(temp)
+
   # Simulate Epsilon
+  set.seed(seed + 10)
   Epsilon <- array(NA, dim = c(n_stations, n_years))
   for(t in 1:n_years) {
     Epsilon[, t] <- RandomFields::RFsimulate(

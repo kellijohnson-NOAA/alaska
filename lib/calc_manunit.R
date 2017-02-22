@@ -102,7 +102,6 @@ calc_manunit <- function(readin, dir = getwd(), file = NULL,
   if (exists("pvalues")) {
     pol.choose <- pol.choose[pvalues <= criticalvalue]
   }
-browser()
   #4. Calculate the number of points from each true group encompassed
   # in each calculated management unit
   if (length(pol.choose) > 0) {

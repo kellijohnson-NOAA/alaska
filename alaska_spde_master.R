@@ -22,7 +22,7 @@ my.base <- file.path("c:", "alaska")
 setwd(my.base)
 
 getweb <- FALSE #If TRUE pull r4kfj off of github
-error.use <- 0.25
+error.use <- 0.4
 
 ###############################################################################
 #### Run analysis

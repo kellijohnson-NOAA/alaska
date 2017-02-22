@@ -14,33 +14,36 @@ calc_means <- function(data, digits = 2, ggplot = NULL,
     median(abs(x))
   }
 
-  if ("n.years" %in% colnames(data)) {
-    a <- aggregate(om ~ par + percentinc + n.years, data = data, mean)
-  } else a <- aggregate(om ~ par + percentinc, data = data, mean)
+  a <- data[, colnames(data) %in%
+    c("n_years", "par", "percentinc", "variable", "model", "om")]
+  b <- data[, colnames(data) %in%
+    c("n_years", "par", "percentinc", "variable", "model", "re")]
+  c <- data[, colnames(data) %in%
+    c("n_years", "par", "percentinc", "variable", "model", "re")]
+
+  a <- aggregate(om ~ ., data = a, mean)
   colnames(a)[which(colnames(a) == "om")] <- "mean"
 
-  if ("n.years" %in% colnames(data)) {
-    b <- aggregate(re ~ par + percentinc + n.years, data = data, MARE)
-  } else b <- aggregate(re ~ par + percentinc, data = data, MARE)
+  b <- aggregate(re ~ ., data = b, MARE)
   colnames(b)[which(colnames(b) == "re")] <- "MARE"
 
+  c <- aggregate(re ~ ., data = c, median)
+  colnames(c)[which(colnames(c) == "re")] <- "MRE"
+
   means <- merge(a, b)
+  means <- merge(means, c)
 
   means$MARE <- format(round(means$MARE, digits), nsmall = digits)
+  means$MRE <- format(round(means$MRE, digits), nsmall = digits)
 
   if (!is.null(ggplot)) {
     info <- do.call(rbind, lapply(ggplot_build(ggplot)[["panel"]]$ranges,
       function(range) c(range$x.range, range$y.range)))
     info <- data.frame(info)
-    info$par <- rep(levels(means$par),
-      ifelse(length(unique(means$percentinc)) > 1,
-        NROW(info) / length(levels(means$par)), 1))
-    info$percentinc <- rep(unique(means$percentinc),
-      each = NROW(info) / length(unique(means$percentinc)))
     info$x <- apply(info[, 1:2], 1, mean)
     info$y <- info[, 4] * yscalar
-    means <- merge(means, info[, c("par", "percentinc", "x", "y")],
-      by = c("par", "percentinc"))
+    info <- cbind(info, ggplot_build(ggplot)$panel$layout)
+    means <- merge(means, info)
   }
 
   return(means)

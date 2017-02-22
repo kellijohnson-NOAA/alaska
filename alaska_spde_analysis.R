@@ -16,50 +16,25 @@
   #t_i[1] is the first year of the data
 
 
-  #Obtain the lat / lon (in UTM) coordinates for the used stations
-    x_stations <- mesh$loc[unique(mesh$idx$loc)[order(unique(mesh$idx$loc))], 1]
-    y_stations <- mesh$loc[unique(mesh$idx$loc)[order(unique(mesh$idx$loc))], 2]
 
 ###############################################################################
 #### TMB
 ###############################################################################
 # Build inputs
-  data <- list(
-    Options_vec = 1,
-    n_i = NROW(data.all@data),
-    n_x = spde$n.spde,
-    n_t = length(desired.years),
-    n_p = 1,
+test <- data.all
+data.all <- subset(data.all, survey == "ai")
+    mesh <- calc_mesh(locations = data.all, boundary = NULL,
+      type = "cutoff")$mesh
+  #Obtain the lat / lon (in UTM) coordinates for the used stations
+    x_stations <- mesh$loc[unique(mesh$idx$loc)[order(unique(mesh$idx$loc))], 1]
+    y_stations <- mesh$loc[unique(mesh$idx$loc)[order(unique(mesh$idx$loc))], 2]
 
-    x_s = mesh$idx$loc - 1,
-
-    c_i = as.vector(data.all@data$WTCPUE),
-    s_i = calc_meshmap(mesh),
-    t_i = factor(data.all@data$YEAR, levels = desired.years,
-      labels = 1:length(desired.years) - 1),
-
-    X_xp = matrix(1, ncol = 1, nrow = spde$n.spde),
-
-    G0 = spde$param.inla$M0,
-    G1 = spde$param.inla$M1,
-    G2 = spde$param.inla$M2
-    )
-
-  parameters <- calc_priors(data)
-
-  obj <- MakeADFun(data = data,
-    parameters = parameters,
-    random = c("Epsilon_input", "Omega_input"),
-    map = NULL, # map is always NULL b/c using rates instead of count
-    hessian = FALSE,
-    DLL = my.tmb,
-    silent = TRUE)
-
-newtonOption(obj, smartsearch = FALSE)
+    colnames(data.all@data)[which(colnames(data.all@data) == "YEAR")] <- "Year"
+    obj <- calc_adfun(data = data.all@data, mesh = mesh, tmb = my.tmb, variable = "WTCPUE")
 
   opt <- nlminb(obj$par, obj$fn, gradient = obj$gr,
-    lower = c(rep(-200, 5), -0.999, rep(-200, 2)), #lower par bounds
-    upper = c(rep(200, 5), 0.999, rep(200, 2)),    #upper par bounds
+    lower = c(rep(-1000, 5), -0.999, rep(-1000, 2)), #lower par bounds
+    upper = c(rep(1000, 5), 0.999, rep(1000, 2)),    #upper par bounds
     control = list(eval.max = 1e4, iter.max = 1e4, trace = 1))
   opt[["final_gradient"]] <- obj$gr(opt$par)
 

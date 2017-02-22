@@ -23,7 +23,7 @@ read_report <- function(report) {
     "sd_O" = report$SigmaO,
     "sd_E" = report$SigmaE,
     "sd_obs" = exp(report$theta_z[1]),
-    "theta" = exp(report$theta_z[2]),
+    "log_clustersize" = report$theta_z[2],
     "phi" = report$phi,
     "alpha" = report$alpha,
     "rho" = report$rho,
@@ -37,6 +37,11 @@ read_report <- function(report) {
     "Equil_x" = report$Equil_x,
     "Omega" = report$Omega_x
   )
+  if ("variable" %in% names(report)) {
+    out$variable <- report$variable
+  } else {
+    out$variable <- NA
+  }
 
   long <- data.frame(
     # Manipulate two matrices into long data frames

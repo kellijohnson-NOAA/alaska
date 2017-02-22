@@ -233,6 +233,7 @@ Sim_Gompertz_Fn <- function(n_years, n_stations = 100, phi = NULL,
   DF$SpatialScale <- SpatialScale
   DF$seed <- seed
   DF$rho <- rho
+  DF$model <- model
 
   return(DF)
 }

@@ -19,10 +19,12 @@ calc_meshbound <- function(mesh, projection = NULL) {
   points <- as.data.frame(mesh$loc[locators, ])
   colnames(points) <- c("x", "y", "ID")
 
-  if (!is.null(projection)) {
+
     points$num <- 1:NROW(points)
     sp::coordinates(points) <- ~ x + y
+  if (!is.null(projection)) {
     raster::projection(points) <- projection
+  }
 
     # Create a convex hull polygon that does not follow the
     # points exactly
@@ -34,22 +36,26 @@ calc_meshbound <- function(mesh, projection = NULL) {
         X.chull <- c(X.chull, X.chull[1])
         sp::Polygons(list(sp::Polygon(X[X.chull, ])), parent.frame()$i[])
     }))
-    raster::projection(hull) <- projection
+    if (!is.null(projection)) {
+      raster::projection(hull) <- projection
+    }
     # Create a polygon that follows the points exactly
     # if the interior boundary is present.
     if (NROW(mesh$segm$bnd$idx) > 0) {
       temp <- data.frame(mesh$loc[unique(c(mesh$segm$bnd$idx)), ])
       colnames(temp) <- c("x", "y", "ID")
       sp::coordinates(temp) <- ~ x + y
-      raster::projection(temp) <- projection
+      if (!is.null(projection)) {
+        raster::projection(temp) <- projection
+      }
       poly <- sp::SpatialPolygons(list(sp::Polygons(list(sp::Polygon(temp)), 1)))
-      poly <- rgeos::gBuffer(poly, width = -100)
-      raster::projection(poly) <- projection
+      # todo: legacy code, and I am not sure why it is here.
+      # does not work for a 1 x 1 grid b/c the width is too big.
+      # poly <- rgeos::gBuffer(poly, width = -100)
+      if (!is.null(projection)) {
+        raster::projection(poly) <- projection
+      }
     } else {poly <- NULL}
-  } else {
-    hull <- NULL
-    poly <- NULL
-  }
 
   return(list("points" = points, "hull" = hull, "poly" = poly,
     "locators" = locators))

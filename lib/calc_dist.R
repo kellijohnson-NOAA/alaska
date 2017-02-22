@@ -31,7 +31,7 @@ calc_dist <- function(data, weight) {
   locs <- locs * weight
 
   # 4. combine the distance matrices
-  out <- sqrt(locs + weight)
+  out <- sqrt(locs + var)
 
   return(out)
 }

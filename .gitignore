@@ -1,5 +1,9 @@
 .SyncArchive/**
 analysis.***.**
+alaska_simulation_100/**
+alaska_simulation_500/**
+alaska_simulation_cache/**
+alaska_simulation_files/**
 data/**
 ignore/**
 ms/alaska_ms_20*

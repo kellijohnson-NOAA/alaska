@@ -98,16 +98,18 @@ Type objective_function<Type>::operator() ()
   matrix<Type> Epsilon_xt(n_x, n_t);
 
   // Probability of Gaussian-Markov random fields (GMRFs)
-  jnll_comp(0) += GMRF(Q)(Omega_input);
+  // jnll_comp(0) += GMRF(Q)(Omega_input);
   // If you do not scale below using Omega_x then you can scale here.
   // jnll_comp(0) += GMRF(Q)(Omega_input);
   // Spatial-temporal process error
   // If using autoregressive model.
   // jnll_comp(1) = SEPARABLE(AR1(rho),GMRF(Q))(Epsilon_input);
   // If using a recursive model
+  jnll_comp(0) += GMRF(Q)(Omega_input);
   for(int t=0; t<n_t; t++){
     // code from spatial_index_model_V1
     // jnll_comp(1) += SCALE(GMRF(Q), 1/exp(log_tau_E))( Epsilon_input.col(t)-Epsilon_input.col(t-1));
+
     jnll_comp(1) += GMRF(Q)(Epsilon_input.col(t));
   }
 
@@ -144,6 +146,7 @@ Type objective_function<Type>::operator() ()
   }
   jnll_comp(2) = jnll_i.sum();
   jnll = jnll_comp.sum();
+  // jnll = jnll_comp(1) + jnll_comp(2);
 
   // Diagnostics
   REPORT( jnll_comp );
@@ -176,3 +179,4 @@ Type objective_function<Type>::operator() ()
 
   return jnll;
 }
+

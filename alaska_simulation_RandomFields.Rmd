@@ -1,0 +1,155 @@
+---
+title: RandomFields, an R package, and properties of simulated data using it.
+author: Kelli Faye Johnson
+output:
+  pdf_document:
+    fig_caption: yes
+date: "2017-01-19"
+---
+
+```{r setup, echo = FALSE, eval = TRUE, message = FALSE, include = FALSE}
+library(INLA)
+library(ncf)
+library(RandomFields)
+library(TMB)
+ignore <- sapply(dir("lib", full.names = TRUE), source)
+variance <- 0.5
+scale <- 0.25
+phi <- 6
+reps <- 10
+n <- 1000
+scale_small <- 0.001
+compile(file.path("data", "test.cpp"))
+dyn.load(dynlib(file.path("data", "test")))
+```
+
+All data was simulated using the `RandomFields` package in `R`.
+Whereas, estimation was done within the TMB framework, so there may be
+miss-specifications that cannot be attributed to estimation capabilities, but
+rather just due to differences in frameworks. For instance,
+the scale (operating model) and range (estimation method) are not equivalent, and
+differ by a scalar of two.
+
+### No spatial correlation
+When scale was set to a small number (i.e., `r scale_small`) the spatial correlation
+in the simulated data was negligible and standard functions could be used
+to calculate the realized standard deviation of the simulated vectors of
+spatial deviation (e.g., $\omega_{x,y}$).
+Scale, which represents the distance at which the correlation falls to
+0.10 of its maximum, cannot be set to zero, and any value smaller than
+`r scale_small` was sufficient to remove spatial autocorrelation in the
+simulated data.
+```{r noscale, echo = FALSE}
+  sim_data <- Sim_Gompertz_Fn(
+    n_years = 20,
+    n_stations = n,
+    SpatialScale = scale_small,
+    SD_O = sqrt(variance),
+    SD_E = sqrt(variance),
+    SD_obs = 0.1,
+    logMeanDens = 1.0,
+    rho = 0.5,
+    phi = 0.0,
+    Loc = NULL,
+    projection = NULL,
+    seed = 5)
+```
+
+The true variance used in the call to `RandomFields` was `r variance`,
+or `sd = `r round(sqrt(variance), 2)``.
+
+```{r boxplotsdsmall, echo = FALSE, eval = TRUE, fig.cap = "Estimated standard deviation of the simulated spatial fields using RandomFields package with a small scale value."}
+ignore <- data.frame("re" = c("sigma[omega]",
+  rep("sigma[epsilon]", length(unique(sim_data$Year)))),
+  "sigma" = c(sd(sim_data$Omega[sim_data$Year == 1]),
+  tapply(sim_data$Epsilon, sim_data$Year, sd)))
+foo <- Vectorize(function(u) eval(parse(text=sprintf("expression(%s)", u))))
+b <- boxplot(sigma ~ re, data = ignore, plot = FALSE)
+boxplot(sigma ~ re, data = ignore, names = foo(b$names),
+  ylab = expression(sigma), las = 1)
+abline(h = sqrt(variance), lty = 2, col = "red")
+text(x = 1:2, y = tapply(ignore$sigma, ignore$re, mean) * 0.99,
+  labels = paste0("(n = ", table(ignore$re), ")"))
+```
+
+### Spatial correlation
+When the scale value was set to `r scale`, the base function in `R` to
+calculate standard deviation no longer gave the standard deviation used
+to generate the data.
+
+```{r smallscale, echo = FALSE}
+  sim_data <- Sim_Gompertz_Fn(
+    n_years = 20,
+    n_stations = n,
+    SpatialScale = scale,
+    SD_O = sqrt(variance),
+    SD_E = sqrt(variance),
+    SD_obs = 0.1,
+    logMeanDens = 1.0,
+    rho = 0.5,
+    phi = 0.0,
+    Loc = NULL,
+    projection = NULL,
+    seed = 5)
+```
+
+```{r boxplotsdlarge, echo = FALSE, fig.cap = "Estimated standard deviation of the simulated spatial fields using RandomFields package with a significant scale value."}
+ignore <- data.frame("re" = c("sigma[omega]",
+  rep("sigma[epsilon]", length(unique(sim_data$Year)))),
+  "sigma" = c(sd(sim_data$Omega[sim_data$Year == 1]),
+  tapply(sim_data$Epsilon, sim_data$Year, sd)))
+b <- boxplot(sigma ~ re, data = ignore, plot = FALSE)
+boxplot(sigma ~ re, data = ignore, xlab = "Random effect",
+ names = foo(b$names), ylab = expression(sigma))
+abline(h = sqrt(variance), lty = 2, col = "red")
+text(x = 1:2, y = tapply(ignore$sigma, ignore$re, mean) * 0.99,
+  labels = paste0("(n = ", table(ignore$re), ")"))
+```
+
+Though the Moran's correlation gave back the true standard deviation
+at half of the input scale value.
+
+```{r moran, echo = FALSE, fig.cap = "Moran's correlation versus distance (m)."}
+par(mfrow = c(2, 1), oma = c(4, 4, 0.5, 0.5), mar = rep(0, 4),
+  las = 1)
+for (a in c("Omega", "Epsilon")) {
+  test <- with(sim_data[sim_data$Year == 1, ],
+    ncf::correlog(Longitude, Latitude,
+    eval(parse(text = a)), increment = scale/100, resamp = 100,
+    quiet = TRUE))
+  with(test, plot(mean.of.class, correlation,
+    xlim = c(0, scale * 1.5),
+    ylim = c(0, sqrt(variance) * 1.5),
+    xaxt = ifelse(a == "Omega", "n", "s")))
+  abline(v = scale/2, lty = 2)
+  abline(h = sqrt(variance), lty = 2)
+  mtext(side = 3, line = -3, text = a, adj = 1)
+}
+par(las = 0)
+mtext(side = 1, text = "Distance", line = 2, outer = TRUE)
+mtext(side = 2, text = "Moran correlation", line = 2.5, outer = TRUE)
+```
+
+### Distributions
+Code was originally adapted from that written by Dr. James T. Thorson, and, thus,
+the `RandomFields::RMgauss` function was used to generate a
+gaussian markov random field (GMRF).
+The documentation for
+[`RandomFields`](https://cran.r-project.org/web/packages/RandomFields/RandomFields.pdf)
+specifies that `RandomFields::RMgneiting` is hardly distinguishable from
+`RandomFields::RMgneiting`, but possesses neither the mathematical nor the numerical
+disadvantages of the Gaussian model.
+
+The following code will show their similarity. Unfortunately, the graphic device is not
+compatible with `rmarkdown`.
+```{r similar, eval = FALSE}
+plot(RandomFields::RMgauss(var = variance, scale = scale))
+lines(RandomFields::RMgneiting(orig = FALSE, var = variance, scale = scale),
+  lty = 2)
+legend("topright", bty = "n", legend = c("Gaussian", "Gneiting"),
+  lty = c(1:2))
+```
+
+```{r cleanup, echo = FALSE, eval = TRUE, message = FALSE, include = FALSE}
+dyn.unload(TMB::dynlib(file.path("data", "test")))
+```

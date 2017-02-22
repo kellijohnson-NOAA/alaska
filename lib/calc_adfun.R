@@ -7,8 +7,9 @@
 #' @param variable A character value of the dependent variable that you
 #' want to model. For example, \code{"Simulated_example"}. The character
 #' value must be a column name of \code{data}.
+#' @param fixed Character values specifying which parameters to fix.
 #'
-calc_adfun <- function(data, mesh, tmb, variable) {
+calc_adfun <- function(data, mesh, tmb, variable, fixed = NULL, ...) {
   # Start with data
   ## Make sure that the variable name is in \code{data}
   if(!variable %in% colnames(data)) {
@@ -52,12 +53,20 @@ calc_adfun <- function(data, mesh, tmb, variable) {
     G2 = spde$param.inla$M2)
 
   # Calculate the priors
-  Parameters <- calc_priors(Data)
+  Parameters <- calc_priors(Data, ...)
 
   # Determine if using counts or weights
   Map <- NULL
   if (Data$Options_vec == 0) {
     Map[["theta_z"]] <- factor(c(NA, NA))
+  }
+  if ("alpha" %in% fixed) {
+    Map[["alpha"]] <- factor(NA)
+    Parameters$alpha <- data$alpha[1]
+  }
+  if ("rho" %in% fixed) {
+    Map[["rho"]] <- factor(NA)
+    Parameters$alpha <- data$rho[1]
   }
 
   # Make object for TMB

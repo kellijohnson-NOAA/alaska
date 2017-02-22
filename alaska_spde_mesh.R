@@ -60,7 +60,7 @@ prdomain <- inla.nonconvex.hull(coordinates(data.all), convex = -0.05)
 #   by a single vertex to avoid small triangles.
 #   Critical when we have some very close points, either for
 #   point locations or on the domain boundary.
-mesh <- calc_mesh(locations = coordinates(data.all))
+mesh <- calc_mesh(locations = coordinates(data.all), type = "cutoff")
 spde <- mesh$spde
 mesh <- mesh$mesh
 
